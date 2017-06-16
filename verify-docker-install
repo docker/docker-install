@@ -3,7 +3,7 @@ expected_version=$1
 expected_gitcommit=$2
 (
 	echo "Executing installation script!"
-	sh install.sh
+	sh build/install.sh
 )
 docker_version=$(docker --version)
 if [ $? -ne 0 ]; then
