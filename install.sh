@@ -20,10 +20,22 @@ set -e
 #   To update this script on https://get.docker.com,
 #   use hack/release.sh during a normal release,
 #   or the following one-liner for script hotfixes:
-#     aws s3 cp --acl public-read hack/install.sh s3://get.docker.com/index
+#
+#   aws s3 cp --acl public-read hack/install.sh s3://get.docker.com/index
 #
 
-url="https://get.docker.com/"
+# This value will automatically get changed for:
+#   * edge
+#   * test
+#   * experimental
+DEFAULT_CHANNEL_VALUE="test"
+if [ -z "$CHANNEL" ]; then
+    CHANNEL=$DEFAULT_CHANNEL_VALUE
+fi
+
+# TODO: Once raspbian support is figured out we can remove from:
+# HERE =========================================================
+url="https://test.docker.com/"
 apt_url="https://apt.dockerproject.org"
 yum_url="https://yum.dockerproject.org"
 
@@ -117,6 +129,7 @@ case "$mirror" in
 		yum_url="https://mirrors.aliyun.com/docker-engine/yum"
 		;;
 esac
+# HERE =========================================================
 
 command_exists() {
 	command -v "$@" > /dev/null 2>&1
@@ -205,7 +218,41 @@ semverParse() {
 	patch="${patch%%[-.]*}"
 }
 
+version_lt() {
+	# Stolen from: http://ask.xmodulo.com/compare-two-version-numbers.html
+	test "$(echo "$@" | tr " " "\n" | sort -rV | head -n 1)" != "$1"
+}
+
+check_kernel_version() {
+	kernel_version="$(uname -r|cut -d\- -f1)"
+	acceptable_version="$1"
+	if version_lt $kernel_version $acceptable_version; then
+		echo "Error: Docker requires a kernel version >= $acceptable_version"
+		exit 1
+	fi
+}
+
+deprecation_notice() {
+	echo
+	echo
+	echo "  WARNING: $1 is no longer updated @ $url"
+	echo "           Installing the legacy docker-engine package..."
+	echo
+	echo
+	sleep 10;
+}
+
+ee_notice() {
+	echo
+	echo
+	echo "  WARNING: $1 is now only supported by Docker EE"
+	echo "           Check https://store.docker.com for information on Docker EE"
+	echo
+	echo
+}
+
 do_install() {
+
 	architecture=$(uname -m)
 	case $architecture in
 		# officially supported
@@ -341,9 +388,6 @@ do_install() {
 	if [ -z "$lsb_dist" ] && [ -r /etc/redhat-release ]; then
 		lsb_dist='redhat'
 	fi
-	if [ -z "$lsb_dist" ] && [ -r /etc/photon-release ]; then
-		lsb_dist='photon'
-	fi
 	if [ -z "$lsb_dist" ] && [ -r /etc/os-release ]; then
 		lsb_dist="$(. /etc/os-release && echo "$ID")"
 	fi
@@ -352,8 +396,8 @@ do_install() {
 
 	# Special case redhatenterpriseserver
 	if [ "${lsb_dist}" = "redhatenterpriseserver" ]; then
-        	# Set it to redhat, it will be changed to centos below anyways
-        	lsb_dist='redhat'
+		# Set it to redhat, it will be changed to centos below anyways
+		lsb_dist='redhat'
 	fi
 
 	case "$lsb_dist" in
@@ -392,11 +436,6 @@ do_install() {
 			dist_version="$(rpm -q --whatprovides ${lsb_dist}-release --queryformat "%{VERSION}\n" | sed 's/\/.*//' | sed 's/\..*//' | sed 's/Server*//' | sort | tail -1)"
 		;;
 
-		"vmware photon")
-			lsb_dist="photon"
-			dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
-		;;
-
 		*)
 			if command_exists lsb_release; then
 				dist_version="$(lsb_release --codename | cut -f2)"
@@ -414,7 +453,76 @@ do_install() {
 
 	# Run setup for each distro accordingly
 	case "$lsb_dist" in
-		ubuntu|debian|raspbian)
+		ubuntu|debian)
+			check_kernel_version "3.13.0"
+			pre_reqs="apt-transport-https ca-certificates curl"
+			if [ "$lsb_dist" = "debian" ] && [ "$dist_version" = "wheezy" ]; then
+				pre_reqs="$pre_reqs python-software-properties"
+				backports="deb http://ftp.debian.org/debian wheezy-backports main"
+				if ! grep -Fxq "$backports" /etc/apt/sources.list; then
+					(set -x; $sh_c "echo \"$backports\" >> /etc/apt/sources.list")
+				fi
+			else
+				pre_reqs="$pre_reqs software-properties-common"
+			fi
+			if ! command -v gpg > /dev/null; then
+				pre_reqs="$pre_reqs gnupg"
+			fi
+			apt_repo="deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/$lsb_dist $dist_version $CHANNEL"
+			(
+				set -x
+				$sh_c 'apt-get update'
+				$sh_c "apt-get install -y -q $pre_reqs"
+				curl -fsSl "https://download.docker.com/linux/$lsb_dist/gpg" | $sh_c 'apt-key add -'
+				$sh_c "add-apt-repository \"$apt_repo\""
+				if [ "$lsb_dist" = "debian" ] && [ "$dist_version" = "wheezy" ]; then
+					$sh_c 'sed -i "/deb-src.*download\.docker/d" /etc/apt/sources.list'
+				fi
+				$sh_c 'apt-get update'
+				$sh_c 'apt-get install -y -q docker-ce'
+			)
+			echo_docker_as_nonroot
+			exit 0
+			;;
+		centos|fedora)
+			check_kernel_version "3.10.0"
+			yum_repo="https://download.docker.com/linux/centos/docker-ce.repo"
+			if [ "$lsb_dist" = "fedora" ]; then
+				if [ "$dist_version" -lt "24" ]; then
+					echo "Error: Only Fedora >=24 are supported by $url"
+					exit 1
+				fi
+				pkg_manager="dnf"
+				config_manager="dnf config-manager"
+				enable_channel_flag="--set-enabled"
+				pre_reqs="dnf-plugins-core"
+			else
+				pkg_manager="yum"
+				config_manager="yum-config-manager"
+				enable_channel_flag="--enable"
+				pre_reqs="yum-utils"
+			fi
+			(
+				set -x
+				$sh_c "$pkg_manager install -y -q $pre_reqs"
+				$sh_c "$config_manager --add-repo $yum_repo"
+				if [ "$CHANNEL" != "stable" ]; then
+					echo "Info: Enabling channel '$CHANNEL' for docker-ce repo"
+					$sh_c "$config_manager $enable_channel_flag docker-ce-$CHANNEL"
+				fi
+				$sh_c "$pkg_manager makecache fast"
+				$sh_c "$pkg_manager install -y -q docker-ce"
+				if [ -d '/run/systemd/system' ]; then
+					$sh_c 'service docker start'
+				else
+					$sh_c 'systemctl start docker'
+				fi
+			)
+			echo_docker_as_nonroot
+			exit 0
+			;;
+		raspbian)
+			deprecation_notice "$lsb_dist"
 			export DEBIAN_FRONTEND=noninteractive
 
 			did_apt_get_update=
@@ -491,49 +599,20 @@ do_install() {
 			exit 0
 			;;
 
-		fedora|centos|redhat|oraclelinux|photon)
-			if [ "${lsb_dist}" = "redhat" ]; then
-				# we use the centos repository for both redhat and centos releases
-				lsb_dist='centos'
-			fi
-			$sh_c "cat >/etc/yum.repos.d/docker-${repo}.repo" <<-EOF
-			[docker-${repo}-repo]
-			name=Docker ${repo} Repository
-			baseurl=${yum_url}/repo/${repo}/${lsb_dist}/${dist_version}
-			enabled=1
-			gpgcheck=1
-			gpgkey=${yum_url}/gpg
-			EOF
-			if [ "$lsb_dist" = "fedora" ] && [ "$dist_version" -ge "22" ]; then
-				(
-					set -x
-					$sh_c 'sleep 3; dnf -y -q install docker-engine'
-				)
-			elif [ "$lsb_dist" = "photon" ]; then
-				(
-					set -x
-					$sh_c 'sleep 3; tdnf -y install docker-engine'
-				)
-			else
-				(
-					set -x
-					$sh_c 'sleep 3; yum -y -q install docker-engine'
-				)
-			fi
-			echo_docker_as_nonroot
-			exit 0
+		redhat|oraclelinux)
+			ee_notice "$lsb_dist"
+			exit 1
 			;;
 	esac
 
 	# intentionally mixed spaces and tabs here -- tabs are stripped by "<<-'EOF'", spaces are kept in the output
 	cat >&2 <<-'EOF'
 
-	  Either your platform is not easily detectable, is not supported by this
-	  installer script (yet - PRs welcome! [hack/install.sh]), or does not yet have
-	  a package for Docker.  Please visit the following URL for more detailed
-	  installation instructions:
+	Either your platform is not easily detectable or is not supported by this
+	installer script.
+	Please visit the following URL for more detailed installation instructions:
 
-	    https://docs.docker.com/engine/installation/
+	https://docs.docker.com/engine/installation/
 
 	EOF
 	exit 1
