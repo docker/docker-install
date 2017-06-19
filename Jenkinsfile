@@ -27,7 +27,11 @@ def genVerifyJob(String t) {
     stage("${t}") {
       wrappedNode(label: 'aufs', cleanWorkspace: true) {
         checkout scm
-        sh("make clean ${t}.log")
+        channel = 'test'
+        if ("${env.JOB_NAME}".endsWith('get.docker.com')) {
+            channel='edge'
+        }
+        sh("make CHANNEL_TO_TEST=${channel} clean ${t}.log")
         archiveArtifacts '*.log'
       }
     }
