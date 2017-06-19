@@ -1,6 +1,6 @@
 SHELL:=/bin/bash
 VERIFY_INSTALL_DISTROS:=$(addprefix verify-install-,centos-7 fedora-24 fedora-25 debian-wheezy debian-jessie debian-stretch ubuntu-trusty ubuntu-xenial ubuntu-yakkety ubuntu-zesty)
-CHANNEL_TO_TEST:=test
+CHANNEL_TO_TEST?=test
 EXPECTED_VERSION?=
 EXPECTED_GITCOMMIT?=
 
