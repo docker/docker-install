@@ -1,28 +1,18 @@
 #!/bin/sh
 set -e
-#
+
 # This script is meant for quick & easy install via:
-#   'curl -sSL https://get.docker.com/ | sh'
-# or:
-#   'wget -qO- https://get.docker.com/ | sh'
+#   $ curl -fsSL get.docker.com -o get-docker.sh
+#   $ sh get-docker.sh
 #
 # For test builds (ie. release candidates):
-#   'curl -fsSL https://test.docker.com/ | sh'
-# or:
-#   'wget -qO- https://test.docker.com/ | sh'
+#   $ curl -fsSL test.docker.com -o test-docker.sh
+#   $ sh test-docker.sh
 #
-# For experimental builds:
-#   'curl -fsSL https://experimental.docker.com/ | sh'
-# or:
-#   'wget -qO- https://experimental.docker.com/ | sh'
-#
-# Docker Maintainers:
-#   To update this script on https://get.docker.com,
-#   use hack/release.sh during a normal release,
-#   or the following one-liner for script hotfixes:
-#
-#   aws s3 cp --acl public-read hack/install.sh s3://get.docker.com/index
-#
+# NOTE: Make sure to verify the contents of the script
+#       you downloaded matches the contents of install.sh
+#       located at https://github.com/docker/docker-install
+#       before executing.
 
 # This value will automatically get changed for:
 #   * edge
