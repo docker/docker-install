@@ -218,20 +218,6 @@ semverParse() {
 	patch="${patch%%[-.]*}"
 }
 
-version_lt() {
-	# Stolen from: http://ask.xmodulo.com/compare-two-version-numbers.html
-	test "$(echo "$@" | tr " " "\n" | sort -rV | head -n 1)" != "$1"
-}
-
-check_kernel_version() {
-	kernel_version="$(uname -r|cut -d\- -f1)"
-	acceptable_version="$1"
-	if version_lt $kernel_version $acceptable_version; then
-		echo "Error: Docker requires a kernel version >= $acceptable_version"
-		exit 1
-	fi
-}
-
 deprecation_notice() {
 	echo
 	echo
@@ -454,7 +440,6 @@ do_install() {
 	# Run setup for each distro accordingly
 	case "$lsb_dist" in
 		ubuntu|debian)
-			check_kernel_version "3.13.0"
 			pre_reqs="apt-transport-https ca-certificates curl"
 			if [ "$lsb_dist" = "debian" ] && [ "$dist_version" = "wheezy" ]; then
 				pre_reqs="$pre_reqs python-software-properties"
@@ -485,7 +470,6 @@ do_install() {
 			exit 0
 			;;
 		centos|fedora)
-			check_kernel_version "3.10.0"
 			yum_repo="https://download.docker.com/linux/centos/docker-ce.repo"
 			if [ "$lsb_dist" = "fedora" ]; then
 				if [ "$dist_version" -lt "24" ]; then
