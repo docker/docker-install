@@ -1,7 +1,12 @@
 # docker/docker-install
 Home of the script that lives at `get.docker.com` and `test.docker.com`!
 
-Used for installation of the latest Docker-CE releases.
+The purpose of the install script is for a convenience for quickly
+installing the latest Docker-CE releases on the supported linux
+distros. It is not recommended to depend on this script for deployment
+to production systems. For more thorough instructions for installing
+on the supported distros, see the [install
+instructions](https://docs.docker.com/engine/installation/).
 
 This repository is solely maintained by Docker, Inc.
 
