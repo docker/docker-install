@@ -31,4 +31,4 @@ verify-install-%.log: needs_version needs_gitcommit
 		-v $(CURDIR):/v \
 		-w /v \
 		$(subst -,:,$*) \
-		bash verify-docker-install "$(EXPECTED_VERSION)" "$(EXPECTED_GITCOMMIT)" | tee $@
+		/v/verify-docker-install "$(EXPECTED_VERSION)" "$(EXPECTED_GITCOMMIT)" | tee $@
