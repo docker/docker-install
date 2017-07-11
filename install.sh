@@ -27,7 +27,7 @@ fi
 # HERE =========================================================
 url="https://test.docker.com/"
 apt_url="https://apt.dockerproject.org"
-yum_url="https://yum.dockerproject.org"
+#yum_url="https://yum.dockerproject.org"
 
 docker_key="-----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1
@@ -112,11 +112,11 @@ done
 case "$mirror" in
 	AzureChinaCloud)
 		apt_url="https://mirror.azure.cn/docker-engine/apt"
-		yum_url="https://mirror.azure.cn/docker-engine/yum"
+		#yum_url="https://mirror.azure.cn/docker-engine/yum"
 		;;
 	Aliyun)
 		apt_url="https://mirrors.aliyun.com/docker-engine/apt"
-		yum_url="https://mirrors.aliyun.com/docker-engine/yum"
+		#yum_url="https://mirrors.aliyun.com/docker-engine/yum"
 		;;
 esac
 # HERE =========================================================
