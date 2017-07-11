@@ -262,14 +262,14 @@ do_install() {
 		MAJOR_W=1
 		MINOR_W=10
 
-		semverParse $version
+		semverParse "$version"
 
 		shouldWarn=0
-		if [ $major -lt $MAJOR_W ]; then
+		if [ "$major" -lt "$MAJOR_W" ]; then
 			shouldWarn=1
 		fi
 
-		if [ $major -le $MAJOR_W ] && [ $minor -lt $MINOR_W ]; then
+		if [ "$major" -le "$MAJOR_W" ] && [ "$minor" -lt "$MINOR_W" ]; then
 			shouldWarn=1
 		fi
 
