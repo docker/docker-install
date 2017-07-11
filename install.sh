@@ -183,7 +183,7 @@ check_forked() {
 			if [ -r /etc/debian_version ] && [ "$lsb_dist" != "ubuntu" ] && [ "$lsb_dist" != "raspbian" ]; then
 				# We're Debian and don't even know it!
 				lsb_dist=debian
-				dist_version="$(cat /etc/debian_version | sed 's/\/.*//' | sed 's/\..*//')"
+				dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
 				case "$dist_version" in
 					9)
 						dist_version="stretch"
@@ -388,7 +388,7 @@ do_install() {
 		;;
 
 		debian|raspbian)
-			dist_version="$(cat /etc/debian_version | sed 's/\/.*//' | sed 's/\..*//')"
+			dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
 			case "$dist_version" in
 				9)
 					dist_version="stretch"
