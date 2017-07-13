@@ -3,6 +3,7 @@ VERIFY_INSTALL_DISTROS:=$(addprefix verify-install-,centos-7 fedora-24 fedora-25
 CHANNEL_TO_TEST?=test
 EXPECTED_VERSION?=
 EXPECTED_GITCOMMIT?=
+SHELLCHECK=shellcheck
 
 .PHONY: needs_version
 needs_version:
@@ -15,6 +16,10 @@ needs_gitcommit:
 ifndef EXPECTED_GITCOMMIT
 	$(error EXPECTED_GITCOMMIT is undefined)
 endif
+
+.PHONY: shellcheck
+shellcheck:
+	$(SHELLCHECK) install.sh
 
 .PHONY: check
 check: $(VERIFY_INSTALL_DISTROS)

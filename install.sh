@@ -27,7 +27,7 @@ fi
 # HERE =========================================================
 url="https://test.docker.com/"
 apt_url="https://apt.dockerproject.org"
-yum_url="https://yum.dockerproject.org"
+#yum_url="https://yum.dockerproject.org"
 
 docker_key="-----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1
@@ -112,11 +112,11 @@ done
 case "$mirror" in
 	AzureChinaCloud)
 		apt_url="https://mirror.azure.cn/docker-engine/apt"
-		yum_url="https://mirror.azure.cn/docker-engine/yum"
+		#yum_url="https://mirror.azure.cn/docker-engine/yum"
 		;;
 	Aliyun)
 		apt_url="https://mirrors.aliyun.com/docker-engine/apt"
-		yum_url="https://mirrors.aliyun.com/docker-engine/yum"
+		#yum_url="https://mirrors.aliyun.com/docker-engine/yum"
 		;;
 esac
 # HERE =========================================================
@@ -172,8 +172,8 @@ check_forked() {
 			EOF
 
 			# Get the upstream release info
-			lsb_dist=$(lsb_release -a -u 2>&1 | tr '[:upper:]' '[:lower:]' | grep -E 'id' | cut -d ':' -f 2 | tr -d '[[:space:]]')
-			dist_version=$(lsb_release -a -u 2>&1 | tr '[:upper:]' '[:lower:]' | grep -E 'codename' | cut -d ':' -f 2 | tr -d '[[:space:]]')
+			lsb_dist=$(lsb_release -a -u 2>&1 | tr '[:upper:]' '[:lower:]' | grep -E 'id' | cut -d ':' -f 2 | tr -d '[:space:]')
+			dist_version=$(lsb_release -a -u 2>&1 | tr '[:upper:]' '[:lower:]' | grep -E 'codename' | cut -d ':' -f 2 | tr -d '[:space:]')
 
 			# Print info about upstream distro
 			cat <<-EOF
@@ -183,7 +183,7 @@ check_forked() {
 			if [ -r /etc/debian_version ] && [ "$lsb_dist" != "ubuntu" ] && [ "$lsb_dist" != "raspbian" ]; then
 				# We're Debian and don't even know it!
 				lsb_dist=debian
-				dist_version="$(cat /etc/debian_version | sed 's/\/.*//' | sed 's/\..*//')"
+				dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
 				case "$dist_version" in
 					9)
 						dist_version="stretch"
@@ -262,14 +262,14 @@ do_install() {
 		MAJOR_W=1
 		MINOR_W=10
 
-		semverParse $version
+		semverParse "$version"
 
 		shouldWarn=0
-		if [ $major -lt $MAJOR_W ]; then
+		if [ "$major" -lt "$MAJOR_W" ]; then
 			shouldWarn=1
 		fi
 
-		if [ $major -le $MAJOR_W ] && [ $minor -lt $MINOR_W ]; then
+		if [ "$major" -le "$MAJOR_W" ] && [ "$minor" -lt "$MINOR_W" ]; then
 			shouldWarn=1
 		fi
 
@@ -388,7 +388,7 @@ do_install() {
 		;;
 
 		debian|raspbian)
-			dist_version="$(cat /etc/debian_version | sed 's/\/.*//' | sed 's/\..*//')"
+			dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
 			case "$dist_version" in
 				9)
 					dist_version="stretch"
