@@ -23,9 +23,7 @@ if [ -z "$CHANNEL" ]; then
     CHANNEL=$DEFAULT_CHANNEL_VALUE
 fi
 
-# TODO: Once raspbian support is figured out we can remove from:
-# HERE =========================================================
-url="https://test.docker.com/"
+#TODO: Remove this once raspian support is added to https://download.docker.com
 apt_url="https://apt.dockerproject.org"
 #yum_url="https://yum.dockerproject.org"
 
@@ -119,10 +117,20 @@ case "$mirror" in
 		#yum_url="https://mirrors.aliyun.com/docker-engine/yum"
 		;;
 esac
-# HERE =========================================================
 
 command_exists() {
 	command -v "$@" > /dev/null 2>&1
+}
+
+get_distribution() {
+	lsb_dist=""
+	# Every system that we officially support has /etc/os-release
+	if [ -r /etc/os-release ]; then
+		lsb_dist="$(. /etc/os-release && echo "$ID")"
+	fi
+	# Returning an empty string here should be alright since the
+	# case statements don't act unless you provide an actual value
+	echo "$lsb_dist"
 }
 
 echo_docker_as_nonroot() {
@@ -228,7 +236,8 @@ ee_notice() {
 }
 
 do_install() {
-
+	# TODO: Move this to after we figure out the distribution and the version
+	#       to check whether or not we support that distro-version on that arch
 	architecture=$(uname -m)
 	case $architecture in
 		# officially supported
@@ -330,51 +339,24 @@ do_install() {
 		curl='busybox wget -qO-'
 	fi
 
+	#TODO: Remove this once raspian support is added to https://download.docker.com
+	url='https://get.docker.com/'
+	if [ "$CHANNEL" = "test" ]; then
+		url='https://test.docker.com/'
+	fi
+
 	# check to see which repo they are trying to install from
 	if [ -z "$repo" ]; then
 		repo='main'
 		if [ "https://test.docker.com/" = "$url" ]; then
 			repo='testing'
-		elif [ "https://experimental.docker.com/" = "$url" ]; then
-			repo='experimental'
 		fi
 	fi
+	#TODO: Remove to HERE =========================================================
 
 	# perform some very rudimentary platform detection
-	lsb_dist=''
-	dist_version=''
-	if command_exists lsb_release; then
-		lsb_dist="$(lsb_release -si)"
-	fi
-	if [ -z "$lsb_dist" ] && [ -r /etc/lsb-release ]; then
-		lsb_dist="$(. /etc/lsb-release && echo "$DISTRIB_ID")"
-	fi
-	if [ -z "$lsb_dist" ] && [ -r /etc/debian_version ]; then
-		lsb_dist='debian'
-	fi
-	if [ -z "$lsb_dist" ] && [ -r /etc/fedora-release ]; then
-		lsb_dist='fedora'
-	fi
-	if [ -z "$lsb_dist" ] && [ -r /etc/oracle-release ]; then
-		lsb_dist='oracleserver'
-	fi
-	if [ -z "$lsb_dist" ] && [ -r /etc/centos-release ]; then
-		lsb_dist='centos'
-	fi
-	if [ -z "$lsb_dist" ] && [ -r /etc/redhat-release ]; then
-		lsb_dist='redhat'
-	fi
-	if [ -z "$lsb_dist" ] && [ -r /etc/os-release ]; then
-		lsb_dist="$(. /etc/os-release && echo "$ID")"
-	fi
-
+	lsb_dist=$( get_distribution )
 	lsb_dist="$(echo "$lsb_dist" | tr '[:upper:]' '[:lower:]')"
-
-	# Special case redhatenterpriseserver
-	if [ "${lsb_dist}" = "redhatenterpriseserver" ]; then
-		# Set it to redhat, it will be changed to centos below anyways
-		lsb_dist='redhat'
-	fi
 
 	case "$lsb_dist" in
 
@@ -402,16 +384,6 @@ do_install() {
 			esac
 		;;
 
-		oracleserver)
-			# need to switch lsb_dist to match yum repo URL
-			lsb_dist="oraclelinux"
-			dist_version="$(rpm -q --whatprovides redhat-release --queryformat "%{VERSION}\n" | sed 's/\/.*//' | sed 's/\..*//' | sed 's/Server*//')"
-		;;
-
-		fedora|centos|redhat)
-			dist_version="$(rpm -q --whatprovides ${lsb_dist}-release --queryformat "%{VERSION}\n" | sed 's/\/.*//' | sed 's/\..*//' | sed 's/Server*//' | sort | tail -1)"
-		;;
-
 		*)
 			if command_exists lsb_release; then
 				dist_version="$(lsb_release --codename | cut -f2)"
@@ -420,7 +392,6 @@ do_install() {
 				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
 			fi
 		;;
-
 
 	esac
 
@@ -491,6 +462,7 @@ do_install() {
 			exit 0
 			;;
 		raspbian)
+			#TODO: Remove this once raspian support is added to https://download.docker.com
 			deprecation_notice "$lsb_dist"
 			export DEBIAN_FRONTEND=noninteractive
 
@@ -568,7 +540,7 @@ do_install() {
 			exit 0
 			;;
 
-		redhat|oraclelinux)
+		rhel|ol|sles)
 			ee_notice "$lsb_dist"
 			exit 1
 			;;
