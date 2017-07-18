@@ -455,7 +455,7 @@ do_install() {
 					echo "Info: Enabling channel '$CHANNEL' for docker-ce repo"
 					$sh_c "$config_manager $enable_channel_flag docker-ce-$CHANNEL"
 				fi
-				$sh_c "$pkg_manager makecache fast"
+				$sh_c "$pkg_manager makecache"
 				$sh_c "$pkg_manager install -y -q docker-ce"
 			)
 			echo_docker_as_nonroot
