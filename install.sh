@@ -431,7 +431,7 @@ do_install() {
 			exit 0
 			;;
 		centos|fedora)
-			yum_repo="https://download.docker.com/linux/centos/docker-ce.repo"
+			yum_repo="https://download.docker.com/linux/$lsb_dist/docker-ce.repo"
 			if [ "$lsb_dist" = "fedora" ]; then
 				if [ "$dist_version" -lt "24" ]; then
 					echo "Error: Only Fedora >=24 are supported by $url"
