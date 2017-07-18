@@ -13,6 +13,11 @@ set -e
 #       you downloaded matches the contents of install.sh
 #       located at https://github.com/docker/docker-install
 #       before executing.
+#
+# Git commit from https://github.com/docker/docker-install when
+# the script was uploaded (Should only be modified by upload job):
+SCRIPT_COMMIT_SHA=UNKNOWN
+
 
 # This value will automatically get changed for:
 #   * edge
@@ -236,6 +241,7 @@ ee_notice() {
 }
 
 do_install() {
+	echo "Executing docker install script, commit: $SCRIPT_COMMIT_SHA"
 	# TODO: Move this to after we figure out the distribution and the version
 	#       to check whether or not we support that distro-version on that arch
 	architecture=$(uname -m)
