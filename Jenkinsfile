@@ -1,13 +1,4 @@
 #!groovy
-properties(
-  [
-    buildDiscarder(logRotator(numToKeepStr: '20')),
-    parameters([
-      string(defaultValue: '', description: 'Expected docker version output of --version flag.', name: 'EXPECTED_VERSION'),
-      string(defaultValue: '', description: 'Expected docker gitcommit output of --version flag.', name: 'EXPECTED_GITCOMMIT'),
-    ])
-  ]
-)
 
 def verifyTargets = [
   'verify-install-centos-7',
@@ -31,8 +22,8 @@ def genVerifyJob(String t) {
         if ("${env.JOB_NAME}".endsWith('get.docker.com')) {
             channel='edge'
         }
-        sh("make CHANNEL_TO_TEST=${channel} clean ${t}.log")
-        archiveArtifacts '*.log'
+        sh("make CHANNEL_TO_TEST=${channel} clean ${t}")
+        archiveArtifacts 'verify-install-*'
       }
     }
   } ]
