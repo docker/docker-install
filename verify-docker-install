@@ -1,29 +1,21 @@
 #!/bin/bash -e
-expected_version=$1
-expected_gitcommit=$2
 (
-	echo "Executing installation script!"
+	echo "INFO: Executing installation script!"
 	sh build/install.sh
 )
-docker_version=$(docker --version)
-if [ $? -ne 0 ]; then
+
+# Verify that we can at least get version output
+if ! docker --version; then
 	echo "ERROR: Did Docker get installed?"
-	exit 3
-fi
-installed_version=$(echo $docker_version | awk '{print$3}')
-installed_gitcommit=$(echo $docker_version | awk '{print$5}')
-echo $docker_version
-echo -n "Checking if installed version '$installed_version' matches '$expected_version'... "
-if [[ "$installed_version" =~ "$expected_version" ]]; then
-	echo "PASSED!"
-else
-	echo "FAILED!"
 	exit 1
 fi
-echo -n "Checking if installed gitcommit '$installed_gitcommit' matches '$expected_gitcommit'... "
-if [[ "$installed_gitcommit" =~ "$expected_gitcommit" ]]; then
-	echo "PASSED!"
-else
-	echo "FAILED!"
-	exit 2
+
+# Attempt to run a container if not in a container
+if [ ! -f /.dockerenv  ]; then
+	if ! docker run --rm hello-world; then
+		echo "ERROR: Could not get docker to run the hello world container"
+		exit 2
+	fi
 fi
+
+echo "INFO: Successfully verified docker installation!"
