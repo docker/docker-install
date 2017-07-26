@@ -24,3 +24,43 @@ verify-install-%:
 		-w /v \
 		$(subst -,:,$*) \
 		/v/verify-docker-install | tee $@
+
+armhf-verify-install-raspbian-jessie:
+	mkdir -p build
+	sed 's/DEFAULT_CHANNEL_VALUE="test"/DEFAULT_CHANNEL_VALUE="$(CHANNEL_TO_TEST)"/' install.sh > build/install.sh
+	set -o pipefail && docker run \
+		--rm \
+		-v $(CURDIR):/v \
+		-w /v \
+		resin/rpi-raspbian:jessie \
+		/v/verify-docker-install | tee $@
+
+armhf-verify-install-%:
+	mkdir -p build
+	sed 's/DEFAULT_CHANNEL_VALUE="test"/DEFAULT_CHANNEL_VALUE="$(CHANNEL_TO_TEST)"/' install.sh > build/install.sh
+	set -o pipefail && docker run \
+		--rm \
+		-v $(CURDIR):/v \
+		-w /v \
+		arm32v7/$(subst -,:,$*) \
+		/v/verify-docker-install | tee $@
+
+aarch64-verify-install-%:
+	mkdir -p build
+	sed 's/DEFAULT_CHANNEL_VALUE="test"/DEFAULT_CHANNEL_VALUE="$(CHANNEL_TO_TEST)"/' install.sh > build/install.sh
+	set -o pipefail && docker run \
+		--rm \
+		-v $(CURDIR):/v \
+		-w /v \
+		arm64v8/$(subst -,:,$*) \
+		/v/verify-docker-install | tee $@
+
+s390x-verify-install-%:
+	mkdir -p build
+	sed 's/DEFAULT_CHANNEL_VALUE="test"/DEFAULT_CHANNEL_VALUE="$(CHANNEL_TO_TEST)"/' install.sh > build/install.sh
+	set -o pipefail && docker run \
+		--rm \
+		-v $(CURDIR):/v \
+		-w /v \
+		s390x/$(subst -,:,$*) \
+		/v/verify-docker-install | tee $@
