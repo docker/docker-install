@@ -28,6 +28,39 @@ if [ -z "$CHANNEL" ]; then
     CHANNEL=$DEFAULT_CHANNEL_VALUE
 fi
 
+# TODO: Remove *-ubuntu-yakkety once 17.07.0-ce hits GA
+SUPPORT_MAP="
+x86_64-centos-7
+x86_64-fedora-24
+x86_64-fedora-25
+x86_64-fedora-26
+x86_64-debian-wheezy
+x86_64-debian-jessie
+x86_64-debian-stretch
+x86_64-ubuntu-trusty
+x86_64-ubuntu-xenial
+x86_64-ubuntu-yakkety
+x86_64-ubuntu-zesty
+s390x-ubuntu-xenial
+s390x-ubuntu-yakkety
+s390x-ubuntu-zesty
+aarch64-ubuntu-xenial
+armv6l-raspbian-jessie
+armv6l-debian-jessie
+armv6l-debian-stretch
+armv6l-ubuntu-trusty
+armv6l-ubuntu-xenial
+armv6l-ubuntu-yakkety
+armv6l-ubuntu-zesty
+armv7l-raspbian-jessie
+armv7l-debian-jessie
+armv7l-debian-stretch
+armv7l-ubuntu-trusty
+armv7l-ubuntu-xenial
+armv7l-ubuntu-yakkety
+armv7l-ubuntu-zesty
+"
+
 #TODO: Remove this once raspian support is added to https://download.docker.com
 apt_url="https://apt.dockerproject.org"
 #yum_url="https://yum.dockerproject.org"
@@ -245,32 +278,6 @@ do_install() {
 	# TODO: Move this to after we figure out the distribution and the version
 	#       to check whether or not we support that distro-version on that arch
 	architecture=$(uname -m)
-	case $architecture in
-		# officially supported
-		amd64|x86_64)
-			;;
-		# unofficially supported with available repositories
-		armv6l|armv7l)
-			;;
-		# unofficially supported without available repositories
-		aarch64|arm64|ppc64le|s390x)
-			cat 1>&2 <<-EOF
-			Error: This install script does not support $architecture, because no
-			$architecture package exists in Docker's repositories.
-
-			Other install options include checking your distribution's package repository
-			for a version of Docker, or building Docker from source.
-			EOF
-			exit 1
-			;;
-		# not supported
-		*)
-			cat >&2 <<-EOF
-			Error: $architecture is not a recognized platform.
-			EOF
-			exit 1
-			;;
-	esac
 
 	if command_exists docker; then
 		version="$(docker -v | cut -d ' ' -f3 | cut -d ',' -f1)"
@@ -403,6 +410,20 @@ do_install() {
 
 	# Check if this is a forked Linux distro
 	check_forked
+
+	# Check if we actually support this configuration
+	if ! echo "$SUPPORT_MAP" | grep "$architecture-$lsb_dist-$dist_version" >/dev/null; then
+		cat >&2 <<-'EOF'
+
+		Either your platform is not easily detectable or is not supported by this
+		installer script.
+		Please visit the following URL for more detailed installation instructions:
+
+		https://docs.docker.com/engine/installation/
+
+		EOF
+		exit 1
+	fi
 
 	# Run setup for each distro accordingly
 	case "$lsb_dist" in
