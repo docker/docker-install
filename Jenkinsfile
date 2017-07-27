@@ -1,15 +1,15 @@
 #!groovy
 
 def verifyTargets = [
-  'verify-install-centos-7',
-  'verify-install-fedora-24',
-  'verify-install-fedora-25',
-  'verify-install-debian-wheezy',
-  'verify-install-debian-jessie',
-  'verify-install-debian-stretch',
-  'verify-install-ubuntu-trusty',
-  'verify-install-ubuntu-xenial',
-  'verify-install-ubuntu-zesty',
+  'x86_64-verify-install-centos-7',
+  'x86_64-verify-install-fedora-24',
+  'x86_64-verify-install-fedora-25',
+  'x86_64-verify-install-debian-wheezy',
+  'x86_64-verify-install-debian-jessie',
+  'x86_64-verify-install-debian-stretch',
+  'x86_64-verify-install-ubuntu-trusty',
+  'x86_64-verify-install-ubuntu-xenial',
+  'x86_64-verify-install-ubuntu-zesty',
 ]
 
 def armhfverifyTargets = [
@@ -40,7 +40,7 @@ def genVerifyJob(String t, String label) {
             channel='edge'
         }
         sh("make CHANNEL_TO_TEST=${channel} clean ${t}")
-        archiveArtifacts 'verify-install-*'
+        archiveArtifacts '*-verify-install-*'
       }
     }
   } ]
