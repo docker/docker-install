@@ -1,6 +1,6 @@
 SHELL:=/bin/bash
 DISTROS:=centos-7 fedora-24 fedora-25 debian-wheezy debian-jessie debian-stretch ubuntu-trusty ubuntu-xenial ubuntu-yakkety ubuntu-zesty
-VERIFY_INSTALL_DISTROS:=$(addprefix verify-install-,$(DISTROS))
+VERIFY_INSTALL_DISTROS:=$(addprefix x86_64-verify-install-,$(DISTROS))
 CHANNEL_TO_TEST?=test
 SHELLCHECK=shellcheck
 
@@ -13,9 +13,10 @@ check: $(VERIFY_INSTALL_DISTROS)
 
 .PHONY: clean
 clean:
-	$(RM) verify-install-*
+	$(RM) *-verify-install-*
+	$(RM) -r build
 
-verify-install-%:
+x86_64-verify-install-%:
 	mkdir -p build
 	sed 's/DEFAULT_CHANNEL_VALUE="test"/DEFAULT_CHANNEL_VALUE="$(CHANNEL_TO_TEST)"/' install.sh > build/install.sh
 	set -o pipefail && docker run \
