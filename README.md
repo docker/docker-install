@@ -34,10 +34,8 @@ sh install.sh
 To verify that the install script works amongst the supported operating systems run:
 
 ```shell
-make EXPECTED_VERSION=your_expected_version EXPECTED_GITCOMMIT=your_expected_gitcommit check
+make check
 ```
-
-`EXPECTED_VERSION` and `EXPECTED_GITCOMMIT` can be pulled from the latest release at https://download.docker.com
 
 ## Legal
 *Brought to you courtesy of our legal counsel. For more context,
