@@ -28,6 +28,8 @@ if [ -z "$CHANNEL" ]; then
     CHANNEL=$DEFAULT_CHANNEL_VALUE
 fi
 
+DOWNLOAD_URL="https://download.docker.com"
+
 # TODO: Remove *-ubuntu-yakkety once 17.07.0-ce hits GA
 SUPPORT_MAP="
 x86_64-centos-7
@@ -54,6 +56,26 @@ armv7l-ubuntu-xenial
 armv7l-ubuntu-yakkety
 armv7l-ubuntu-zesty
 "
+
+mirror=''
+while [ $# -gt 0 ]; do
+	case "$1" in
+		--mirror)
+			mirror="$2"
+			shift
+			;;
+		*)
+			echo "Illegal option $1"
+			;;
+	esac
+	shift $(( $# > 0 ? 1 : 0 ))
+done
+
+case "$mirror" in
+	Aliyun)
+		DOWNLOAD_URL="https://mirrors.aliyun.com/docker-ce"
+		;;
+esac
 
 command_exists() {
 	command -v "$@" > /dev/null 2>&1
@@ -308,12 +330,12 @@ do_install() {
 			if ! command -v gpg > /dev/null; then
 				pre_reqs="$pre_reqs gnupg"
 			fi
-			apt_repo="deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/$lsb_dist $dist_version $CHANNEL"
+			apt_repo="deb [arch=$(dpkg --print-architecture)] $DOWNLOAD_URL/linux/$lsb_dist $dist_version $CHANNEL"
 			(
 				set -x
 				$sh_c 'apt-get update'
 				$sh_c "apt-get install -y -q $pre_reqs"
-				curl "https://download.docker.com/linux/$lsb_dist/gpg" | $sh_c 'apt-key add -'
+				curl "$DOWNLOAD_URL/linux/$lsb_dist/gpg" | $sh_c 'apt-key add -'
 				$sh_c "echo \"$apt_repo\" > /etc/apt/sources.list.d/docker.list"
 				if [ "$lsb_dist" = "debian" ] && [ "$dist_version" = "wheezy" ]; then
 					$sh_c 'sed -i "/deb-src.*download\.docker/d" /etc/apt/sources.list.d/docker.list'
@@ -325,7 +347,7 @@ do_install() {
 			exit 0
 			;;
 		centos|fedora)
-			yum_repo="https://download.docker.com/linux/$lsb_dist/docker-ce.repo"
+			yum_repo="$DOWNLOAD_URL/linux/$lsb_dist/docker-ce.repo"
 			if [ "$lsb_dist" = "fedora" ]; then
 				if [ "$dist_version" -lt "24" ]; then
 					echo "Error: Only Fedora >=24 are supported"
