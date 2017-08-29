@@ -2,7 +2,8 @@ SHELL:=/bin/bash
 DISTROS:=centos-7 fedora-24 fedora-25 debian-wheezy debian-jessie debian-stretch ubuntu-trusty ubuntu-xenial ubuntu-yakkety ubuntu-zesty
 VERIFY_INSTALL_DISTROS:=$(addprefix x86_64-verify-install-,$(DISTROS))
 CHANNEL_TO_TEST?=test
-SHELLCHECK=shellcheck
+SHELLCHECK_EXCLUSIONS=$(addprefix -e, SC1091 SC1117)
+SHELLCHECK=docker run --rm -v "$(CURDIR)":/v -w /v koalaman/shellcheck $(SHELLCHECK_EXCLUSIONS)
 
 .PHONY: shellcheck
 shellcheck:
