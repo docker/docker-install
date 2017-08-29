@@ -14,6 +14,7 @@ def verifyTargets = [
 
 def armhfverifyTargets = [
   'armhf-verify-install-raspbian-jessie',
+  'armhf-verify-install-raspbian-stretch',
   'armhf-verify-install-debian-jessie',
   'armhf-verify-install-debian-stretch',
   'armhf-verify-install-ubuntu-trusty',

@@ -49,6 +49,8 @@ s390x-ubuntu-zesty
 aarch64-ubuntu-xenial
 armv6l-raspbian-jessie
 armv7l-raspbian-jessie
+armv6l-raspbian-stretch
+armv7l-raspbian-stretch
 armv7l-debian-jessie
 armv7l-debian-stretch
 armv7l-ubuntu-trusty
@@ -505,7 +507,9 @@ do_install() {
 				apt_get_update
 				( set -x; $sh_c 'sleep 3; apt-get install -y -q dirmngr' )
 			fi
-
+			if [ "$dist_version" = "stretch" ]; then
+				dist_version="jessie"
+			fi
 			(
 			set -x
 			echo "$docker_key" | $sh_c 'apt-key add -'

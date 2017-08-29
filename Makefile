@@ -36,6 +36,16 @@ armhf-verify-install-raspbian-jessie:
 		resin/rpi-raspbian:jessie \
 		/v/verify-docker-install | tee $@
 
+armhf-verify-install-raspbian-stretch:
+	mkdir -p build
+	sed 's/DEFAULT_CHANNEL_VALUE="test"/DEFAULT_CHANNEL_VALUE="$(CHANNEL_TO_TEST)"/' install.sh > build/install.sh
+	set -o pipefail && docker run \
+		--rm \
+		-v $(CURDIR):/v \
+		-w /v \
+		resin/rpi-raspbian:stretch \
+		/v/verify-docker-install | tee $@
+
 armhf-verify-install-%:
 	mkdir -p build
 	sed 's/DEFAULT_CHANNEL_VALUE="test"/DEFAULT_CHANNEL_VALUE="$(CHANNEL_TO_TEST)"/' install.sh > build/install.sh
