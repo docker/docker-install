@@ -25,7 +25,7 @@ SCRIPT_COMMIT_SHA=UNKNOWN
 #   * experimental
 DEFAULT_CHANNEL_VALUE="test"
 if [ -z "$CHANNEL" ]; then
-    CHANNEL=$DEFAULT_CHANNEL_VALUE
+	CHANNEL=$DEFAULT_CHANNEL_VALUE
 fi
 
 DOWNLOAD_URL="https://download.docker.com"
@@ -102,22 +102,19 @@ echo_docker_as_nonroot() {
 	your_user=your-user
 	[ "$user" != 'root' ] && your_user="$user"
 	# intentionally mixed spaces and tabs here -- tabs are stripped by "<<-EOF", spaces are kept in the output
-	cat <<-EOF
+	echo "If you would like to use Docker as a non-root user, you should now consider"
+	echo "adding your user to the \"docker\" group with something like:"
+	echo
+	echo "  sudo usermod -aG docker $your_user"
+	echo
+	echo "Remember that you will have to log out and back in for this to take effect!"
+	echo
+	echo "WARNING: Adding a user to the \"docker\" group will grant the ability to run"
+	echo "         containers which can be used to obtain root privileges on the"
+	echo "         docker host."
+	echo "         Refer to https://docs.docker.com/engine/security/security/#docker-daemon-attack-surface"
+	echo "         for more information."
 
-	If you would like to use Docker as a non-root user, you should now consider
-	adding your user to the "docker" group with something like:
-
-	  sudo usermod -aG docker $your_user
-
-	Remember that you will have to log out and back in for this to take effect!
-
-	WARNING: Adding a user to the "docker" group will grant the ability to run
-	         containers which can be used to obtain root privileges on the
-	         docker host.
-	         Refer to https://docs.docker.com/engine/security/security/#docker-daemon-attack-surface
-	         for more information.
-
-	EOF
 }
 
 # Check if this is a forked Linux distro
