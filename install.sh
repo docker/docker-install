@@ -75,6 +75,9 @@ case "$mirror" in
 	Aliyun)
 		DOWNLOAD_URL="https://mirrors.aliyun.com/docker-ce"
 		;;
+	AzureChinaCloud)
+		DOWNLOAD_URL="https://mirror.azure.cn/docker-ce"
+		;;
 esac
 
 docker_key="-----BEGIN PGP PUBLIC KEY BLOCK-----
