@@ -14,9 +14,11 @@ def verifyTargets = [
 
 def armhfverifyTargets = [
   'armhf-verify-install-raspbian-jessie',
+  'armhf-verify-install-raspbian-stretch',
   'armhf-verify-install-debian-jessie',
   'armhf-verify-install-debian-stretch',
-  'armhf-verify-install-ubuntu-trusty',
+  // TEMPORARY: security.ubuntu.com is returning a 404 for trusty armhf, support may have ended
+  // 'armhf-verify-install-ubuntu-trusty',
   'armhf-verify-install-ubuntu-xenial',
   'armhf-verify-install-ubuntu-zesty',
 ]
@@ -44,6 +46,13 @@ def genVerifyJob(String t, String label) {
       }
     }
   } ]
+}
+
+wrappedNode(label: 'aufs', cleanWorkspace: true) {
+  stage('Shellcheck') {
+    checkout scm
+    sh('make shellcheck')
+  }
 }
 
 def verifyJobs = [:]
