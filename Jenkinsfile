@@ -36,13 +36,21 @@ def genVerifyJob(String t, String label) {
   return [ "${t}" : { ->
     stage("${t}") {
       wrappedNode(label: label, cleanWorkspace: true) {
-        checkout scm
-        channel = 'test'
-        if ("${env.JOB_NAME}".endsWith('get.docker.com')) {
-            channel='edge'
+        def notifyDefaults = [context: t, description: 'Platform Test']
+        githubNotify(notifyDefaults << [status: 'PENDING'])
+        try {
+          checkout scm
+          channel = 'test'
+          if ("${env.JOB_NAME}".endsWith('get.docker.com')) {
+              channel='edge'
+          }
+          sh("make CHANNEL_TO_TEST=${channel} clean ${t}")
+          archiveArtifacts '*-verify-install-*'
+        } catch(err) {
+          githubNotify(notifyDefaults << [status: 'FAILED'])
+          throw err
         }
-        sh("make CHANNEL_TO_TEST=${channel} clean ${t}")
-        archiveArtifacts '*-verify-install-*'
+        githubNotify(notifyDefaults << [status: 'SUCCESS'])
       }
     }
   } ]
@@ -50,8 +58,16 @@ def genVerifyJob(String t, String label) {
 
 wrappedNode(label: 'aufs', cleanWorkspace: true) {
   stage('Shellcheck') {
-    checkout scm
-    sh('make shellcheck')
+    def notifyDefaults = [context: "shellcheck", description: 'Platform Test']
+    githubNotify(notifyDefaults << [status: 'PENDING'])
+    try {
+      checkout scm
+      sh('make shellcheck')
+    } catch(err) {
+      githubNotify(notifyDefaults << [status: 'FAILED'])
+      throw err
+    }
+    githubNotify(notifyDefaults << [status: 'SUCCESS'])
   }
 }
 
