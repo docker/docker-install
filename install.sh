@@ -417,6 +417,13 @@ do_install() {
 		centos|fedora)
 			yum_repo="$DOWNLOAD_URL/linux/$lsb_dist/docker-ce.repo"
 			if [ "$lsb_dist" = "fedora" ]; then
+				if [ "$dist_version" = "24" ]; then
+					echo
+					echo "Warning: Fedora 24 has reached EOL"
+					echo "         Support for Fedora 24 for this installation script will be removed on October 1, 2017"
+					echo
+					sleep 10
+				fi
 				if [ "$dist_version" -lt "24" ]; then
 					echo "Error: Only Fedora >=24 are supported"
 					exit 1
