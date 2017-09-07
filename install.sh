@@ -60,11 +60,15 @@ armv7l-ubuntu-zesty
 "
 
 mirror=''
+DRY_RUN=${DRY_RUN:-}
 while [ $# -gt 0 ]; do
 	case "$1" in
 		--mirror)
 			mirror="$2"
 			shift
+			;;
+		--dry-run)
+			DRY_RUN=1
 			;;
 		*)
 			echo "Illegal option $1"
@@ -152,6 +156,14 @@ command_exists() {
 	command -v "$@" > /dev/null 2>&1
 }
 
+is_dry_run() {
+	if [ -z "$DRY_RUN" ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+
 get_distribution() {
 	lsb_dist=""
 	# Every system that we officially support has /etc/os-release
@@ -164,6 +176,9 @@ get_distribution() {
 }
 
 echo_docker_as_nonroot() {
+	if is_dry_run; then
+		return
+	fi
 	if command_exists docker && [ -e /var/run/docker.sock ]; then
 		(
 			set -x
@@ -253,7 +268,7 @@ ee_notice() {
 }
 
 do_install() {
-	echo "Executing docker install script, commit: $SCRIPT_COMMIT_SHA"
+	echo "# Executing docker install script, commit: $SCRIPT_COMMIT_SHA"
 
 	if command_exists docker; then
 		version="$(docker -v | cut -d ' ' -f3 | cut -d ',' -f1)"
@@ -317,6 +332,10 @@ do_install() {
 			EOF
 			exit 1
 		fi
+	fi
+
+	if is_dry_run; then
+		sh_c="echo"
 	fi
 
 	# perform some very rudimentary platform detection
@@ -406,16 +425,18 @@ do_install() {
 			fi
 			apt_repo="deb [arch=$(dpkg --print-architecture)] $DOWNLOAD_URL/linux/$lsb_dist $dist_version $CHANNEL"
 			(
-				set -x
-				$sh_c 'apt-get update'
-				$sh_c "apt-get install -y -q $pre_reqs"
-				curl "$DOWNLOAD_URL/linux/$lsb_dist/gpg" | $sh_c 'apt-key add -'
+				if ! is_dry_run; then
+					set -x
+				fi
+				$sh_c 'apt-get update -qq >/dev/null'
+				$sh_c "apt-get install -y -qq $pre_reqs >/dev/null"
+				$sh_c "curl -fsSL \"$DOWNLOAD_URL/linux/$lsb_dist/gpg\" | apt-key add -qq - >/dev/null"
 				$sh_c "echo \"$apt_repo\" > /etc/apt/sources.list.d/docker.list"
 				if [ "$lsb_dist" = "debian" ] && [ "$dist_version" = "wheezy" ]; then
 					$sh_c 'sed -i "/deb-src.*download\.docker/d" /etc/apt/sources.list.d/docker.list'
 				fi
-				$sh_c 'apt-get update'
-				$sh_c 'apt-get install -y -q docker-ce'
+				$sh_c 'apt-get update -qq >/dev/null'
+				$sh_c 'apt-get install -y -qq docker-ce >/dev/null'
 			)
 			echo_docker_as_nonroot
 			exit 0
@@ -445,11 +466,12 @@ do_install() {
 				pre_reqs="yum-utils"
 			fi
 			(
-				set -x
+				if ! is_dry_run; then
+					set -x
+				fi
 				$sh_c "$pkg_manager install -y -q $pre_reqs"
 				$sh_c "$config_manager --add-repo $yum_repo"
 				if [ "$CHANNEL" != "stable" ]; then
-					echo "Info: Enabling channel '$CHANNEL' for docker-ce repo"
 					$sh_c "$config_manager $enable_channel_flag docker-ce-$CHANNEL"
 				fi
 				$sh_c "$pkg_manager makecache"
