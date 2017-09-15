@@ -14,19 +14,43 @@ This repository is solely maintained by Docker, Inc.
 
 From `https://get.docker.com`:
 ```shell
-curl -fsSL get.docker.com -o get-docker.sh
-sh get-docker.sh
+$ curl -fsSL get.docker.com -o get-docker.sh
+$ sh get-docker.sh
 ```
 
 From `https://test.docker.com`:
 ```shell
-curl -fsSL test.docker.com -o test-docker.sh
-sh test-docker.sh
+$ curl -fsSL test.docker.com -o test-docker.sh
+$ sh test-docker.sh
 ```
 
 From the source repo (This will install latest from the `test` channel):
 ```shell
-sh install.sh
+$ sh install.sh
+```
+
+### Dry running
+
+If you'd like to see the commands that will be run for you distribution,
+feel free to use the `dry run` option like so:
+
+```shell
+$ curl -fsSL get.docker.com -o get-docker.sh
+$ sh get-docker.sh --dry-run
+# Executing docker install script, commit: 716f7ca
+yum install -y -q yum-utils
+yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+yum-config-manager --enable docker-ce-edge
+yum makecache
+yum install -y -q docker-ce
+```
+
+The output of the `dry run` can also be used as a shell script to actually
+install docker on your machine!
+
+```shell
+$ sh get-docker.sh --dry-run > install.sh
+$ sh install.sh
 ```
 
 ## Testing:
