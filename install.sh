@@ -46,6 +46,8 @@ x86_64-ubuntu-zesty
 s390x-ubuntu-xenial
 s390x-ubuntu-yakkety
 s390x-ubuntu-zesty
+ppc64le-ubuntu-xenial
+ppc64le-ubuntu-zesty
 aarch64-ubuntu-xenial
 armv6l-raspbian-jessie
 armv7l-raspbian-jessie
