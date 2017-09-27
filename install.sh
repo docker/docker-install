@@ -70,7 +70,7 @@ while [ $# -gt 0 ]; do
 		--dry-run)
 			DRY_RUN=1
 			;;
-		*)
+		--*)
 			echo "Illegal option $1"
 			;;
 	esac
@@ -374,6 +374,11 @@ do_install() {
 			fi
 		;;
 
+		rhel|ol|sles)
+			ee_notice "$lsb_dist"
+			exit 1
+			;;
+
 		*)
 			if command_exists lsb_release; then
 				dist_version="$(lsb_release --codename | cut -f2)"
@@ -382,11 +387,6 @@ do_install() {
 				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
 			fi
 		;;
-
-		rhel|ol|sles)
-			ee_notice "$lsb_dist"
-			exit 1
-			;;
 
 	esac
 
