@@ -76,3 +76,13 @@ s390x-verify-install-%:
 		-w /v \
 		s390x/$(subst -,:,$*) \
 		/v/verify-docker-install | tee $@
+
+ppc64le-verify-install-%:
+	mkdir -p build
+	sed 's/DEFAULT_CHANNEL_VALUE="test"/DEFAULT_CHANNEL_VALUE="$(CHANNEL_TO_TEST)"/' install.sh > build/install.sh
+	set -o pipefail && docker run \
+		--rm \
+		-v $(CURDIR):/v \
+		-w /v \
+		ppc64le/$(subst -,:,$*) \
+		/v/verify-docker-install | tee $@

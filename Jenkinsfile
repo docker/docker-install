@@ -32,6 +32,11 @@ def aarch64verifyTargets = [
   'aarch64-verify-install-ubuntu-xenial',
 ]
 
+def ppc64leverifyTargets = [
+  'ppc64le-verify-install-ubuntu-xenial',
+  'ppc64le-verify-install-ubuntu-zesty',
+]
+
 def genVerifyJob(String t, String label) {
   return [ "${t}" : { ->
     stage("${t}") {
@@ -70,6 +75,10 @@ for (t in s390xverifyTargets) {
 
 for (t in aarch64verifyTargets) {
   verifyJobs << genVerifyJob(t, 'aarch64')
+}
+
+for (t in ppc64leverifyTargets) {
+  verifyJobs << genVerifyJob(t, 'ppc64le')
 }
 
 parallel(verifyJobs)
