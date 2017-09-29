@@ -77,4 +77,8 @@ for (t in aarch64verifyTargets) {
   verifyJobs << genVerifyJob(t, 'aarch64')
 }
 
+for (t in ppc64leverifyTargets) {
+  verifyJobs << genVerifyJob(t, 'ppc64le')
+}
+
 parallel(verifyJobs)
