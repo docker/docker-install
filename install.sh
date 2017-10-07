@@ -383,7 +383,7 @@ do_install() {
 
 		*)
 			if command_exists lsb_release; then
-				dist_version="$(lsb_release --codename | cut -f2)"
+				dist_version="$(lsb_release --release | cut -f2)"
 			fi
 			if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
 				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
