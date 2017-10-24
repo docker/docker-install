@@ -379,7 +379,7 @@ do_install() {
 					$sh_c 'sed -i "/deb-src.*download\.docker/d" /etc/apt/sources.list.d/docker.list'
 				fi
 				$sh_c 'apt-get update -qq >/dev/null'
-				$sh_c 'apt-get install -y -qq docker-ce >/dev/null'
+				$sh_c 'apt-get install -y -qq --no-install-recommends docker-ce >/dev/null'
 			)
 			echo_docker_as_nonroot
 			exit 0
