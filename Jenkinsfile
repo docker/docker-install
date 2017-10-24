@@ -10,6 +10,7 @@ def verifyTargets = [
   'x86_64-verify-install-ubuntu-trusty',
   'x86_64-verify-install-ubuntu-xenial',
   'x86_64-verify-install-ubuntu-zesty',
+  'x86_64-verify-install-ubuntu-artful',
 ]
 
 def armhfverifyTargets = [
