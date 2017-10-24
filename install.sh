@@ -41,10 +41,13 @@ x86_64-debian-stretch
 x86_64-ubuntu-trusty
 x86_64-ubuntu-xenial
 x86_64-ubuntu-zesty
+x86_64-ubuntu-artful
 s390x-ubuntu-xenial
 s390x-ubuntu-zesty
+s390x-ubuntu-artful
 ppc64le-ubuntu-xenial
 ppc64le-ubuntu-zesty
+ppc64le-ubuntu-artful
 aarch64-ubuntu-xenial
 armv6l-raspbian-jessie
 armv7l-raspbian-jessie
@@ -55,6 +58,7 @@ armv7l-debian-stretch
 armv7l-ubuntu-trusty
 armv7l-ubuntu-xenial
 armv7l-ubuntu-zesty
+armv7l-ubuntu-artful
 "
 
 mirror=''
@@ -352,6 +356,13 @@ do_install() {
 			else
 				pre_reqs="$pre_reqs software-properties-common"
 			fi
+
+			# TODO: DELETE HERE
+			if [ "$lsb_dist" = "ubuntu" ] && [ "$dist_version" = "artful" ]; then
+				dist_version="zesty"
+			fi
+			# TODO: DELETE HERE
+
 			if ! command -v gpg > /dev/null; then
 				pre_reqs="$pre_reqs gnupg"
 			fi
@@ -368,7 +379,7 @@ do_install() {
 					$sh_c 'sed -i "/deb-src.*download\.docker/d" /etc/apt/sources.list.d/docker.list'
 				fi
 				$sh_c 'apt-get update -qq >/dev/null'
-				$sh_c 'apt-get install -y -qq docker-ce >/dev/null'
+				$sh_c 'apt-get install -y -qq --no-install-recommends docker-ce >/dev/null'
 			)
 			echo_docker_as_nonroot
 			exit 0
