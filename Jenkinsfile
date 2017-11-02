@@ -22,11 +22,13 @@ def armhfverifyTargets = [
   // 'armhf-verify-install-ubuntu-trusty',
   'armhf-verify-install-ubuntu-xenial',
   'armhf-verify-install-ubuntu-zesty',
+  'armhf-verify-install-ubuntu-artful',
 ]
 
 def s390xverifyTargets = [
   's390x-verify-install-ubuntu-xenial',
   's390x-verify-install-ubuntu-zesty',
+  's390x-verify-install-ubuntu-artful',
 ]
 
 def aarch64verifyTargets = [
@@ -36,6 +38,7 @@ def aarch64verifyTargets = [
 def ppc64leverifyTargets = [
   'ppc64le-verify-install-ubuntu-xenial',
   'ppc64le-verify-install-ubuntu-zesty',
+  'ppc64le-verify-install-ubuntu-artful',
 ]
 
 def genVerifyJob(String t, String label) {
