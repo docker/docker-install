@@ -356,13 +356,6 @@ do_install() {
 			else
 				pre_reqs="$pre_reqs software-properties-common"
 			fi
-
-			# TODO: DELETE HERE
-			if [ "$lsb_dist" = "ubuntu" ] && [ "$dist_version" = "artful" ]; then
-				dist_version="zesty"
-			fi
-			# TODO: DELETE HERE
-
 			if ! command -v gpg > /dev/null; then
 				pre_reqs="$pre_reqs gnupg"
 			fi
