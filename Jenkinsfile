@@ -7,6 +7,7 @@ def verifyTargets = [
   'x86_64-verify-install-debian-wheezy',
   'x86_64-verify-install-debian-jessie',
   'x86_64-verify-install-debian-stretch',
+  'x86_64-verify-install-debian-buster',
   'x86_64-verify-install-ubuntu-trusty',
   'x86_64-verify-install-ubuntu-xenial',
   'x86_64-verify-install-ubuntu-zesty',
@@ -18,6 +19,7 @@ def armhfverifyTargets = [
   'armhf-verify-install-raspbian-stretch',
   'armhf-verify-install-debian-jessie',
   'armhf-verify-install-debian-stretch',
+  'armhf-verify-install-debian-buster',
   // TEMPORARY: security.ubuntu.com is returning a 404 for trusty armhf, support may have ended
   // 'armhf-verify-install-ubuntu-trusty',
   'armhf-verify-install-ubuntu-xenial',

@@ -38,6 +38,7 @@ x86_64-fedora-26
 x86_64-debian-wheezy
 x86_64-debian-jessie
 x86_64-debian-stretch
+x86_64-debian-buster
 x86_64-ubuntu-trusty
 x86_64-ubuntu-xenial
 x86_64-ubuntu-zesty
@@ -55,6 +56,7 @@ armv6l-raspbian-stretch
 armv7l-raspbian-stretch
 armv7l-debian-jessie
 armv7l-debian-stretch
+armv7l-debian-buster
 armv7l-ubuntu-trusty
 armv7l-ubuntu-xenial
 armv7l-ubuntu-zesty
