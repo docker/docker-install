@@ -35,6 +35,7 @@ x86_64-centos-7
 x86_64-fedora-24
 x86_64-fedora-25
 x86_64-fedora-26
+x86_64-fedora-27
 x86_64-debian-wheezy
 x86_64-debian-jessie
 x86_64-debian-stretch
@@ -407,6 +408,24 @@ do_install() {
 				fi
 				$sh_c "$pkg_manager install -y -q $pre_reqs"
 				$sh_c "$config_manager --add-repo $yum_repo"
+
+				# DELETE FROM HERE
+				if [ "$dist_version" -eq "27" ]; then
+					$sh_c "sed -i 's/\\\$releasever/26/g' /etc/yum.repos.d/docker-ce.repo"
+					set +x
+					echo "=================================================================================="
+					echo
+					echo "WARNING: Hardcoding repository to use Fedora 26 repositories"
+					echo "         You will need to update your repositories after the release of 17.12.0-ce"
+					echo
+					echo "         See: https://github.com/docker/for-linux/issues/164#issuecomment-345034887"
+					echo
+					echo "=================================================================================="
+					sleep 10
+					set -x
+				fi
+				# DELETE TO HERE
+
 				if [ "$CHANNEL" != "stable" ]; then
 					$sh_c "$config_manager $enable_channel_flag docker-ce-$CHANNEL"
 				fi

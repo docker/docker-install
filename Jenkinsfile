@@ -4,6 +4,7 @@ def verifyTargets = [
   'x86_64-verify-install-centos-7',
   'x86_64-verify-install-fedora-25',
   'x86_64-verify-install-fedora-26',
+  'x86_64-verify-install-fedora-27',
   'x86_64-verify-install-debian-wheezy',
   'x86_64-verify-install-debian-jessie',
   'x86_64-verify-install-debian-stretch',
