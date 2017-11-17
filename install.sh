@@ -412,6 +412,17 @@ do_install() {
 				# DELETE FROM HERE
 				if [ "$dist_version" -eq "27" ]; then
 					$sh_c "sed -i 's/\\\$releasever/26/g' /etc/yum.repos.d/docker-ce.repo"
+					set +x
+					echo "=================================================================================="
+					echo
+					echo "WARNING: Hardcoding repository to use Fedora 26 repositories"
+					echo "         You will need to update your repositories after the release of 17.12.0-ce"
+					echo
+					echo "         See: https://github.com/docker/for-linux/issues/164#issuecomment-345034887"
+					echo
+					echo "=================================================================================="
+					sleep 10
+					set -x
 				fi
 				# DELETE TO HERE
 
