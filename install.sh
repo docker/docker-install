@@ -351,13 +351,10 @@ do_install() {
 		ubuntu|debian|raspbian)
 			pre_reqs="apt-transport-https ca-certificates curl"
 			if [ "$lsb_dist" = "debian" ] && [ "$dist_version" = "wheezy" ]; then
-				pre_reqs="$pre_reqs python-software-properties"
 				backports="deb http://ftp.debian.org/debian wheezy-backports main"
 				if ! grep -Fxq "$backports" /etc/apt/sources.list; then
 					(set -x; $sh_c "echo \"$backports\" >> /etc/apt/sources.list")
 				fi
-			else
-				pre_reqs="$pre_reqs software-properties-common"
 			fi
 			if ! command -v gpg > /dev/null; then
 				pre_reqs="$pre_reqs gnupg"
