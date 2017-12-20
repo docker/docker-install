@@ -51,6 +51,9 @@ ppc64le-ubuntu-xenial
 ppc64le-ubuntu-zesty
 ppc64le-ubuntu-artful
 aarch64-ubuntu-xenial
+aarch64-ubuntu-zesty
+aarch64-debian-jessie
+aarch64-debian-stretch
 armv6l-raspbian-jessie
 armv7l-raspbian-jessie
 armv6l-raspbian-stretch
@@ -112,6 +115,14 @@ get_distribution() {
 	# Returning an empty string here should be alright since the
 	# case statements don't act unless you provide an actual value
 	echo "$lsb_dist"
+}
+
+add_debian_backport_repo() {
+	debian_version="$1"
+	backports="deb http://ftp.debian.org/debian $debian_version-backports main"
+	if ! grep -Fxq "$backports" /etc/apt/sources.list; then
+		(set -x; $sh_c "echo \"$backports\" >> /etc/apt/sources.list")
+	fi
 }
 
 echo_docker_as_nonroot() {
@@ -350,10 +361,13 @@ do_install() {
 	case "$lsb_dist" in
 		ubuntu|debian|raspbian)
 			pre_reqs="apt-transport-https ca-certificates curl"
-			if [ "$lsb_dist" = "debian" ] && [ "$dist_version" = "wheezy" ]; then
-				backports="deb http://ftp.debian.org/debian wheezy-backports main"
-				if ! grep -Fxq "$backports" /etc/apt/sources.list; then
-					(set -x; $sh_c "echo \"$backports\" >> /etc/apt/sources.list")
+			if [ "$lsb_dist" = "debian" ]; then
+				if [ "$dist_version" = "wheezy" ]; then
+					add_debian_backport_repo "$dist_version"
+				fi
+				# libseccomp2 does not exist for debian jessie main repos for aarch64
+				if [ "$(uname -m)" = "aarch64" ] && [ "$dist_version" = "jessie" ]; then
+					add_debian_backport_repo "$dist_version"
 				fi
 			fi
 			if ! command -v gpg > /dev/null; then
