@@ -36,6 +36,9 @@ def s390xverifyTargets = [
 
 def aarch64verifyTargets = [
   'aarch64-verify-install-ubuntu-xenial',
+  'aarch64-verify-install-ubuntu-zesty',
+  'aarch64-verify-install-debian-jessie',
+  'aarch64-verify-install-debian-stretch',
 ]
 
 def ppc64leverifyTargets = [
