@@ -88,7 +88,7 @@ for (t in aarch64verifyTargets) {
 }
 
 for (t in ppc64leverifyTargets) {
-  verifyJobs << genVerifyJob(t, 'ppc64le')
+  verifyJobs << genVerifyJob(t, 'ppc64le-ubuntu-1604')
 }
 
 parallel(verifyJobs)
