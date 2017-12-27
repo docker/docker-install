@@ -80,7 +80,7 @@ for (t in armhfverifyTargets) {
 }
 
 for (t in s390xverifyTargets) {
-  verifyJobs << genVerifyJob(t, 's390x')
+  verifyJobs << genVerifyJob(t, 's390x-ubuntu-1604')
 }
 
 for (t in aarch64verifyTargets) {
