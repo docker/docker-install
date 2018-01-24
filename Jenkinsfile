@@ -11,7 +11,6 @@ def verifyTargets = [
   'x86_64-verify-install-debian-buster',
   'x86_64-verify-install-ubuntu-trusty',
   'x86_64-verify-install-ubuntu-xenial',
-  'x86_64-verify-install-ubuntu-zesty',
   'x86_64-verify-install-ubuntu-artful',
 ]
 
@@ -24,26 +23,22 @@ def armhfverifyTargets = [
   // TEMPORARY: security.ubuntu.com is returning a 404 for trusty armhf, support may have ended
   // 'armhf-verify-install-ubuntu-trusty',
   'armhf-verify-install-ubuntu-xenial',
-  'armhf-verify-install-ubuntu-zesty',
   'armhf-verify-install-ubuntu-artful',
 ]
 
 def s390xverifyTargets = [
   's390x-verify-install-ubuntu-xenial',
-  's390x-verify-install-ubuntu-zesty',
   's390x-verify-install-ubuntu-artful',
 ]
 
 def aarch64verifyTargets = [
   'aarch64-verify-install-ubuntu-xenial',
-  'aarch64-verify-install-ubuntu-zesty',
   'aarch64-verify-install-debian-jessie',
   'aarch64-verify-install-debian-stretch',
 ]
 
 def ppc64leverifyTargets = [
   'ppc64le-verify-install-ubuntu-xenial',
-  'ppc64le-verify-install-ubuntu-zesty',
   'ppc64le-verify-install-ubuntu-artful',
 ]
 
