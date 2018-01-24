@@ -1,5 +1,5 @@
 SHELL:=/bin/bash
-DISTROS:=centos-7 fedora-25 fedora-26 debian-wheezy debian-jessie debian-stretch debian-buster ubuntu-trusty ubuntu-xenial ubuntu-yakkety ubuntu-zesty ubuntu-artful
+DISTROS:=centos-7 fedora-25 fedora-26 debian-wheezy debian-jessie debian-stretch debian-buster ubuntu-trusty ubuntu-xenial ubuntu-yakkety ubuntu-artful
 VERIFY_INSTALL_DISTROS:=$(addprefix x86_64-verify-install-,$(DISTROS))
 CHANNEL_TO_TEST?=test
 SHELLCHECK_EXCLUSIONS=$(addprefix -e, SC1091 SC1117)
