@@ -35,6 +35,9 @@ def aarch64verifyTargets = [
   'aarch64-verify-install-ubuntu-xenial',
   'aarch64-verify-install-debian-jessie',
   'aarch64-verify-install-debian-stretch',
+  'aarch64-verify-install-centos-7',
+  'aarch64-verify-install-fedora-26',
+  'aarch64-verify-install-fedora-27',
 ]
 
 def ppc64leverifyTargets = [
