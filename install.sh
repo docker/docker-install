@@ -108,6 +108,17 @@ is_dry_run() {
 	fi
 }
 
+deprecation_notice() {
+	distro=$1
+	date=$2
+	echo
+	echo "DEPRECATION WARNING:"
+	echo "    The distribution, $distro, will no longer be supported in this script as of $date."
+	echo "    If you feel this is a mistake please submit an issue at https://github.com/docker/docker-install/issues/new"
+	echo
+	sleep 10
+}
+
 get_distribution() {
 	lsb_dist=""
 	# Every system that we officially support has /etc/os-release
@@ -377,6 +388,13 @@ do_install() {
 					add_debian_backport_repo "$dist_version"
 				fi
 			fi
+
+			# TODO: March 1, 2018 delete from here,
+			if [ "$lsb_dist" =  "ubuntu" ] && [ "$dist_version" = "zesty" ]; then
+				deprecation_notice "$lsb_dist $dist_version" "March 1, 2018"
+			fi
+			# TODO: March 1, 2018 delete to here,
+
 			if ! command -v gpg > /dev/null; then
 				pre_reqs="$pre_reqs gnupg"
 			fi
@@ -405,6 +423,13 @@ do_install() {
 					echo "Error: Only Fedora >=24 are supported"
 					exit 1
 				fi
+
+				# TODO: March 1, 2018 delete from here,
+				if [ "$dist_version" = "25" ]; then
+					deprecation_notice "$lsb_dist $dist_version" "March 1, 2018"
+				fi
+				# TODO: March 1, 2018 delete to here,
+
 				pkg_manager="dnf"
 				config_manager="dnf config-manager"
 				enable_channel_flag="--set-enabled"
