@@ -239,11 +239,11 @@ do_install() {
 	echo "# Executing docker install script, commit: $SCRIPT_COMMIT_SHA"
 
 	if command_exists docker; then
-		version="$(docker -v | cut -d ' ' -f3 | cut -d ',' -f1)"
+		docker_version="$(docker -v | cut -d ' ' -f3 | cut -d ',' -f1)"
 		MAJOR_W=1
 		MINOR_W=10
 
-		semverParse "$version"
+		semverParse "$docker_version"
 
 		shouldWarn=0
 		if [ "$major" -lt "$MAJOR_W" ]; then
@@ -411,7 +411,32 @@ do_install() {
 					$sh_c 'sed -i "/deb-src.*download\.docker/d" /etc/apt/sources.list.d/docker.list'
 				fi
 				$sh_c 'apt-get update -qq >/dev/null'
-				$sh_c 'apt-get install -y -qq --no-install-recommends docker-ce >/dev/null'
+			)
+			pkg_version=""
+			if [ ! -z "$VERSION" ]; then
+				if is_dry_run; then
+					echo "# WARNING: VERSION pinning is not supported in DRY_RUN"
+				else
+					# Will work for incomplete versions IE (17.12), but may not actually grab the "latest" if in the test channel
+					pkg_pattern="$(echo "$VERSION" | sed "s/-ce-/~ce~/g" | sed "s/-/.*/g").*-0~$lsb_dist"
+					search_command="apt-cache madison 'docker-ce' | grep '$pkg_pattern' | head -1 | cut -d' ' -f 4"
+					pkg_version="$($sh_c "$search_command")"
+					echo "INFO: Searching repository for VERSION '$VERSION'"
+					echo "INFO: $search_command"
+					if [ -z "$pkg_version" ]; then
+						echo
+						echo "ERROR: '$VERSION' not found amongst apt-cache madison results"
+						echo
+						exit 1
+					fi
+					pkg_version="=$pkg_version"
+				fi
+			fi
+			(
+				if ! is_dry_run; then
+					set -x
+				fi
+				$sh_c "apt-get install -y -qq --no-install-recommends docker-ce$pkg_version >/dev/null"
 			)
 			echo_docker_as_nonroot
 			exit 0
@@ -434,11 +459,13 @@ do_install() {
 				config_manager="dnf config-manager"
 				enable_channel_flag="--set-enabled"
 				pre_reqs="dnf-plugins-core"
+				pkg_suffix="fc$dist_version"
 			else
 				pkg_manager="yum"
 				config_manager="yum-config-manager"
 				enable_channel_flag="--enable"
 				pre_reqs="yum-utils"
+				pkg_suffix="el"
 			fi
 			(
 				if ! is_dry_run; then
@@ -451,7 +478,32 @@ do_install() {
 					$sh_c "$config_manager $enable_channel_flag docker-ce-$CHANNEL"
 				fi
 				$sh_c "$pkg_manager makecache"
-				$sh_c "$pkg_manager install -y -q docker-ce"
+			)
+			pkg_version=""
+			if [ ! -z "$VERSION" ]; then
+				if is_dry_run; then
+					echo "# WARNING: VERSION pinning is not supported in DRY_RUN"
+				else
+					pkg_pattern="$(echo "$VERSION" | sed "s/-ce-/\\\\.ce\\\\./g" | sed "s/-/.*/g").*$pkg_suffix"
+					search_command="$pkg_manager list --showduplicates 'docker-ce' | grep '$pkg_pattern' | tail -1 | awk '{print \$2}'"
+					pkg_version="$($sh_c "$search_command")"
+					echo "INFO: Searching repository for VERSION '$VERSION'"
+					echo "INFO: $search_command"
+					if [ -z "$pkg_version" ]; then
+						echo
+						echo "ERROR: '$VERSION' not found amongst $pkg_manager list results"
+						echo
+						exit 1
+					fi
+					# Cut out the epoch and prefix with a '-'
+					pkg_version="-$(echo "$pkg_version" | cut -d':' -f 2)"
+				fi
+			fi
+			(
+				if ! is_dry_run; then
+					set -x
+				fi
+				$sh_c "$pkg_manager install -y -q docker-ce$pkg_version"
 			)
 			echo_docker_as_nonroot
 			exit 0
