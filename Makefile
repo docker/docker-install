@@ -2,6 +2,7 @@ SHELL:=/bin/bash
 DISTROS:=centos-7 fedora-25 fedora-26 debian-wheezy debian-jessie debian-stretch debian-buster ubuntu-trusty ubuntu-xenial ubuntu-yakkety ubuntu-artful
 VERIFY_INSTALL_DISTROS:=$(addprefix x86_64-verify-install-,$(DISTROS))
 CHANNEL_TO_TEST?=test
+VERSION?=
 SHELLCHECK_EXCLUSIONS=$(addprefix -e, SC1091 SC1117)
 SHELLCHECK=docker run --rm -v "$(CURDIR)":/v -w /v koalaman/shellcheck $(SHELLCHECK_EXCLUSIONS)
 
@@ -22,6 +23,7 @@ x86_64-verify-install-%:
 	sed 's/DEFAULT_CHANNEL_VALUE="test"/DEFAULT_CHANNEL_VALUE="$(CHANNEL_TO_TEST)"/' install.sh > build/install.sh
 	set -o pipefail && docker run \
 		--rm \
+		-e VERSION \
 		-v $(CURDIR):/v \
 		-w /v \
 		$(subst -,:,$*) \
@@ -32,6 +34,7 @@ armhf-verify-install-raspbian-jessie:
 	sed 's/DEFAULT_CHANNEL_VALUE="test"/DEFAULT_CHANNEL_VALUE="$(CHANNEL_TO_TEST)"/' install.sh > build/install.sh
 	set -o pipefail && docker run \
 		--rm \
+		-e VERSION \
 		-v $(CURDIR):/v \
 		-w /v \
 		resin/rpi-raspbian:jessie \
@@ -42,6 +45,7 @@ armhf-verify-install-raspbian-stretch:
 	sed 's/DEFAULT_CHANNEL_VALUE="test"/DEFAULT_CHANNEL_VALUE="$(CHANNEL_TO_TEST)"/' install.sh > build/install.sh
 	set -o pipefail && docker run \
 		--rm \
+		-e VERSION \
 		-v $(CURDIR):/v \
 		-w /v \
 		resin/rpi-raspbian:stretch \
@@ -52,6 +56,7 @@ armhf-verify-install-%:
 	sed 's/DEFAULT_CHANNEL_VALUE="test"/DEFAULT_CHANNEL_VALUE="$(CHANNEL_TO_TEST)"/' install.sh > build/install.sh
 	set -o pipefail && docker run \
 		--rm \
+		-e VERSION \
 		-v $(CURDIR):/v \
 		-w /v \
 		arm32v7/$(subst -,:,$*) \
@@ -62,6 +67,7 @@ aarch64-verify-install-%:
 	sed 's/DEFAULT_CHANNEL_VALUE="test"/DEFAULT_CHANNEL_VALUE="$(CHANNEL_TO_TEST)"/' install.sh > build/install.sh
 	set -o pipefail && docker run \
 		--rm \
+		-e VERSION \
 		-v $(CURDIR):/v \
 		-w /v \
 		arm64v8/$(subst -,:,$*) \
@@ -72,6 +78,7 @@ s390x-verify-install-%:
 	sed 's/DEFAULT_CHANNEL_VALUE="test"/DEFAULT_CHANNEL_VALUE="$(CHANNEL_TO_TEST)"/' install.sh > build/install.sh
 	set -o pipefail && docker run \
 		--rm \
+		-e VERSION \
 		-v $(CURDIR):/v \
 		-w /v \
 		s390x/$(subst -,:,$*) \
@@ -82,6 +89,7 @@ ppc64le-verify-install-%:
 	sed 's/DEFAULT_CHANNEL_VALUE="test"/DEFAULT_CHANNEL_VALUE="$(CHANNEL_TO_TEST)"/' install.sh > build/install.sh
 	set -o pipefail && docker run \
 		--rm \
+		-e VERSION \
 		-v $(CURDIR):/v \
 		-w /v \
 		ppc64le/$(subst -,:,$*) \
