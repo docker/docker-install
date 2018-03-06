@@ -35,7 +35,6 @@ fi
 
 SUPPORT_MAP="
 x86_64-centos-7
-x86_64-fedora-25
 x86_64-fedora-26
 x86_64-fedora-27
 x86_64-debian-wheezy
@@ -44,16 +43,12 @@ x86_64-debian-stretch
 x86_64-debian-buster
 x86_64-ubuntu-trusty
 x86_64-ubuntu-xenial
-x86_64-ubuntu-zesty
 x86_64-ubuntu-artful
 s390x-ubuntu-xenial
-s390x-ubuntu-zesty
 s390x-ubuntu-artful
 ppc64le-ubuntu-xenial
-ppc64le-ubuntu-zesty
 ppc64le-ubuntu-artful
 aarch64-ubuntu-xenial
-aarch64-ubuntu-zesty
 aarch64-debian-jessie
 aarch64-debian-stretch
 aarch64-fedora-26
@@ -68,7 +63,6 @@ armv7l-debian-stretch
 armv7l-debian-buster
 armv7l-ubuntu-trusty
 armv7l-ubuntu-xenial
-armv7l-ubuntu-zesty
 armv7l-ubuntu-artful
 "
 
@@ -392,11 +386,11 @@ do_install() {
 				fi
 			fi
 
-			# TODO: March 1, 2018 delete from here,
-			if [ "$lsb_dist" =  "ubuntu" ] && [ "$dist_version" = "zesty" ]; then
-				deprecation_notice "$lsb_dist $dist_version" "March 1, 2018"
+			# TODO: August 31, 2018 delete from here,
+			if [ "$lsb_dist" =  "ubuntu" ] && [ "$dist_version" = "artful" ]; then
+				deprecation_notice "$lsb_dist $dist_version" "August 31, 2018"
 			fi
-			# TODO: March 1, 2018 delete to here,
+			# TODO: August 31, 2018 delete to here,
 
 			if ! command -v gpg > /dev/null; then
 				pre_reqs="$pre_reqs gnupg"
@@ -447,16 +441,10 @@ do_install() {
 		centos|fedora)
 			yum_repo="$DOWNLOAD_URL/linux/$lsb_dist/docker-ce.repo"
 			if [ "$lsb_dist" = "fedora" ]; then
-				if [ "$dist_version" -lt "25" ]; then
-					echo "Error: Only Fedora >=24 are supported"
+				if [ "$dist_version" -lt "26" ]; then
+					echo "Error: Only Fedora >=26 are supported"
 					exit 1
 				fi
-
-				# TODO: March 1, 2018 delete from here,
-				if [ "$dist_version" = "25" ]; then
-					deprecation_notice "$lsb_dist $dist_version" "March 1, 2018"
-				fi
-				# TODO: March 1, 2018 delete to here,
 
 				pkg_manager="dnf"
 				config_manager="dnf config-manager"
