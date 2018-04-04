@@ -43,12 +43,16 @@ x86_64-debian-stretch
 x86_64-debian-buster
 x86_64-ubuntu-trusty
 x86_64-ubuntu-xenial
+x86_64-ubuntu-bionic
 x86_64-ubuntu-artful
 s390x-ubuntu-xenial
+s390x-ubuntu-bionic
 s390x-ubuntu-artful
 ppc64le-ubuntu-xenial
+ppc64le-ubuntu-bionic
 ppc64le-ubuntu-artful
 aarch64-ubuntu-xenial
+aarch64-ubuntu-bionic
 aarch64-debian-jessie
 aarch64-debian-stretch
 aarch64-fedora-26
@@ -63,6 +67,7 @@ armv7l-debian-stretch
 armv7l-debian-buster
 armv7l-ubuntu-trusty
 armv7l-ubuntu-xenial
+armv7l-ubuntu-bionic
 armv7l-ubuntu-artful
 "
 
