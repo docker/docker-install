@@ -33,6 +33,11 @@ if [ -z "$DOWNLOAD_URL" ]; then
 	DOWNLOAD_URL=$DEFAULT_DOWNLOAD_URL
 fi
 
+DEFAULT_REPO_FILE="docker-ce.repo"
+if [ -z "$REPO_FILE" ]; then
+	REPO_FILE="$DEFAULT_REPO_FILE"
+fi
+
 SUPPORT_MAP="
 x86_64-centos-7
 x86_64-fedora-26
@@ -444,7 +449,11 @@ do_install() {
 			exit 0
 			;;
 		centos|fedora)
-			yum_repo="$DOWNLOAD_URL/linux/$lsb_dist/docker-ce.repo"
+			yum_repo="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
+			if ! curl -Ifs "$yum_repo" > /dev/null; then
+				echo "Error: Unable to curl repository file $yum_repo, is it valid?"
+				exit 1
+			fi
 			if [ "$lsb_dist" = "fedora" ]; then
 				if [ "$dist_version" -lt "26" ]; then
 					echo "Error: Only Fedora >=26 are supported"
