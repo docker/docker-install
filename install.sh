@@ -42,6 +42,7 @@ SUPPORT_MAP="
 x86_64-centos-7
 x86_64-fedora-26
 x86_64-fedora-27
+x86_64-fedora-28
 x86_64-debian-wheezy
 x86_64-debian-jessie
 x86_64-debian-stretch
@@ -62,6 +63,7 @@ aarch64-debian-jessie
 aarch64-debian-stretch
 aarch64-fedora-26
 aarch64-fedora-27
+aarch64-fedora-28
 aarch64-centos-7
 armv6l-raspbian-jessie
 armv7l-raspbian-jessie
