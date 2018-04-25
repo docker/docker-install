@@ -61,6 +61,7 @@ aarch64-ubuntu-xenial
 aarch64-ubuntu-bionic
 aarch64-debian-jessie
 aarch64-debian-stretch
+aarch64-debian-buster
 aarch64-fedora-26
 aarch64-fedora-27
 aarch64-fedora-28
