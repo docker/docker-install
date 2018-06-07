@@ -38,47 +38,6 @@ if [ -z "$REPO_FILE" ]; then
 	REPO_FILE="$DEFAULT_REPO_FILE"
 fi
 
-SUPPORT_MAP="
-x86_64-centos-7
-x86_64-fedora-26
-x86_64-fedora-27
-x86_64-fedora-28
-x86_64-debian-wheezy
-x86_64-debian-jessie
-x86_64-debian-stretch
-x86_64-debian-buster
-x86_64-ubuntu-trusty
-x86_64-ubuntu-xenial
-x86_64-ubuntu-bionic
-x86_64-ubuntu-artful
-s390x-ubuntu-xenial
-s390x-ubuntu-bionic
-s390x-ubuntu-artful
-ppc64le-ubuntu-xenial
-ppc64le-ubuntu-bionic
-ppc64le-ubuntu-artful
-aarch64-ubuntu-xenial
-aarch64-ubuntu-bionic
-aarch64-debian-jessie
-aarch64-debian-stretch
-aarch64-debian-buster
-aarch64-fedora-26
-aarch64-fedora-27
-aarch64-fedora-28
-aarch64-centos-7
-armv6l-raspbian-jessie
-armv7l-raspbian-jessie
-armv6l-raspbian-stretch
-armv7l-raspbian-stretch
-armv7l-debian-jessie
-armv7l-debian-stretch
-armv7l-debian-buster
-armv7l-ubuntu-trusty
-armv7l-ubuntu-xenial
-armv7l-ubuntu-bionic
-armv7l-ubuntu-artful
-"
-
 mirror=''
 DRY_RUN=${DRY_RUN:-}
 while [ $# -gt 0 ]; do
@@ -138,6 +97,25 @@ get_distribution() {
 	# Returning an empty string here should be alright since the
 	# case statements don't act unless you provide an actual value
 	echo "$lsb_dist"
+}
+
+is_distro_supported() {
+	distro_with_arch=$1
+	supported_url="$DOWNLOAD_URL/supported/$CHANNEL/latest"
+	if [ ! -z "$VERSION" ]; then
+		cut_version="$(echo "$VERSION" | sed 's/-ce.*/-ce')"
+		# The version we're looking for has a supported version file
+		if curl -I "$DOWNLOAD_URL/supported/$CHANNEL/$cut_version" > /dev/null; then
+			supported_url="$DOWNLOAD_URL/supported/$CHANNEL/$cut_version"
+		else
+			echo "WARN: Support file not found for specified version '$VERSION', using default instead..."
+		fi
+	fi
+	if curl -fsSL "$supported_url" | grep "$distro_with_arch" > /dev/null; then
+		return 0
+	else
+		return 1
+	fi
 }
 
 add_debian_backport_repo() {
@@ -329,6 +307,10 @@ do_install() {
 			if [ -z "$dist_version" ] && [ -r /etc/lsb-release ]; then
 				dist_version="$(. /etc/lsb-release && echo "$DISTRIB_CODENAME")"
 			fi
+			# Install curl if it's not already installed since it's important for downloading
+			if ! command_exists curl; then
+				(set -ex; $sh_c "apt-get update && apt-get install -y curl")
+			fi
 		;;
 
 		debian|raspbian)
@@ -372,7 +354,7 @@ do_install() {
 	check_forked
 
 	# Check if we actually support this configuration
-	if ! echo "$SUPPORT_MAP" | grep "$(uname -m)-$lsb_dist-$dist_version" >/dev/null; then
+	if ! is_distro_supported "$(uname -m)-$lsb_dist-$dist_version"; then
 		cat >&2 <<-'EOF'
 
 		Either your platform is not easily detectable or is not supported by this
@@ -388,7 +370,7 @@ do_install() {
 	# Run setup for each distro accordingly
 	case "$lsb_dist" in
 		ubuntu|debian|raspbian)
-			pre_reqs="apt-transport-https ca-certificates curl"
+			pre_reqs="apt-transport-https ca-certificates"
 			if [ "$lsb_dist" = "debian" ]; then
 				if [ "$dist_version" = "wheezy" ]; then
 					add_debian_backport_repo "$dist_version"
