@@ -43,7 +43,6 @@ x86_64-centos-7
 x86_64-fedora-26
 x86_64-fedora-27
 x86_64-fedora-28
-x86_64-debian-wheezy
 x86_64-debian-jessie
 x86_64-debian-stretch
 x86_64-debian-buster
@@ -219,9 +218,6 @@ check_forked() {
 					8|'Kali Linux 2')
 						dist_version="jessie"
 					;;
-					7)
-						dist_version="wheezy"
-					;;
 				esac
 			fi
 		fi
@@ -340,9 +336,6 @@ do_install() {
 				8)
 					dist_version="jessie"
 				;;
-				7)
-					dist_version="wheezy"
-				;;
 			esac
 		;;
 
@@ -390,9 +383,6 @@ do_install() {
 		ubuntu|debian|raspbian)
 			pre_reqs="apt-transport-https ca-certificates curl"
 			if [ "$lsb_dist" = "debian" ]; then
-				if [ "$dist_version" = "wheezy" ]; then
-					add_debian_backport_repo "$dist_version"
-				fi
 				# libseccomp2 does not exist for debian jessie main repos for aarch64
 				if [ "$(uname -m)" = "aarch64" ] && [ "$dist_version" = "jessie" ]; then
 					add_debian_backport_repo "$dist_version"
@@ -417,9 +407,6 @@ do_install() {
 				$sh_c "apt-get install -y -qq $pre_reqs >/dev/null"
 				$sh_c "curl -fsSL \"$DOWNLOAD_URL/linux/$lsb_dist/gpg\" | apt-key add -qq - >/dev/null"
 				$sh_c "echo \"$apt_repo\" > /etc/apt/sources.list.d/docker.list"
-				if [ "$lsb_dist" = "debian" ] && [ "$dist_version" = "wheezy" ]; then
-					$sh_c 'sed -i "/deb-src.*download\.docker/d" /etc/apt/sources.list.d/docker.list'
-				fi
 				$sh_c 'apt-get update -qq >/dev/null'
 			)
 			pkg_version=""
