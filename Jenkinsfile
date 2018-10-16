@@ -10,7 +10,6 @@ def verifyTargets = [
   'x86_64-verify-install-debian-buster',
   'x86_64-verify-install-ubuntu-trusty',
   'x86_64-verify-install-ubuntu-xenial',
-  'x86_64-verify-install-ubuntu-artful',
 ]
 
 def armhfverifyTargets = [
@@ -22,12 +21,10 @@ def armhfverifyTargets = [
   // TEMPORARY: security.ubuntu.com is returning a 404 for trusty armhf, support may have ended
   // 'armhf-verify-install-ubuntu-trusty',
   'armhf-verify-install-ubuntu-xenial',
-  'armhf-verify-install-ubuntu-artful',
 ]
 
 def s390xverifyTargets = [
   's390x-verify-install-ubuntu-xenial',
-  's390x-verify-install-ubuntu-artful',
 ]
 
 def aarch64verifyTargets = [
@@ -41,7 +38,6 @@ def aarch64verifyTargets = [
 
 def ppc64leverifyTargets = [
   'ppc64le-verify-install-ubuntu-xenial',
-  'ppc64le-verify-install-ubuntu-artful',
 ]
 
 def genVerifyJob(String t, String label) {
