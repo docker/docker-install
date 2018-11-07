@@ -14,13 +14,13 @@ This repository is solely maintained by Docker, Inc.
 
 From `https://get.docker.com`:
 ```shell
-curl -fsSL get.docker.com -o get-docker.sh
+curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
 ```
 
 From `https://test.docker.com`:
 ```shell
-curl -fsSL test.docker.com -o test-docker.sh
+curl -fsSL https://test.docker.com -o test-docker.sh
 sh test-docker.sh
 ```
 
