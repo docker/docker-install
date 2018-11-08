@@ -466,12 +466,14 @@ do_install() {
 				pkg_manager="dnf"
 				config_manager="dnf config-manager"
 				enable_channel_flag="--set-enabled"
+				disable_channel_flag="--set-disabled"
 				pre_reqs="dnf-plugins-core"
 				pkg_suffix="fc$dist_version"
 			else
 				pkg_manager="yum"
 				config_manager="yum-config-manager"
 				enable_channel_flag="--enable"
+				disable_channel_flag="--disable"
 				pre_reqs="yum-utils"
 				pkg_suffix="el"
 			fi
@@ -483,6 +485,7 @@ do_install() {
 				$sh_c "$config_manager --add-repo $yum_repo"
 
 				if [ "$CHANNEL" != "stable" ]; then
+					$sh_c "$config_manager $disable_channel_flag docker-ce-*"
 					$sh_c "$config_manager $enable_channel_flag docker-ce-$CHANNEL"
 				fi
 				$sh_c "$pkg_manager makecache"
