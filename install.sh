@@ -423,7 +423,7 @@ do_install() {
 				$sh_c 'apt-get update -qq >/dev/null'
 			)
 			pkg_version=""
-			if [ ! -z "$VERSION" ]; then
+			if [ -n "$VERSION" ]; then
 				if is_dry_run; then
 					echo "# WARNING: VERSION pinning is not supported in DRY_RUN"
 				else
@@ -491,7 +491,7 @@ do_install() {
 				$sh_c "$pkg_manager makecache"
 			)
 			pkg_version=""
-			if [ ! -z "$VERSION" ]; then
+			if [ -n "$VERSION" ]; then
 				if is_dry_run; then
 					echo "# WARNING: VERSION pinning is not supported in DRY_RUN"
 				else
