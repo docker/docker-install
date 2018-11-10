@@ -2,8 +2,8 @@
 
 def verifyTargets = [
   'x86_64-verify-install-centos-7',
-  'x86_64-verify-install-fedora-26',
-  'x86_64-verify-install-fedora-27',
+  'x86_64-verify-install-fedora-28',
+  'x86_64-verify-install-fedora-29',
   'x86_64-verify-install-debian-jessie',
   'x86_64-verify-install-debian-stretch',
   'x86_64-verify-install-debian-buster',
@@ -31,8 +31,8 @@ def aarch64verifyTargets = [
   'aarch64-verify-install-debian-jessie',
   'aarch64-verify-install-debian-stretch',
   'aarch64-verify-install-centos-7',
-  'aarch64-verify-install-fedora-26',
-  'aarch64-verify-install-fedora-27',
+  'aarch64-verify-install-fedora-28',
+  'aarch64-verify-install-fedora-29',
 ]
 
 def ppc64leverifyTargets = [

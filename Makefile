@@ -1,5 +1,5 @@
 SHELL:=/bin/bash
-DISTROS:=centos-7 fedora-26 fedora-27 debian-wheezy debian-jessie debian-stretch debian-buster ubuntu-trusty ubuntu-xenial ubuntu-yakkety
+DISTROS:=centos-7 fedora-28 fedora-29 debian-jessie debian-stretch debian-buster ubuntu-trusty ubuntu-xenial ubuntu-yakkety ubuntu-artful
 VERIFY_INSTALL_DISTROS:=$(addprefix x86_64-verify-install-,$(DISTROS))
 CHANNEL_TO_TEST?=test
 VERSION?=
