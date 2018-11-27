@@ -50,13 +50,10 @@ x86_64-debian-buster
 x86_64-ubuntu-trusty
 x86_64-ubuntu-xenial
 x86_64-ubuntu-bionic
-x86_64-ubuntu-artful
 s390x-ubuntu-xenial
 s390x-ubuntu-bionic
-s390x-ubuntu-artful
 ppc64le-ubuntu-xenial
 ppc64le-ubuntu-bionic
-ppc64le-ubuntu-artful
 aarch64-ubuntu-xenial
 aarch64-ubuntu-bionic
 aarch64-debian-jessie
@@ -76,7 +73,6 @@ armv7l-debian-buster
 armv7l-ubuntu-trusty
 armv7l-ubuntu-xenial
 armv7l-ubuntu-bionic
-armv7l-ubuntu-artful
 "
 
 mirror=''
@@ -398,12 +394,6 @@ do_install() {
 					add_debian_backport_repo "$dist_version"
 				fi
 			fi
-
-			# TODO: August 31, 2018 delete from here,
-			if [ "$lsb_dist" =  "ubuntu" ] && [ "$dist_version" = "artful" ]; then
-				deprecation_notice "$lsb_dist $dist_version" "August 31, 2018"
-			fi
-			# TODO: August 31, 2018 delete to here,
 
 			if ! command -v gpg > /dev/null; then
 				pre_reqs="$pre_reqs gnupg"
