@@ -18,7 +18,6 @@ set -e
 # the script was uploaded (Should only be modified by upload job):
 SCRIPT_COMMIT_SHA=UNKNOWN
 
-
 # This value will automatically get changed for:
 #   * edge
 #   * test
@@ -92,7 +91,7 @@ while [ $# -gt 0 ]; do
 			echo "Illegal option $1"
 			;;
 	esac
-	shift $(( $# > 0 ? 1 : 0 ))
+	shift $(($# > 0 ? 1 : 0))
 done
 
 case "$mirror" in
@@ -131,6 +130,7 @@ get_distribution() {
 	lsb_dist=""
 	# Every system that we officially support has /etc/os-release
 	if [ -r /etc/os-release ]; then
+		# shellcheck source=/dev/null
 		lsb_dist="$(. /etc/os-release && echo "$ID")"
 	fi
 	# Returning an empty string here should be alright since the
@@ -142,7 +142,10 @@ add_debian_backport_repo() {
 	debian_version="$1"
 	backports="deb http://ftp.debian.org/debian $debian_version-backports main"
 	if ! grep -Fxq "$backports" /etc/apt/sources.list; then
-		(set -x; $sh_c "echo \"$backports\" >> /etc/apt/sources.list")
+		(
+			set -x
+			$sh_c "echo \"$backports\" >> /etc/apt/sources.list"
+		)
 	fi
 }
 
@@ -160,13 +163,13 @@ echo_docker_as_nonroot() {
 	[ "$user" != 'root' ] && your_user="$user"
 	# intentionally mixed spaces and tabs here -- tabs are stripped by "<<-EOF", spaces are kept in the output
 	echo "If you would like to use Docker as a non-root user, you should now consider"
-	echo "adding your user to the \"docker\" group with something like:"
+	echo 'adding your user to the "docker" group with something like:'
 	echo
 	echo "  sudo usermod -aG docker $your_user"
 	echo
 	echo "Remember that you will have to log out and back in for this to take effect!"
 	echo
-	echo "WARNING: Adding a user to the \"docker\" group will grant the ability to run"
+	echo 'WARNING: Adding a user to the "docker" group will grant the ability to run'
 	echo "         containers which can be used to obtain root privileges on the"
 	echo "         docker host."
 	echo "         Refer to https://docs.docker.com/engine/security/security/#docker-daemon-attack-surface"
@@ -188,8 +191,8 @@ check_forked() {
 		# Check if the command has exited successfully, it means we're in a forked distro
 		if [ "$lsb_release_exit_code" = "0" ]; then
 			# Print info about current distro
-			cat <<-EOF
-			You're using '$lsb_dist' version '$dist_version'.
+			cat <<- EOF
+				You're using '$lsb_dist' version '$dist_version'.
 			EOF
 
 			# Get the upstream release info
@@ -197,8 +200,8 @@ check_forked() {
 			dist_version=$(lsb_release -a -u 2>&1 | tr '[:upper:]' '[:lower:]' | grep -E 'codename' | cut -d ':' -f 2 | tr -d '[:space:]')
 
 			# Print info about upstream distro
-			cat <<-EOF
-			Upstream release is '$lsb_dist' version '$dist_version'.
+			cat <<- EOF
+				Upstream release is '$lsb_dist' version '$dist_version'.
 			EOF
 		else
 			if [ -r /etc/debian_version ] && [ "$lsb_dist" != "ubuntu" ] && [ "$lsb_dist" != "raspbian" ]; then
@@ -213,10 +216,10 @@ check_forked() {
 				case "$dist_version" in
 					9)
 						dist_version="stretch"
-					;;
-					8|'Kali Linux 2')
+						;;
+					8 | 'Kali Linux 2')
 						dist_version="jessie"
-					;;
+						;;
 				esac
 			fi
 		fi
@@ -259,38 +262,41 @@ do_install() {
 			shouldWarn=1
 		fi
 
-		cat >&2 <<-'EOF'
+		cat >&2 <<- 'EOF'
 			Warning: the "docker" command appears to already exist on this system.
-
+			
 			If you already have Docker installed, this script can cause trouble, which is
 			why we're displaying this warning and provide the opportunity to cancel the
 			installation.
-
+			
 			If you installed the current Docker package using this script and are using it
 		EOF
 
 		if [ $shouldWarn -eq 1 ]; then
-			cat >&2 <<-'EOF'
-			again to update Docker, we urge you to migrate your image store before upgrading
-			to v1.10+.
-
-			You can find instructions for this here:
-			https://github.com/docker/docker/wiki/Engine-v1.10.0-content-addressability-migration
+			cat >&2 <<- 'EOF'
+				again to update Docker, we urge you to migrate your image store before upgrading
+				to v1.10+.
+			
+				You can find instructions for this here:
+				https://github.com/docker/docker/wiki/Engine-v1.10.0-content-addressability-migration
 			EOF
 		else
-			cat >&2 <<-'EOF'
-			again to update Docker, you can safely ignore this message.
+			cat >&2 <<- 'EOF'
+				again to update Docker, you can safely ignore this message.
 			EOF
 		fi
 
-		cat >&2 <<-'EOF'
-
-			You may press Ctrl+C now to abort this script.
+		cat >&2 <<- 'EOF'
+			
+						You may press Ctrl+C now to abort this script.
 		EOF
-		( set -x; sleep 20 )
+		(
+			set -x
+			sleep 20
+		)
 	fi
 
-	user="$(id -un 2>/dev/null || true)"
+	user="$(id -un 2> /dev/null || true)"
 
 	sh_c='sh -c'
 	if [ "$user" != 'root' ]; then
@@ -299,9 +305,9 @@ do_install() {
 		elif command_exists su; then
 			sh_c='su -c'
 		else
-			cat >&2 <<-'EOF'
-			Error: this installer needs the ability to run commands as root.
-			We are unable to find either "sudo" or "su" available to make this happen.
+			cat >&2 <<- 'EOF'
+				Error: this installer needs the ability to run commands as root.
+				We are unable to find either "sudo" or "su" available to make this happen.
 			EOF
 			exit 1
 		fi
@@ -312,7 +318,7 @@ do_install() {
 	fi
 
 	# perform some very rudimentary platform detection
-	lsb_dist=$( get_distribution )
+	lsb_dist=$(get_distribution)
 	lsb_dist="$(echo "$lsb_dist" | tr '[:upper:]' '[:lower:]')"
 
 	case "$lsb_dist" in
@@ -322,29 +328,31 @@ do_install() {
 				dist_version="$(lsb_release --codename | cut -f2)"
 			fi
 			if [ -z "$dist_version" ] && [ -r /etc/lsb-release ]; then
+				# shellcheck source=/dev/null
 				dist_version="$(. /etc/lsb-release && echo "$DISTRIB_CODENAME")"
 			fi
-		;;
+			;;
 
-		debian|raspbian)
+		debian | raspbian)
 			dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
 			case "$dist_version" in
 				9)
 					dist_version="stretch"
-				;;
+					;;
 				8)
 					dist_version="jessie"
-				;;
+					;;
 			esac
-		;;
+			;;
 
 		centos)
 			if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
+				# shellcheck source=/dev/null
 				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
 			fi
-		;;
+			;;
 
-		rhel|ol|sles)
+		rhel | ol | sles)
 			ee_notice "$lsb_dist"
 			exit 1
 			;;
@@ -354,9 +362,10 @@ do_install() {
 				dist_version="$(lsb_release --release | cut -f2)"
 			fi
 			if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
+				# shellcheck source=/dev/null
 				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
 			fi
-		;;
+			;;
 
 	esac
 
@@ -364,22 +373,22 @@ do_install() {
 	check_forked
 
 	# Check if we actually support this configuration
-	if ! echo "$SUPPORT_MAP" | grep "$(uname -m)-$lsb_dist-$dist_version" >/dev/null; then
-		cat >&2 <<-'EOF'
-
-		Either your platform is not easily detectable or is not supported by this
-		installer script.
-		Please visit the following URL for more detailed installation instructions:
-
-		https://docs.docker.com/engine/installation/
-
+	if ! echo "$SUPPORT_MAP" | grep "$(uname -m)-$lsb_dist-$dist_version" > /dev/null; then
+		cat >&2 <<- 'EOF'
+			
+					Either your platform is not easily detectable or is not supported by this
+					installer script.
+					Please visit the following URL for more detailed installation instructions:
+			
+					https://docs.docker.com/engine/installation/
+			
 		EOF
 		exit 1
 	fi
 
 	# Run setup for each distro accordingly
 	case "$lsb_dist" in
-		ubuntu|debian|raspbian)
+		ubuntu | debian | raspbian)
 			pre_reqs="apt-transport-https ca-certificates curl"
 			if [ "$lsb_dist" = "debian" ]; then
 				# libseccomp2 does not exist for debian jessie main repos for aarch64
@@ -431,7 +440,7 @@ do_install() {
 			echo_docker_as_nonroot
 			exit 0
 			;;
-		centos|fedora)
+		centos | fedora)
 			yum_repo="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
 			if ! curl -Ifs "$yum_repo" > /dev/null; then
 				echo "Error: Unable to curl repository file $yum_repo, is it valid?"
@@ -475,7 +484,7 @@ do_install() {
 				if is_dry_run; then
 					echo "# WARNING: VERSION pinning is not supported in DRY_RUN"
 				else
-					pkg_pattern="$(echo "$VERSION" | sed "s/-ce-/\\\\.ce.*/g" | sed "s/-/.*/g").*$pkg_suffix"
+					pkg_pattern="$(echo "$VERSION" | sed 's/-ce-/\\.ce.*/g' | sed "s/-/.*/g").*$pkg_suffix"
 					search_command="$pkg_manager list --showduplicates 'docker-ce' | grep '$pkg_pattern' | tail -1 | awk '{print \$2}'"
 					pkg_version="$($sh_c "$search_command")"
 					echo "INFO: Searching repository for VERSION '$VERSION'"

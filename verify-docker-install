@@ -11,7 +11,7 @@ if ! docker --version; then
 fi
 
 # Attempt to run a container if not in a container
-if [ ! -f /.dockerenv  ]; then
+if [ ! -f /.dockerenv ]; then
 	if ! docker run --rm hello-world; then
 		echo "ERROR: Could not get docker to run the hello world container"
 		exit 2
