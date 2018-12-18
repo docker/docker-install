@@ -162,7 +162,7 @@ echo_docker_as_nonroot() {
 	echo "If you would like to use Docker as a non-root user, you should now consider"
 	echo "adding your user to the \"docker\" group with something like:"
 	echo
-	echo "  sudo usermod -aG docker $your_user"
+	echo "  sudo usermod -aG docker \$User"
 	echo
 	echo "Remember that you will have to log out and back in for this to take effect!"
 	echo
