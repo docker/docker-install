@@ -156,8 +156,7 @@ echo_docker_as_nonroot() {
 			$sh_c 'docker version'
 		) || true
 	fi
-	your_user=your-user
-	[ "$user" != 'root' ] && your_user="$user"
+
 	# intentionally mixed spaces and tabs here -- tabs are stripped by "<<-EOF", spaces are kept in the output
 	echo "If you would like to use Docker as a non-root user, you should now consider"
 	echo "adding your user to the \"docker\" group with something like:"
