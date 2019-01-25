@@ -38,45 +38,6 @@ if [ -z "$REPO_FILE" ]; then
 	REPO_FILE="$DEFAULT_REPO_FILE"
 fi
 
-SUPPORT_MAP="
-x86_64-centos-7
-x86_64-fedora-28
-x86_64-fedora-29
-x86_64-debian-jessie
-x86_64-debian-stretch
-x86_64-debian-buster
-x86_64-ubuntu-trusty
-x86_64-ubuntu-xenial
-x86_64-ubuntu-bionic
-x86_64-ubuntu-cosmic
-s390x-ubuntu-xenial
-s390x-ubuntu-bionic
-s390x-ubuntu-cosmic
-ppc64le-ubuntu-xenial
-ppc64le-ubuntu-bionic
-ppc64le-ubuntu-cosmic
-aarch64-ubuntu-xenial
-aarch64-ubuntu-bionic
-aarch64-ubuntu-cosmic
-aarch64-debian-jessie
-aarch64-debian-stretch
-aarch64-debian-buster
-aarch64-fedora-28
-aarch64-fedora-29
-aarch64-centos-7
-armv6l-raspbian-jessie
-armv7l-raspbian-jessie
-armv6l-raspbian-stretch
-armv7l-raspbian-stretch
-armv7l-debian-jessie
-armv7l-debian-stretch
-armv7l-debian-buster
-armv7l-ubuntu-trusty
-armv7l-ubuntu-xenial
-armv7l-ubuntu-bionic
-armv7l-ubuntu-cosmic
-"
-
 mirror=''
 DRY_RUN=${DRY_RUN:-}
 while [ $# -gt 0 ]; do
@@ -362,20 +323,6 @@ do_install() {
 
 	# Check if this is a forked Linux distro
 	check_forked
-
-	# Check if we actually support this configuration
-	if ! echo "$SUPPORT_MAP" | grep "$(uname -m)-$lsb_dist-$dist_version" >/dev/null; then
-		cat >&2 <<-'EOF'
-
-		Either your platform is not easily detectable or is not supported by this
-		installer script.
-		Please visit the following URL for more detailed installation instructions:
-
-		https://docs.docker.com/engine/installation/
-
-		EOF
-		exit 1
-	fi
 
 	# Run setup for each distro accordingly
 	case "$lsb_dist" in
