@@ -385,11 +385,6 @@ do_install() {
 				exit 1
 			fi
 			if [ "$lsb_dist" = "fedora" ]; then
-				if [ "$dist_version" -lt "28" ]; then
-					echo "Error: Only Fedora >=28 is supported"
-					exit 1
-				fi
-
 				pkg_manager="dnf"
 				config_manager="dnf config-manager"
 				enable_channel_flag="--set-enabled"
