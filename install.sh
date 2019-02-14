@@ -206,12 +206,14 @@ ee_promo() {
 	echo
 	echo "** DOCKER ENGINE - ENTERPRISE **"
 	echo
+	SHORT_URL=""
 	case $(shuf -i 0-1 -n 1) in
 		0)
 			echo "Test drive additional security features by activating Docker Engine - Enterprise."
 			echo
 			echo "  * Leverage FIPS 140-2 validated encryption"
 			echo "  * Run only trusted images with digital signature enforcement"
+			SHORT_URL="https://dockr.ly/engine1"
 			;;
 		1)
 			echo "If you’re ready for production workloads, Docker Engine - Enterprise also includes:"
@@ -219,10 +221,11 @@ ee_promo() {
 			echo "  * SLA-backed technical support"
 			echo "  * Extended lifecycle maintenance policy for patches and hotfixes"
 			echo "  * Access to certified ecosystem content"
+			SHORT_URL="https://dockr.ly/engine2"
 			;;
 	esac
 	echo
-	echo "** Learn more at https://www.docker.com/products/docker-engine **"
+	echo "** Learn more at ${SHORT_URL} **"
 	echo
 	echo "ACTIVATE your own engine to Docker Engine - Enterprise using:"
 	echo
