@@ -201,6 +201,39 @@ ee_notice() {
 	echo
 }
 
+ee_promo() {
+	# Randomly select an advertisement
+	echo
+	echo "** DOCKER ENGINE - ENTERPRISE **"
+	echo
+	SHORT_URL=""
+	case $(shuf -i 0-1 -n 1) in
+		0)
+			echo "Test drive additional security features by activating Docker Engine - Enterprise."
+			echo
+			echo "  * Leverage FIPS 140-2 validated encryption"
+			echo "  * Run only trusted images with digital signature enforcement"
+			SHORT_URL="https://dockr.ly/engine1"
+			;;
+		1)
+			echo "If you’re ready for production workloads, Docker Engine - Enterprise also includes:"
+			echo
+			echo "  * SLA-backed technical support"
+			echo "  * Extended lifecycle maintenance policy for patches and hotfixes"
+			echo "  * Access to certified ecosystem content"
+			SHORT_URL="https://dockr.ly/engine2"
+			;;
+	esac
+	echo
+	echo "** Learn more at ${SHORT_URL} **"
+	echo
+	echo "ACTIVATE your own engine to Docker Engine - Enterprise using:"
+	echo
+	echo "  sudo docker engine activate"
+	echo
+	sleep 10
+}
+
 do_install() {
 	echo "# Executing docker install script, commit: $SCRIPT_COMMIT_SHA"
 
@@ -376,6 +409,7 @@ do_install() {
 				$sh_c "apt-get install -y -qq --no-install-recommends docker-ce$pkg_version >/dev/null"
 			)
 			echo_docker_as_nonroot
+			ee_promo
 			exit 0
 			;;
 		centos|fedora)
@@ -439,6 +473,7 @@ do_install() {
 				$sh_c "$pkg_manager install -y -q docker-ce$pkg_version"
 			)
 			echo_docker_as_nonroot
+			ee_promo
 			exit 0
 			;;
 	esac
