@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # This script is meant for quick & easy install via:
-#   $ curl -fsSL https://rootless.docker.com -o get-docker.sh
+#   $ curl -fsSL https://get.docker.com/rootless -o get-docker.sh
 #   $ sh get-docker.sh
 #
 # NOTE: Make sure to verify the contents of the script
