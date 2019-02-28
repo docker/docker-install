@@ -193,7 +193,7 @@ start_docker() {
 	fi
 
 	if [ "$USE_OVERLAY" = "1" ]; then
-		DOCKERD_FLAGS="$DOCKERD_FLAGS --storage-driver=overlay"
+		DOCKERD_FLAGS="$DOCKERD_FLAGS --storage-driver=overlay2"
 	else
 		DOCKERD_FLAGS="$DOCKERD_FLAGS --storage-driver=vfs"
 	fi
