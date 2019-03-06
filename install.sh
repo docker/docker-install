@@ -19,11 +19,12 @@ set -e
 SCRIPT_COMMIT_SHA=UNKNOWN
 
 
-# This value will automatically get changed for:
-#   * edge
+# The channel to install from:
+#   * nightly
 #   * test
-#   * experimental
-DEFAULT_CHANNEL_VALUE="test"
+#   * stable
+#   * edge (deprecated)
+DEFAULT_CHANNEL_VALUE="stable"
 if [ -z "$CHANNEL" ]; then
 	CHANNEL=$DEFAULT_CHANNEL_VALUE
 fi
