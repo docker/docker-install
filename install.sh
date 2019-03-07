@@ -93,7 +93,7 @@ get_distribution() {
 	lsb_dist=""
 	# Every system that we officially support has /etc/os-release
 	if [ -r /etc/os-release ]; then
-		lsb_dist="$(. /etc/os-release && echo "$ID")"
+		lsb_dist=$(grep --color=never -Po "^ID=\K.*" "/etc/os-release" || true)
 	fi
 	# Returning an empty string here should be alright since the
 	# case statements don't act unless you provide an actual value
@@ -317,7 +317,7 @@ do_install() {
 				dist_version="$(lsb_release --codename | cut -f2)"
 			fi
 			if [ -z "$dist_version" ] && [ -r /etc/lsb-release ]; then
-				dist_version="$(. /etc/lsb-release && echo "$DISTRIB_CODENAME")"
+				dist_version=$(grep --color=never -Po "^DISTRIB_CODENAME=\K.*" "/etc/lsb-release" || true)
 			fi
 		;;
 
@@ -335,7 +335,7 @@ do_install() {
 
 		centos)
 			if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
-				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
+				dist_version=$(grep --color=never -Po "^VERSION_ID=\K.*" "/etc/os-release" || true)
 			fi
 		;;
 
@@ -349,7 +349,7 @@ do_install() {
 				dist_version="$(lsb_release --release | cut -f2)"
 			fi
 			if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
-				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
+				dist_version=$(grep --color=never -Po "^VERSION_ID=\K.*" "/etc/os-release" || true)
 			fi
 		;;
 
