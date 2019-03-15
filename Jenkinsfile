@@ -21,6 +21,7 @@ def aarch64verifyTargets = [
   'aarch64-verify-install-ubuntu-xenial',
   'aarch64-verify-install-ubuntu-bionic',
   'aarch64-verify-install-centos-7',
+  'aarch64-verify-install-fedora-29',
 ]
 
 def ppc64leverifyTargets = [
