@@ -442,6 +442,12 @@ do_install() {
 			echo_docker_as_nonroot
 			exit 0
 			;;
+		*)
+			echo
+			echo "ERROR: Unsupported distribution '$lsb_dist'"
+			echo
+			exit 1
+			;;
 	esac
 	exit 1
 }
