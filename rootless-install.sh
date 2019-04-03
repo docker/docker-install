@@ -186,7 +186,7 @@ start_docker() {
 
 	mkdir -p $HOME/.config/systemd/user
 	
-	DOCKERD_FLAGS="--experimental"
+	DOCKERD_FLAGS="--experimental --userland-proxy --userland-proxy-path=$HOME/bin/rootlesskit-docker-proxy"
 	
 	if [ -n "$SKIP_IPTABLES" ]; then
 		DOCKERD_FLAGS="$DOCKERD_FLAGS --iptables=false"
