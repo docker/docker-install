@@ -357,7 +357,7 @@ do_install() {
 				else
 					# Will work for incomplete versions IE (17.12), but may not actually grab the "latest" if in the test channel
 					pkg_pattern="$(echo "$VERSION" | sed "s/-ce-/~ce~.*/g" | sed "s/-/.*/g").*-0~$lsb_dist"
-					search_command="apt-cache madison 'docker-ce' | grep '$pkg_pattern' | head -1 | cut -d' ' -f 4"
+					search_command="apt-cache madison 'docker-ce' | grep '$pkg_pattern' | head -1 | awk '{\$1=\$1};1' | cut -d' ' -f 3"
 					pkg_version="$($sh_c "$search_command")"
 					echo "INFO: Searching repository for VERSION '$VERSION'"
 					echo "INFO: $search_command"
@@ -367,7 +367,7 @@ do_install() {
 						echo
 						exit 1
 					fi
-					search_command="apt-cache madison 'docker-ce-cli' | grep '$pkg_pattern' | head -1 | cut -d' ' -f 4"
+					search_command="apt-cache madison 'docker-ce-cli' | grep '$pkg_pattern' | head -1 | awk '{\$1=\$1};1' | cut -d' ' -f 3"
 					# Don't insert an = for cli_pkg_version, we'll just include it later
 					cli_pkg_version="$($sh_c "$search_command")"
 					pkg_version="=$pkg_version"
