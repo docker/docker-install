@@ -14,6 +14,7 @@
 SCRIPT_COMMIT_SHA=UNKNOWN
 
 # This script should be run with an unprivileged user and install/setup Docker under $HOME/bin/.
+CHANNEL=$1
 
 set -e
 
@@ -24,6 +25,8 @@ init_vars() {
 	if systemctl --user daemon-reload >/dev/null 2>&1; then
 		SYSTEMD=1
 	fi
+
+	## Add the Channel variable here
 }
 
 checks() {
@@ -168,6 +171,9 @@ For example:
 echo \"$(id -un):100000:65536\" >> /etc/subgid"
 		exit 1
 	fi
+
+
+	# Add checks here to Channel to make sure if was set.  If it wasn't set, then we need to default it to testing
 }
 
 start_docker() {
@@ -185,9 +191,9 @@ start_docker() {
 	fi
 
 	mkdir -p $HOME/.config/systemd/user
-	
+
 	DOCKERD_FLAGS="--experimental"
-	
+
 	if [ -n "$SKIP_IPTABLES" ]; then
 		DOCKERD_FLAGS="$DOCKERD_FLAGS --iptables=false"
 	fi
@@ -304,10 +310,19 @@ do_install() {
 
 	tmp=$(mktemp -d)
 	trap "rm -rf $tmp" EXIT INT TERM
-	# Alternatively could find latest nightly release from https://download.docker.com/linux/static/nightly/ .
-	# Later we can provide different channels.
-	STATIC_RELEASE_URL="https://master.dockerproject.org/linux/x86_64/docker.tgz"
-	STATIC_RELEASE_ROOTLESS_URL="https://master.dockerproject.org/linux/x86_64/docker-rootless-extras.tgz"
+
+	if [ -z "$CHANNEL" ] || [ "$CHANNEL" = "test" ]; then
+					STATIC_RELEASE_URL="https://download.docker.com/linux/static/test/x86_64/docker-19.03.0-beta4.tgz"
+					STATIC_RELEASE_ROOTLESS_URL="https://download.docker.com/linux/static/test/x86_64/docker-rootless-extras-19.03.0-beta4.tgz"
+	elif [ "$CHANNEL" = "nightly" ]; then
+					STATIC_RELEASE_URL="https://download.docker.com/linux/static/nightly/docker-0.0.0-20190515210812-c58b5bc.tgz"
+					STATIC_RELEASE_ROOTLESS_URL="https://download.docker.com/linux/static/nightly/docker-rootless-extras-0.0.0-20190515210812-c58b5bc.tgz"
+	elif [ "$CHANNEL" = "stable" ]; then
+					STATIC_RELEASE_URL="https://master.dockerproject.org/linux/x86_64/docker.tgz"
+					STATIC_RELEASE_ROOTLESS_URL="https://master.dockerproject.org/linux/x86_64/docker-rootless-extras.tgz"
+	else
+					echo "Invalid option provided for CHANNEL: $CHANNEL, please provide one of the following: test, nightly, stable"
+	fi
 
 	# Download tarballs docker-* and docker-rootless-extras=*
 	(
