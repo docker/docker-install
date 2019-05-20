@@ -306,15 +306,18 @@ do_install() {
 	tmp=$(mktemp -d)
 	trap "rm -rf $tmp" EXIT INT TERM
 
+	# Download docker binary based on the build the user requested
+	BASE_STATIC_RELEASE_URL="https://download.docker.com/linux/static"
+	MASTER_STATIC_RELEASE_URL="https://master.dockerproject.org/linux/x86_64"
 	if [ -z "$CHANNEL" ] || [ "$CHANNEL" = "test" ]; then
-					STATIC_RELEASE_URL="https://download.docker.com/linux/static/test/x86_64/docker-19.03.0-beta4.tgz"
-					STATIC_RELEASE_ROOTLESS_URL="https://download.docker.com/linux/static/test/x86_64/docker-rootless-extras-19.03.0-beta4.tgz"
+					STATIC_RELEASE_URL="$BASE_STATIC_RELEASE_URL/test/x86_64/docker-19.03.0-beta4.tgz"
+					STATIC_RELEASE_ROOTLESS_URL="$BASE_STATIC_RELEASE_URL/test/x86_64/docker-rootless-extras-19.03.0-beta4.tgz"
 	elif [ "$CHANNEL" = "nightly" ]; then
-					STATIC_RELEASE_URL="https://download.docker.com/linux/static/nightly/docker-0.0.0-20190515210812-c58b5bc.tgz"
-					STATIC_RELEASE_ROOTLESS_URL="https://download.docker.com/linux/static/nightly/docker-rootless-extras-0.0.0-20190515210812-c58b5bc.tgz"
+					STATIC_RELEASE_URL="$BASE_STATIC_RELEASE_URL/nightly/docker-0.0.0-20190515210812-c58b5bc.tgz"
+					STATIC_RELEASE_ROOTLESS_URL="$BASE_STATIC_RELEASE_URL/nightly/docker-rootless-extras-0.0.0-20190515210812-c58b5bc.tgz"
 	elif [ "$CHANNEL" = "stable" ]; then
-					STATIC_RELEASE_URL="https://master.dockerproject.org/linux/x86_64/docker.tgz"
-					STATIC_RELEASE_ROOTLESS_URL="https://master.dockerproject.org/linux/x86_64/docker-rootless-extras.tgz"
+					STATIC_RELEASE_URL="$MASTER_STATIC_RELEASE_URL/docker.tgz"
+					STATIC_RELEASE_ROOTLESS_URL="$MASTER_STATIC_RELEASE_URL/docker-rootless-extras.tgz"
 	else
 					echo "Invalid option provided for CHANNEL: $CHANNEL, please provide one of the following: test, nightly, stable"
 	fi
