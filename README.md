@@ -29,6 +29,14 @@ From the source repo (This will install latest from the `test` channel):
 sh install.sh
 ```
 
+For rootless installation, multiple channels are present for the user to install.
+By default, it installs from the `test` channel
+```shell
+  sh rootless-install.sh test
+  sh rootless-install.sh nightly
+  sh rootless-install.sh stable
+```
+
 ## Testing:
 
 To verify that the install script works amongst the supported operating systems run:

@@ -25,8 +25,6 @@ init_vars() {
 	if systemctl --user daemon-reload >/dev/null 2>&1; then
 		SYSTEMD=1
 	fi
-
-	## Add the Channel variable here
 }
 
 checks() {
@@ -171,9 +169,6 @@ For example:
 echo \"$(id -un):100000:65536\" >> /etc/subgid"
 		exit 1
 	fi
-
-
-	# Add checks here to Channel to make sure if was set.  If it wasn't set, then we need to default it to testing
 }
 
 start_docker() {
