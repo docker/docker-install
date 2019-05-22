@@ -18,7 +18,8 @@ SCRIPT_COMMIT_SHA=UNKNOWN
 set -e
 
 init_vars() {
-	BIN="$HOME/bin"
+	BIN="${DOCKER_BIN:-$HOME/bin}"
+
 	DAEMON=dockerd
 	SYSTEMD=
 	if systemctl --user daemon-reload >/dev/null 2>&1; then
@@ -185,9 +186,9 @@ start_docker() {
 	fi
 
 	mkdir -p $HOME/.config/systemd/user
-	
+
 	DOCKERD_FLAGS="--experimental"
-	
+
 	if [ -n "$SKIP_IPTABLES" ]; then
 		DOCKERD_FLAGS="$DOCKERD_FLAGS --iptables=false"
 	fi
@@ -211,8 +212,8 @@ Description=Docker Application Container Engine (Rootless)
 Documentation=https://docs.docker.com
 
 [Service]
-Environment=PATH=$HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ExecStart=$HOME/bin/dockerd-rootless.sh $DOCKERD_FLAGS
+Environment=PATH=$BIN:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=$BIN/dockerd-rootless.sh $DOCKERD_FLAGS
 ExecReload=/bin/kill -s HUP \$MAINPID
 TimeoutSec=0
 RestartSec=2
