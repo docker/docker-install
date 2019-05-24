@@ -291,6 +291,9 @@ do_install() {
 		debian|raspbian)
 			dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
 			case "$dist_version" in
+				10)
+					dist_version="$(grep -Po 'VERSION_CODENAME=\K.*' /etc/os-release)"
+				;;
 				9)
 					dist_version="stretch"
 				;;
