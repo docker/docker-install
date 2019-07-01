@@ -173,8 +173,11 @@ check_forked() {
 				fi
 				dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
 				case "$dist_version" in
+					10)
+						dist_version="buster"
+					;;
 					9)
-						dist_version="stretch"
+					        dist_version="stretch"
 					;;
 					8|'Kali Linux 2')
 						dist_version="jessie"
