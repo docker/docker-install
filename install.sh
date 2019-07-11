@@ -1,4 +1,9 @@
 #!/bin/sh
+
+cat >/dev/null <<\EOF
+${HTML}
+EOF
+
 set -e
 
 # This script is meant for quick & easy install via:
