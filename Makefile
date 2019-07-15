@@ -9,10 +9,11 @@ SHELLCHECK=docker run --rm $(VOLUME_MOUNTS) -w /v koalaman/shellcheck $(SHELLCHE
 ENVSUBST_VARS=SCRIPT_COMMIT_SHA
 
 .PHONY: build
+build: build/install.sh
 
 build/install.sh: install.sh
 	mkdir -p $(@D)
-	SCRIPT_COMMIT_SHA='"$(shell git rev-parse HEAD)"' envsubst '$(addprefix $,$(ENVSUBST_VARS))' < $< > $@
+	SCRIPT_COMMIT_SHA='$(shell git rev-parse HEAD)' envsubst '$(addprefix $$,$(ENVSUBST_VARS))' < $< > $@
 
 .PHONY: shellcheck
 shellcheck: build/install.sh
