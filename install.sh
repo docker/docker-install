@@ -16,9 +16,7 @@ set -e
 #
 # Git commit from https://github.com/docker/docker-install when
 # the script was uploaded (Should only be modified by upload job):
-
-# shellcheck disable=SC2140
-SCRIPT_COMMIT_SHA="${SCRIPT_COMMIT_SHA}"
+SCRIPT_COMMIT_SHA="${LOAD_SCRIPT_COMMIT_SHA}"
 
 
 # The channel to install from:
