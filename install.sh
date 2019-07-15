@@ -16,7 +16,7 @@ set -e
 #
 # Git commit from https://github.com/docker/docker-install when
 # the script was uploaded (Should only be modified by upload job):
-SCRIPT_COMMIT_SHA=${SCRIPT_COMMIT_SHA}
+SCRIPT_COMMIT_SHA="${LOAD_SCRIPT_COMMIT_SHA}"
 
 
 # The channel to install from:
