@@ -2,12 +2,10 @@
 set -e
 
 # This script is meant for quick & easy install via:
-#   $ curl -fsSL https://get.docker.com -o get-docker.sh
-#   $ sh get-docker.sh
+#   $ curl -sSL https://get.docker.com | bash
 #
 # For test builds (ie. release candidates):
-#   $ curl -fsSL https://test.docker.com -o test-docker.sh
-#   $ sh test-docker.sh
+#   $ curl -sSL https://test.docker.com | bash
 #
 # NOTE: Make sure to verify the contents of the script
 #       you downloaded matches the contents of install.sh
