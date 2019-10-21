@@ -13,6 +13,9 @@
 # the script was uploaded (Should only be modified by upload job):
 SCRIPT_COMMIT_SHA=UNKNOWN
 
+# Set this variable to avoid to download docker.tgz
+USE_SYSTEM_DOCKER=
+
 # This script should be run with an unprivileged user and install/setup Docker under $HOME/bin/.
 
 set -e
@@ -313,14 +316,18 @@ do_install() {
 	# Download tarballs docker-* and docker-rootless-extras=*
 	(
 		cd "$tmp"
-		curl -L -o docker.tgz "$STATIC_RELEASE_URL"
+		if [ -z "$USE_SYSTEM_DOCKER" ]; then
+			curl -L -o docker.tgz "$STATIC_RELEASE_URL"
+		fi
 		curl -L -o rootless.tgz "$STATIC_RELEASE_ROOTLESS_URL"
 	)
 	# Extract under $HOME/bin/
 	(
 		mkdir -p "$BIN"
 		cd "$BIN"
-		tar zxf "$tmp/docker.tgz" --strip-components=1
+		if [ -z "$USE_SYSTEM_DOCKER" ]; then
+			tar zxf "$tmp/docker.tgz" --strip-components=1
+		fi
 		tar zxf "$tmp/rootless.tgz" --strip-components=1
 	)
 
