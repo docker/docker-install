@@ -18,7 +18,9 @@ SCRIPT_COMMIT_SHA=UNKNOWN
 set -e
 
 init_vars() {
-	BIN="${DOCKER_BIN:-$HOME/bin}"
+	if [ -z "$BIN" ]; then
+		BIN="${DOCKER_BIN:-$HOME/bin}"
+	fi
 
 	DAEMON=dockerd
 	SYSTEMD=
