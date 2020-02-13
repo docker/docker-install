@@ -1,0 +1,23 @@
+name: docker-install CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os:
+          - ubuntu:18.04
+          - centos:7
+        version:
+          - 19.03
+          - 18.09
+          - ""
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Shellcheck
+      run: make shellcheck
+    - name: Check distribution
+      run: TEST_IMAGE=${{ matrix.os }} VERSION=${{ matrix.version }} make test
