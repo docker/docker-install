@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
-
+# Docker CE for Linux installation script
+#
+# See https://docs.docker.com/install/ for the installation steps.
+#
 # This script is meant for quick & easy install via:
 #   $ curl -fsSL https://get.docker.com -o get-docker.sh
 #   $ sh get-docker.sh
