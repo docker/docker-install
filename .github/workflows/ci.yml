@@ -13,7 +13,6 @@ jobs:
           - centos:7
         version:
           - 19.03
-          - 18.09
           - ""
 
     steps:
