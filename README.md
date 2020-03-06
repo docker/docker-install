@@ -1,4 +1,7 @@
 # docker/docker-install
+
+TESTING
+
 Home of the script that lives at `get.docker.com` and `test.docker.com`!
 
 The purpose of the install script is for a convenience for quickly
