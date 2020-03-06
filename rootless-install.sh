@@ -1,5 +1,10 @@
 #!/bin/sh
 set -e
+# Docker CE for Linux installation script (Rootless mode)
+#
+# See https://docs.docker.com/engine/security/rootless/ for the
+# installation steps.
+#
 # This script is meant for quick & easy install via:
 #   $ curl -fsSL https://get.docker.com/rootless -o get-docker.sh
 #   $ sh get-docker.sh
