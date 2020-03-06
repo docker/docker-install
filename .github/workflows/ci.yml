@@ -5,6 +5,7 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     strategy:
       matrix:
         os:
@@ -12,7 +13,6 @@ jobs:
           - centos:7
         version:
           - 19.03
-          - 18.09
           - ""
 
     steps:
