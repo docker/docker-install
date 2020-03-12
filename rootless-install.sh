@@ -258,7 +258,7 @@ Delegate=yes
 Type=simple
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
 EOT
 	systemctl --user daemon-reload
 	fi
