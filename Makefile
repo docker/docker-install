@@ -1,4 +1,4 @@
-TEST_IMAGE?=ubuntu:18.04
+TEST_IMAGE?=ubuntu:18.04 centos:8
 VERSION?=
 CHANNEL?=
 
@@ -21,13 +21,16 @@ shellcheck: build/install.sh
 
 .PHONY: test
 test: build/install.sh
-	docker run --rm -i \
-		$(VOLUME_MOUNTS) \
-		-w /v \
-		-e VERSION \
-		-e CHANNEL \
-		$(TEST_IMAGE) \
-		sh "$<"
+	@echo "Test in the followin images: $(TEST_IMAGE)"
+	for image in $(TEST_IMAGE); do \
+		docker run --rm -it \
+			$(VOLUME_MOUNTS) \
+			-w /v \
+			-e VERSION \
+			-e CHANNEL \
+			$$image \
+			sh "$<"; \
+	done 
 
 .PHONY: clean
 clean:
