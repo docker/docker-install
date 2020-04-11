@@ -145,7 +145,7 @@ intall_prompt_centos_8() {
 	echo "However you can install with \"--nobest\" flag and exclude in /etc/yum.conf" 
 	echo 
 
-	if read -r -s -n 1 -t 10 -p "Press any key to abort in the next 10 seconds..."; then
+	if read -r -n 1 -t 10 -p "Press any key to abort in the next 10 seconds..."; then
 		echo "Installation process aborted"
 		echo "Docker will not be instaled "
 		exit 1;
@@ -473,7 +473,7 @@ do_install() {
 					$sh_c "$pkg_manager install -y -q docker-ce-cli-$cli_pkg_version"
 				fi
 				# Install for Centos 8
-				if [ $lsb_dist = "centos" ] && [ $dist_version = "8" ]; then
+				if [ "$lsb_dist" = "centos" ] && [ "$dist_version" = "8" ]; then
 					intall_prompt_centos_8
 					$sh_c "$pkg_manager install -y -q --nobest docker-ce$pkg_version"
 					$sh_c "echo 'exclude=docker-ce' >> /etc/yum.conf"
