@@ -23,7 +23,7 @@ shellcheck: build/install.sh
 test: build/install.sh
 	@echo "Test in the followin images: $(TEST_IMAGE)"
 	for image in $(TEST_IMAGE); do \
-		docker run --rm -it \
+		docker run --rm -i \
 			$(VOLUME_MOUNTS) \
 			-w /v \
 			-e VERSION \
