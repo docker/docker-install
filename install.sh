@@ -139,19 +139,6 @@ echo_docker_as_nonroot() {
 
 }
 
-intall_prompt_centos_8() {
-	echo
-	echo "Currently docker-ce is not officialy supported by Centos 8"
-	echo "However you can install with \"--nobest\" flag and exclude in /etc/yum.conf" 
-	echo 
-
-	if read -r -n 1 -t 10 -p "Press any key to abort in the next 10 seconds..."; then
-		echo "Installation process aborted"
-		echo "Docker will not be instaled "
-		exit 1;
-	fi
-}
-
 # Check if this is a forked Linux distro
 check_forked() {
 
@@ -474,7 +461,14 @@ do_install() {
 				fi
 				# Install for Centos 8
 				if [ "$lsb_dist" = "centos" ] && [ "$dist_version" = "8" ]; then
-					intall_prompt_centos_8
+					echo
+					echo "Currently docker-ce is not officialy supported by Centos 8"
+					echo "However you can install with \"--nobest\" flag and exclude in /etc/yum.conf" 
+					echo 
+
+					echo "Press Ctrl-c abort in the next 10 seconds..."
+					sleep 10
+
 					$sh_c "$pkg_manager install -y -q --nobest docker-ce$pkg_version"
 					$sh_c "echo 'exclude=docker-ce' >> /etc/yum.conf"
 				else
