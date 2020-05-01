@@ -81,6 +81,22 @@ is_dry_run() {
 	fi
 }
 
+is_wsl() {
+	case "$(uname -r)" in
+	*microsoft* ) true ;; # WSL 2
+	*Microsoft* ) true ;; # WSL 1
+	* ) false;;
+	esac
+}
+
+is_darwin() {
+	case "$(uname -s)" in
+	*darwin* ) true ;;
+	*Darwin* ) true ;;
+	* ) false;;
+	esac
+}
+
 deprecation_notice() {
 	distro=$1
 	date=$2
@@ -283,6 +299,18 @@ do_install() {
 	lsb_dist=$( get_distribution )
 	lsb_dist="$(echo "$lsb_dist" | tr '[:upper:]' '[:lower:]')"
 
+	if is_wsl; then
+		echo
+		echo "WSL DETECTED: We recommend using Docker Desktop for Windows."
+		echo "Please get Docker Desktop from https://www.docker.com/products/docker-desktop"
+		echo
+		cat >&2 <<-'EOF'
+
+			You may press Ctrl+C now to abort this script.
+		EOF
+		( set -x; sleep 20 )
+	fi
+
 	case "$lsb_dist" in
 
 		ubuntu)
@@ -465,6 +493,15 @@ do_install() {
 			exit 0
 			;;
 		*)
+			if [ -z "$lsb_dist" ]; then
+				if is_darwin; then
+					echo
+					echo "ERROR: Unsupported operating system 'macOS'"
+					echo "Please get Docker Desktop from https://www.docker.com/products/docker-desktop"
+					echo
+					exit 1
+				fi
+			fi
 			echo
 			echo "ERROR: Unsupported distribution '$lsb_dist'"
 			echo
