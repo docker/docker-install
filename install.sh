@@ -337,13 +337,13 @@ do_install() {
 			esac
 		;;
 
-		centos)
+		centos|rhel)
 			if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
 				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
 			fi
 		;;
 
-		rhel|ol|sles)
+		ol|sles)
 			ee_notice "$lsb_dist"
 			exit 1
 			;;
@@ -422,7 +422,7 @@ do_install() {
 			echo_docker_as_nonroot
 			exit 0
 			;;
-		centos|fedora)
+		centos|fedora|rhel)
 			yum_repo="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
 			if ! curl -Ifs "$yum_repo" > /dev/null; then
 				echo "Error: Unable to curl repository file $yum_repo, is it valid?"
