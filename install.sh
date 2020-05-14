@@ -215,15 +215,6 @@ semverParse() {
 	patch="${patch%%[-.]*}"
 }
 
-ee_notice() {
-	echo
-	echo
-	echo "  WARNING: $1 is now only supported by Docker EE"
-	echo "           Check https://store.docker.com for information on Docker EE"
-	echo
-	echo
-}
-
 do_install() {
 	echo "# Executing docker install script, commit: $SCRIPT_COMMIT_SHA"
 
@@ -342,11 +333,6 @@ do_install() {
 				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
 			fi
 		;;
-
-		ol|sles)
-			ee_notice "$lsb_dist"
-			exit 1
-			;;
 
 		*)
 			if command_exists lsb_release; then
