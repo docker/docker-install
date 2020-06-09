@@ -31,10 +31,10 @@ sh install.sh
 
 ## Testing:
 
-To verify that the install script works amongst the supported operating systems run:
+To verify that the install script works on Ubuntu:18.04 run:
 
 ```shell
-make check
+make test
 ```
 
 ## Legal
