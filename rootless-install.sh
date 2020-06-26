@@ -55,6 +55,11 @@ init_vars() {
 	if systemctl --user daemon-reload >/dev/null 2>&1; then
 		SYSTEMD=1
 	fi
+
+	V1903=
+	if [ "$CHANNEL" = "stable" ] && ( echo "$STABLE_LATEST" | grep -q "^19\.03" ); then
+		V1903=1
+	fi
 }
 
 checks() {
@@ -101,16 +106,22 @@ checks() {
 			>&2 echo "- or simply log back in as the desired unprivileged user (ssh works for remote machines)"
 			exit 1
 		fi
-		export XDG_RUNTIME_DIR="$HOME/.docker/run"
-		mkdir -p -m 700 "$XDG_RUNTIME_DIR"
-		XDG_RUNTIME_DIR_CREATED=1
+		if [ -n "$V1903" ]; then
+			export XDG_RUNTIME_DIR="$HOME/.docker/run"
+			mkdir -p -m 700 "$XDG_RUNTIME_DIR"
+			XDG_RUNTIME_DIR_CREATED=1
+		fi
 	fi
 
 	# Already installed verification (unless force?). Only having docker cli binary previously shouldn't fail the build.
 	if [ -x "$BIN/$DAEMON" ]; then
 		# If rootless installation is detected print out the modified PATH and DOCKER_HOST that needs to be set.
 		echo "# Existing rootless Docker detected at $BIN/$DAEMON"
-		print_instructions
+		if [ -n "$V1903" ]; then
+			v1903_print_instructions
+		else
+			echo "# See https://docs.docker.com/engine/security/rootless/ for the usage."
+		fi
 		exit 0
 	fi
 
@@ -201,7 +212,7 @@ echo \"$(id -un):100000:65536\" >> /etc/subgid"
 	fi
 }
 
-start_docker() {
+v1903_start_docker() {
 	# detect if overlay is supported (ubuntu)
 	tmpdir=$(mktemp -d)
 	mkdir -p $tmpdir/lower $tmpdir/upper $tmpdir/work $tmpdir/merged
@@ -211,7 +222,7 @@ start_docker() {
 	rm -rf "$tmpdir"
 
 	if [ -z "$SYSTEMD" ]; then
-		start_docker_nonsystemd
+		v1903_start_docker_nonsystemd
 		return
 	fi
 
@@ -272,7 +283,7 @@ EOT
 	PATH="$BIN:$PATH" DOCKER_HOST="unix://$XDG_RUNTIME_DIR/docker.sock" docker version
 }
 
-service_instructions() {
+v1903_service_instructions() {
 	if [ -z "$SYSTEMD" ]; then
 		return
 	fi
@@ -285,7 +296,7 @@ EOT
 }
 
 
-start_docker_nonsystemd() {
+v1903_start_docker_nonsystemd() {
 	iptablesflag=
 	if [ -n "$SKIP_IPTABLES" ]; then
 		iptablesflag="--iptables=false "
@@ -298,8 +309,8 @@ $BIN/dockerd-rootless.sh --experimental $iptablesflag--storage-driver vfs
 EOT
 }
 
-print_instructions() {
-	start_docker
+v1903_print_instructions() {
+	v1903_start_docker
 	echo "# Docker binaries are installed in $BIN"
 	if [ "$(which $DAEMON)" != "$BIN/$DAEMON" ]; then
 		echo "# WARN: dockerd is not in your current PATH or pointing to $BIN/$DAEMON"
@@ -327,7 +338,20 @@ print_instructions() {
 
 	echo "export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock"
 	echo
-	service_instructions
+	v1903_service_instructions
+}
+
+exec_setuptool() {
+	if [ -n "$FORCE_ROOTLESS_INSTALL" ]; then
+		set -- "$@" --force
+	fi
+	if [ -n "$SKIP_IPTABLES" ]; then
+		set -- "$@" --skip-iptables
+	fi
+	(
+		set -x
+		"$BIN/dockerd-rootless-setuptool.sh" install "$@"
+	)
 }
 
 do_install() {
@@ -350,8 +374,11 @@ do_install() {
 		tar zxf "$tmp/rootless.tgz" --strip-components=1
 	)
 
-	print_instructions
-
+	if [ -n "$V1903" ]; then
+		v1903_print_instructions
+	else
+		exec_setuptool "$@"
+	fi
 }
 
-do_install
+do_install "$@"
