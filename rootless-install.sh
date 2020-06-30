@@ -27,8 +27,13 @@ DEFAULT_CHANNEL_VALUE="stable"
 if [ -z "$CHANNEL" ]; then
 	CHANNEL=$DEFAULT_CHANNEL_VALUE
 fi
-# The latest release is currently hard-coded.
-STABLE_LATEST="19.03.11"
+
+get_docker_release() {
+	curl -fsSL "https://api.github.com/repos/docker/docker-ce/releases/latest" |
+	grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/'
+}
+
+STABLE_LATEST=$(get_docker_release)
 STATIC_RELEASE_URL=
 STATIC_RELEASE_ROOTLESS_URL=
 case "$CHANNEL" in
