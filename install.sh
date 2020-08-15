@@ -112,15 +112,7 @@ get_distribution() {
 	lsb_dist=""
 	# Every system that we officially support has /etc/os-release
 	if [ -r /etc/os-release ]; then
-		# lsb_dist="$(. /etc/os-release && echo "$ID")"
-		# linux mint provides the information that it is "like" ubuntu
-		# if this is present, use $ID_LIKE
-		lsb_dist="$(. /etc/os-release && 
-			if [ -n "$ID_LIKE" ];
-			then echo "$ID_LIKE"
-			else echo "$ID"
-			fi
-			)"
+		lsb_dist="$(. /etc/os-release && echo "$ID")"
 	fi
 	# Returning an empty string here should be alright since the
 	# case statements don't act unless you provide an actual value
@@ -197,6 +189,15 @@ check_forked() {
 				else
 					# We're Debian and don't even know it!
 					lsb_dist=debian
+
+					# now, we can check /etc/os-release for ID_LIKE and UBUNTU_CODENAME
+					if [ -r /etc/os-release ]; then
+						id_like="$(. /etc/os-release && echo "$ID_LIKE")"
+						if [ "$id_like" = "ubuntu" ]; then
+							lsb_dist="$id_like"
+							dist_version="$(. /etc/os-release && echo "$UBUNTU_CODENAME")"
+						fi
+					fi
 				fi
 				dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
 				case "$dist_version" in
@@ -313,12 +314,7 @@ do_install() {
 	case "$lsb_dist" in
 
 		ubuntu)
-			# check also for ubuntu-like distros, such as linux mint
-			# if they do pass the `UBUNTU_CODENAME`
-			if [ -r /etc/os-release ]; then
-				dist_version=$(. /etc/os-release && echo "$UBUNTU_CODENAME")
-			fi
-			if [ -z "$dist_version" ] && command_exists lsb_release; then
+			if command_exists lsb_release; then
 				dist_version="$(lsb_release --codename | cut -f2)"
 			fi
 			if [ -z "$dist_version" ] && [ -r /etc/lsb-release ]; then
