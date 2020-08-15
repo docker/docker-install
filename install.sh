@@ -192,9 +192,9 @@ check_forked() {
 
 					# now, we can check /etc/os-release for ID_LIKE and UBUNTU_CODENAME
 					if [ -r /etc/os-release ]; then
-						id_like="$(. /etc/os-release && echo "$ID_LIKE")"
-						if [ "$id_like" = "ubuntu" ]; then
-							lsb_dist="$id_like"
+						base_dist="$(. /etc/os-release && echo "$ID_LIKE")"
+						if [ "$base_dist" = "ubuntu" ]; then
+							lsb_dist="$base_dist"
 							dist_version="$(. /etc/os-release && echo "$UBUNTU_CODENAME")"
 						fi
 					fi
