@@ -350,7 +350,7 @@ exec_setuptool() {
 	fi
 	(
 		set -x
-		"$BIN/dockerd-rootless-setuptool.sh" install "$@"
+		PATH="$BIN:$PATH" "$BIN/dockerd-rootless-setuptool.sh" install "$@"
 	)
 }
 
