@@ -215,6 +215,34 @@ semverParse() {
 	patch="${patch%%[-.]*}"
 }
 
+
+# on RHEL machines, the $releasever yum/dnf variable may have a Server or Client
+# suffix. Our .repo files use $releasever to switch between repositories for
+# CentOS/RHEL 7 and 8, but (currently) don't have separate repositories for
+# Client/Server variants.
+#
+# adjust_repo_releasever substitutes ${releasever} with 7 or 8
+adjust_repo_releasever() {
+	case $1 in
+	7*)
+		releasever=7
+		;;
+	8*)
+		releasever=8
+		;;
+	*)
+		# fedora, or unsupported
+		return
+		;;
+	esac
+
+	for channel in "stable" "test" "nightly"; do
+		$sh_c yum-config-manager --setopt="docker-ce-${channel}.baseurl=${DOWNLOAD_URL}/linux/centos/${releasever}/\$basearch/${channel}" --save;
+		$sh_c yum-config-manager --setopt="docker-ce-${channel}-debuginfo.baseurl=${DOWNLOAD_URL}/linux/centos/${releasever}/debug-\$basearch/${channel}" --save;
+		$sh_c yum-config-manager --setopt="docker-ce-${channel}-source.baseurl=${DOWNLOAD_URL}/linux/centos/${releasever}/source/${channel}" --save;
+	done
+}
+
 do_install() {
 	echo "# Executing docker install script, commit: $SCRIPT_COMMIT_SHA"
 
@@ -435,6 +463,9 @@ do_install() {
 				fi
 				$sh_c "$pkg_manager install -y -q $pre_reqs"
 				$sh_c "$config_manager --add-repo $yum_repo"
+
+				# FIXME adjusting ${releasever} to account for RHEL "xServer"/"xClient"
+				adjust_repo_releasever "$dist_version"
 
 				if [ "$CHANNEL" != "stable" ]; then
 					$sh_c "$config_manager $disable_channel_flag docker-ce-*"
