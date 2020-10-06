@@ -315,7 +315,7 @@ v1903_print_instructions() {
 	if [ "$(which $DAEMON)" != "$BIN/$DAEMON" ]; then
 		echo "# WARN: dockerd is not in your current PATH or pointing to $BIN/$DAEMON"
 	fi
-	echo "# Make sure the following environment variables are set (or add them to ~/.bashrc):\n"
+	echo "# Make sure the following environment variables are set (or add them to ~/.bashrc):"
 
 	if [ -n "$XDG_RUNTIME_DIR_CREATED" ]; then
 		echo "# WARN: systemd not found. You have to remove XDG_RUNTIME_DIR manually on every logout."
