@@ -22,6 +22,7 @@ SCRIPT_COMMIT_SHA=UNKNOWN
 
 # The channel to install from:
 #   * nightly
+#   * test
 #   * stable
 DEFAULT_CHANNEL_VALUE="stable"
 if [ -z "$CHANNEL" ]; then
@@ -29,6 +30,7 @@ if [ -z "$CHANNEL" ]; then
 fi
 # The latest release is currently hard-coded.
 STABLE_LATEST="19.03.13"
+TEST_LATEST="20.10.0-beta1"
 STATIC_RELEASE_URL=
 STATIC_RELEASE_ROOTLESS_URL=
 case "$CHANNEL" in
@@ -37,13 +39,18 @@ case "$CHANNEL" in
         STATIC_RELEASE_URL="https://download.docker.com/linux/static/$CHANNEL/$(uname -m)/docker-${STABLE_LATEST}.tgz"
         STATIC_RELEASE_ROOTLESS_URL="https://download.docker.com/linux/static/$CHANNEL/$(uname -m)/docker-rootless-extras-${STABLE_LATEST}.tgz"
         ;;
+    "test")
+        echo "# Installing test version ${TEST_LATEST}"
+        STATIC_RELEASE_URL="https://download.docker.com/linux/static/$CHANNEL/$(uname -m)/docker-${TEST_LATEST}.tgz"
+        STATIC_RELEASE_ROOTLESS_URL="https://download.docker.com/linux/static/$CHANNEL/$(uname -m)/docker-rootless-extras-${TEST_LATEST}.tgz"
+        ;;
     "nightly")
         echo "# Installing nightly"
         STATIC_RELEASE_URL="https://master.dockerproject.org/linux/$(uname -m)/docker.tgz"
         STATIC_RELEASE_ROOTLESS_URL="https://master.dockerproject.org/linux/$(uname -m)/docker-rootless-extras.tgz"
         ;;
     *)
-        >&2 echo "Aborting because of unknown CHANNEL \"$CHANNEL\". Set \$CHANNEL to either \"stable\" or \"nightly\"."; exit 1
+        >&2 echo "Aborting because of unknown CHANNEL \"$CHANNEL\". Set \$CHANNEL to either \"stable\", \"test\", or \"nightly\"."; exit 1
         ;;
 esac
 
