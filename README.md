@@ -34,7 +34,7 @@ sh install.sh
 To verify that the install script works amongst the supported operating systems run:
 
 ```shell
-make check
+make shellcheck
 ```
 
 ## Legal
