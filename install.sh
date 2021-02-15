@@ -69,6 +69,12 @@ case "$mirror" in
 		;;
 esac
 
+# docker-ce-rootless-extras is packaged since Docker 20.10.0
+has_rootless_extras="1"
+if echo "$VERSION" | grep -q '^1'; then
+	has_rootless_extras=
+fi
+
 command_exists() {
 	command -v "$@" > /dev/null 2>&1
 }
@@ -404,6 +410,11 @@ do_install() {
 					$sh_c "apt-get install -y -qq --no-install-recommends docker-ce-cli=$cli_pkg_version >/dev/null"
 				fi
 				$sh_c "apt-get install -y -qq --no-install-recommends docker-ce$pkg_version >/dev/null"
+				# shellcheck disable=SC2030
+				if [ -n "$has_rootless_extras" ]; then
+					# Install docker-ce-rootless-extras without "--no-install-recommends", so as to install slirp4netns when available
+					$sh_c "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq docker-ce-rootless-extras$pkg_version >/dev/null"
+				fi
 			)
 			echo_docker_as_nonroot
 			exit 0
@@ -474,6 +485,10 @@ do_install() {
 					$sh_c "$pkg_manager install -y -q docker-ce-cli-$cli_pkg_version"
 				fi
 				$sh_c "$pkg_manager install -y -q docker-ce$pkg_version"
+				# shellcheck disable=SC2031
+				if [ -n "$has_rootless_extras" ]; then
+					$sh_c "$pkg_manager install -y -q docker-ce-rootless-extras$pkg_version"
+				fi
 			)
 			echo_docker_as_nonroot
 			exit 0
