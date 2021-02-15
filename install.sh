@@ -146,8 +146,22 @@ echo_docker_as_nonroot() {
 	your_user=your-user
 	[ "$user" != 'root' ] && your_user="$user"
 	# intentionally mixed spaces and tabs here -- tabs are stripped by "<<-EOF", spaces are kept in the output
-	echo "If you would like to use Docker as a non-root user, you should now consider"
-	echo "adding your user to the \"docker\" group with something like:"
+	if [ -n "$has_rootless_extras" ]; then
+		echo
+		echo "===================================================================================================="
+		echo
+		echo "If you would like to use Docker as a non-root user, you should now consider"
+		echo "set up the Docker daemon (Rootless mode) for your user:"
+		echo
+		echo "  dockerd-rootless-setuptool.sh install"
+		echo
+		echo "For more information about Rootless mode, refer to https://docs.docker.com/engine/security/rootless/"
+		echo
+		echo "===================================================================================================="
+	fi
+	echo
+	echo "To allow your user to use the fully privileged Docker daemon, add your user to"
+	echo "to the \"docker\" group with something like:"
 	echo
 	echo "  sudo usermod -aG docker $your_user"
 	echo
