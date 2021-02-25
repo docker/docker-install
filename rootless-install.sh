@@ -2,7 +2,7 @@
 set -e
 # Docker CE for Linux installation script (Rootless mode)
 #
-# See https://docs.docker.com/engine/security/rootless/ for the
+# See https://docs.docker.com/go/rootless/ for the
 # installation steps.
 #
 # This script is meant for quick & easy install via:
@@ -114,7 +114,7 @@ checks() {
 	if [ -x "$BIN/$DAEMON" ]; then
 		# If rootless installation is detected print out the modified PATH and DOCKER_HOST that needs to be set.
 		echo "# Existing rootless Docker detected at $BIN/$DAEMON"
-		echo "# See https://docs.docker.com/engine/security/rootless/ for the usage."
+		echo "# See https://docs.docker.com/go/rootless/ for the usage."
 		exit 0
 	fi
 
