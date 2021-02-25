@@ -6,7 +6,7 @@ installing the latest Docker-CE releases on the supported linux
 distros. It is not recommended to depend on this script for deployment
 to production systems. For more thorough instructions for installing
 on the supported distros, see the [install
-instructions](https://docs.docker.com/engine/installation/).
+instructions](https://docs.docker.com/engine/install/).
 
 This repository is solely maintained by Docker, Inc.
 
