@@ -2,7 +2,7 @@
 set -e
 # Docker CE for Linux installation script
 #
-# See https://docs.docker.com/install/ for the installation steps.
+# See https://docs.docker.com/engine/install/ for the installation steps.
 #
 # This script is meant for quick & easy install via:
 #   $ curl -fsSL https://get.docker.com -o get-docker.sh
@@ -143,36 +143,30 @@ echo_docker_as_nonroot() {
 			$sh_c 'docker version'
 		) || true
 	fi
-	your_user=your-user
-	[ "$user" != 'root' ] && your_user="$user"
+
 	# intentionally mixed spaces and tabs here -- tabs are stripped by "<<-EOF", spaces are kept in the output
+	echo
+	echo "================================================================================"
+	echo
 	if [ -n "$has_rootless_extras" ]; then
+		echo "To run Docker as a non-privileged user, consider setting up the"
+		echo "Docker daemon in rootless mode for your user:"
 		echo
-		echo "===================================================================================================="
+		echo "    dockerd-rootless-setuptool.sh install"
 		echo
-		echo "If you would like to use Docker as a non-root user, you should now consider"
-		echo "set up the Docker daemon (Rootless mode) for your user:"
+		echo "Visit https://docs.docker.com/go/rootless/ to learn about rootless mode."
 		echo
-		echo "  dockerd-rootless-setuptool.sh install"
-		echo
-		echo "For more information about Rootless mode, refer to https://docs.docker.com/engine/security/rootless/"
-		echo
-		echo "===================================================================================================="
 	fi
 	echo
-	echo "To allow your user to use the fully privileged Docker daemon, add your user to"
-	echo "to the \"docker\" group with something like:"
+	echo "To run the Docker daemon as a fully privileged service, but granting non-root"
+	echo "users access, refer to https://docs.docker.com/go/daemon-access/"
 	echo
-	echo "  sudo usermod -aG docker $your_user"
+	echo "WARNING: Access to the remote API on a privileged Docker daemon is equivalent"
+	echo "         to root access on the host. Refer to the 'Docker daemon attack surface'"
+	echo "         documentation for details: https://docs.docker.com/go/attack-surface/"
 	echo
-	echo "Remember that you will have to log out and back in for this to take effect!"
+	echo "================================================================================"
 	echo
-	echo "WARNING: Adding a user to the \"docker\" group will grant the ability to run"
-	echo "         containers which can be used to obtain root privileges on the"
-	echo "         docker host."
-	echo "         Refer to https://docs.docker.com/engine/security/security/#docker-daemon-attack-surface"
-	echo "         for more information."
-
 }
 
 # Check if this is a forked Linux distro
