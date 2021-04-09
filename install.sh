@@ -454,7 +454,16 @@ do_install() {
 				fi
 				$sh_c "$pkg_manager install -y -q $pre_reqs"
 				$sh_c "$config_manager --add-repo $yum_repo"
-
+                if [ -n "$mirror" ]; then
+                    case "$mirror" in
+                        Aliyun)
+                            sed -i "s#download.docker.com#mirrors.aliyun.com/docker-ce#g" /etc/yum.repos.d/docker-ce.repo
+                            ;;
+                        AzureChinaCloud)
+                            sed -i "s#download.docker.com#mirror.azure.cn/docker-ce#g" /etc/yum.repos.d/docker-ce.repo
+                            ;;
+                    esac
+                fi
 				if [ "$CHANNEL" != "stable" ]; then
 					$sh_c "$config_manager $disable_channel_flag docker-ce-*"
 					$sh_c "$config_manager $enable_channel_flag docker-ce-$CHANNEL"
