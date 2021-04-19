@@ -114,7 +114,13 @@ checks() {
 	if [ -x "$BIN/$DAEMON" ]; then
 		# If rootless installation is detected print out the modified PATH and DOCKER_HOST that needs to be set.
 		echo "# Existing rootless Docker detected at $BIN/$DAEMON"
-		echo "# See https://docs.docker.com/go/rootless/ for the usage."
+		echo
+		echo "# To reinstall or upgrade rootless Docker, run the following commands and then rerun the installation script:"
+		echo "systemctl --user stop docker"
+		echo "rm -f $BIN/$DAEMON"
+		echo
+		echo "# Alternatively, install the docker-ce-rootless-extras RPM/deb package for ease of package management (requires root)."
+		echo "# See https://docs.docker.com/go/rootless/ for details."
 		exit 0
 	fi
 
