@@ -188,7 +188,9 @@ check_forked() {
 			EOF
 
 			# Get the upstream release info
-			lsb_dist=$(lsb_release -a -u 2>&1 | tr '[:upper:]' '[:lower:]' | grep -E 'id' | cut -d ':' -f 2 | tr -d '[:space:]')
+			if [ -z ${lsb_dist} ]; then
+				lsb_dist=$(lsb_release -a -u 2>&1 | tr '[:upper:]' '[:lower:]' | grep -E 'id' | cut -d ':' -f 2 | tr -d '[:space:]')
+			fi
 			dist_version=$(lsb_release -a -u 2>&1 | tr '[:upper:]' '[:lower:]' | grep -E 'codename' | cut -d ':' -f 2 | tr -d '[:space:]')
 
 			# Print info about upstream distro
@@ -301,7 +303,9 @@ do_install() {
 	fi
 
 	# perform some very rudimentary platform detection
-	lsb_dist=$( get_distribution )
+	if [ -z ${lsb_dist} ]; then
+		lsb_dist=$( get_distribution )
+	fi
 	lsb_dist="$(echo "$lsb_dist" | tr '[:upper:]' '[:lower:]')"
 
 	if is_wsl; then
