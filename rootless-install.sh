@@ -127,12 +127,12 @@ checks() {
 	INSTRUCTIONS=
 
 	# uidmap dependency check
-	if ! which newuidmap >/dev/null 2>&1; then
-		if which apt-get >/dev/null 2>&1; then
+	if ! command -v newuidmap >/dev/null 2>&1; then
+		if command -v apt-get >/dev/null 2>&1; then
 			INSTRUCTIONS="apt-get install -y uidmap"
-		elif which dnf >/dev/null 2>&1; then
+		elif command -v dnf >/dev/null 2>&1; then
 			INSTRUCTIONS="dnf install -y shadow-utils"
-		elif which yum >/dev/null 2>&1; then
+		elif command -v yum >/dev/null 2>&1; then
 			INSTRUCTIONS="curl -o /etc/yum.repos.d/vbatts-shadow-utils-newxidmap-epel-7.repo https://copr.fedorainfracloud.org/coprs/vbatts/shadow-utils-newxidmap/repo/epel-7/vbatts-shadow-utils-newxidmap-epel-7.repo
 yum install -y shadow-utils46-newxidmap"
 		else
@@ -142,11 +142,11 @@ yum install -y shadow-utils46-newxidmap"
 	fi
 
 	# iptables dependency check
-	if [ -z "$SKIP_IPTABLES" ] && ! which iptables >/dev/null 2>&1 && [ ! -f /sbin/iptables ] && [ ! -f /usr/sbin/iptables ]; then
-		if which apt-get >/dev/null 2>&1; then
+	if [ -z "$SKIP_IPTABLES" ] && ! command -v iptables >/dev/null 2>&1 && [ ! -f /sbin/iptables ] && [ ! -f /usr/sbin/iptables ]; then
+		if command -v apt-get >/dev/null 2>&1; then
 			INSTRUCTIONS="${INSTRUCTIONS}
 apt-get install -y iptables"
-		elif which dnf >/dev/null 2>&1; then
+		elif command -v dnf >/dev/null 2>&1; then
 			INSTRUCTIONS="${INSTRUCTIONS}
 dnf install -y iptables"
 		else
