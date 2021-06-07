@@ -21,6 +21,8 @@ set -e
 # the script was uploaded (Should only be modified by upload job):
 SCRIPT_COMMIT_SHA="${LOAD_SCRIPT_COMMIT_SHA}"
 
+# strip "v" prefix if present
+VERSION="${VERSION#v}"
 
 # The channel to install from:
 #   * nightly
@@ -69,15 +71,56 @@ case "$mirror" in
 		;;
 esac
 
-# docker-ce-rootless-extras is packaged since Docker 20.10.0
-has_rootless_extras="1"
-if echo "$VERSION" | grep -q '^1'; then
-	has_rootless_extras=
-fi
-
 command_exists() {
 	command -v "$@" > /dev/null 2>&1
 }
+
+# version_gte checks if the version specified in $VERSION is at least
+# the given CalVer (YY.MM) version. returns 0 (success) if $VERSION is either
+# unset (=latest) or newer or equal than the specified version. Returns 1 (fail)
+# otherwise.
+#
+# examples:
+#
+# VERSION=20.10
+# version_gte 20.10 // 0 (success)
+# version_gte 19.03 // 0 (success)
+# version_gte 21.10 // 1 (fail)
+version_gte() {
+	if [ -z "$VERSION" ]; then
+			return 0
+	fi
+	eval calver_compare "$VERSION" "$1"
+}
+
+# calver_compare compares two CalVer (YY.MM) version strings. returns 0 (success)
+# if version A is newer or equal than version B, or 1 (fail) otherwise. Patch
+# releases and pre-release (-alpha/-beta) are not taken into account
+#
+# examples:
+#
+# calver_compare 20.10 19.03 // 0 (success)
+# calver_compare 20.10 20.10 // 0 (success)
+# calver_compare 19.03 20.10 // 1 (fail)
+calver_compare() (
+	set +x
+
+	yy_a="$(echo "$1" | cut -d'.' -f1)"
+	yy_b="$(echo "$2" | cut -d'.' -f1)"
+	if [ "$yy_a" -lt "$yy_b" ]; then
+		return 1
+	fi
+	if [ "$yy_a" -gt "$yy_b" ]; then
+		return 0
+	fi
+	mm_a="$(echo "$1" | cut -d'.' -f2)"
+	mm_b="$(echo "$2" | cut -d'.' -f2)"
+	if [ "${mm_a#0}" -lt "${mm_b#0}" ]; then
+		return 1
+	fi
+
+	return 0
+)
 
 is_dry_run() {
 	if [ -z "$DRY_RUN" ]; then
@@ -148,7 +191,7 @@ echo_docker_as_nonroot() {
 	echo
 	echo "================================================================================"
 	echo
-	if [ -n "$has_rootless_extras" ]; then
+	if version_gte "20.10"; then
 		echo "To run Docker as a non-privileged user, consider setting up the"
 		echo "Docker daemon in rootless mode for your user:"
 		echo
@@ -365,24 +408,32 @@ do_install() {
 						echo
 						exit 1
 					fi
-					search_command="apt-cache madison 'docker-ce-cli' | grep '$pkg_pattern' | head -1 | awk '{\$1=\$1};1' | cut -d' ' -f 3"
-					# Don't insert an = for cli_pkg_version, we'll just include it later
-					cli_pkg_version="$($sh_c "$search_command")"
+					if version_gte "18.09"; then
+							search_command="apt-cache madison 'docker-ce-cli' | grep '$pkg_pattern' | head -1 | awk '{\$1=\$1};1' | cut -d' ' -f 3"
+							echo "INFO: $search_command"
+							cli_pkg_version="=$($sh_c "$search_command")"
+					fi
 					pkg_version="=$pkg_version"
 				fi
 			fi
 			(
+				pkgs=""
+				if version_gte "18.09"; then
+						# older versions don't support a cli package
+						pkgs="$pkgs docker-ce-cli${cli_pkg_version%=}"
+				fi
+				if version_gte "20.10" && [ "$(uname -m)" = "x86_64" ]; then
+						# also install the latest version of the "docker scan" cli-plugin (only supported on x86 currently)
+						pkgs="$pkgs docker-scan-plugin"
+				fi
+				pkgs="$pkgs docker-ce${pkg_version%=}"
 				if ! is_dry_run; then
 					set -x
 				fi
-				if [ -n "$cli_pkg_version" ]; then
-					$sh_c "apt-get install -y -qq --no-install-recommends docker-ce-cli=$cli_pkg_version >/dev/null"
-				fi
-				$sh_c "apt-get install -y -qq --no-install-recommends docker-ce$pkg_version >/dev/null"
-				# shellcheck disable=SC2030
-				if [ -n "$has_rootless_extras" ]; then
+				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends $pkgs >/dev/null"
+				if version_gte "20.10"; then
 					# Install docker-ce-rootless-extras without "--no-install-recommends", so as to install slirp4netns when available
-					$sh_c "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq docker-ce-rootless-extras$pkg_version >/dev/null"
+					$sh_c "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq docker-ce-rootless-extras${pkg_version%=} >/dev/null"
 				fi
 			)
 			echo_docker_as_nonroot
@@ -438,9 +489,11 @@ do_install() {
 						echo
 						exit 1
 					fi
-					search_command="$pkg_manager list --showduplicates 'docker-ce-cli' | grep '$pkg_pattern' | tail -1 | awk '{print \$2}'"
-					# It's okay for cli_pkg_version to be blank, since older versions don't support a cli package
-					cli_pkg_version="$($sh_c "$search_command" | cut -d':' -f 2)"
+					if version_gte "18.09"; then
+						# older versions don't support a cli package
+						search_command="$pkg_manager list --showduplicates 'docker-ce-cli' | grep '$pkg_pattern' | tail -1 | awk '{print \$2}'"
+						cli_pkg_version="$($sh_c "$search_command" | cut -d':' -f 2)"
+					fi
 					# Cut out the epoch and prefix with a '-'
 					pkg_version="-$(echo "$pkg_version" | cut -d':' -f 2)"
 				fi
@@ -454,8 +507,7 @@ do_install() {
 					$sh_c "$pkg_manager install -y -q docker-ce-cli-$cli_pkg_version"
 				fi
 				$sh_c "$pkg_manager install -y -q docker-ce$pkg_version"
-				# shellcheck disable=SC2031
-				if [ -n "$has_rootless_extras" ]; then
+				if version_gte "20.10"; then
 					$sh_c "$pkg_manager install -y -q docker-ce-rootless-extras$pkg_version"
 				fi
 			)
