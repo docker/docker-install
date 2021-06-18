@@ -246,6 +246,15 @@ check_forked() {
 				else
 					# We're Debian and don't even know it!
 					lsb_dist=debian
+
+					# now, we can check /etc/os-release for ID_LIKE and UBUNTU_CODENAME
+					if [ -r /etc/os-release ]; then
+						base_dist="$(. /etc/os-release && echo "$ID_LIKE")"
+						if [ "$base_dist" = "ubuntu" ]; then
+							lsb_dist="$base_dist"
+							dist_version="$(. /etc/os-release && echo "$UBUNTU_CODENAME")"
+						fi
+					fi
 				fi
 				dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
 				case "$dist_version" in
@@ -365,6 +374,8 @@ do_install() {
 
 	# Check if this is a forked Linux distro
 	check_forked
+
+	echo "Detected distribution to use for installation: $lsb_dist and version $dist_version"
 
 	# Run setup for each distro accordingly
 	case "$lsb_dist" in
