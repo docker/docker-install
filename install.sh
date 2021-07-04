@@ -148,11 +148,14 @@ is_darwin() {
 
 deprecation_notice() {
 	distro=$1
-	date=$2
+	distro_version=$2
 	echo
-	echo "DEPRECATION WARNING:"
-	echo "    The distribution, $distro, will no longer be supported in this script as of $date."
-	echo "    If you feel this is a mistake please submit an issue at https://github.com/docker/docker-install/issues/new"
+	printf "\033[91;1mDEPRECATION WARNING\033[0m\n"
+	printf "    This Linux distribution (\033[1m%s %s\033[0m) reached end-of-life and is no longer supported by this script.\n" "$distro" "$distro_version"
+	echo   "    No updates or security fixes will be released for this distribution, and users are recommended"
+	echo   "    to upgrade to a currently maintained version of $distro."
+	echo
+	printf   "Press \033[1mCtrl+C\033[0m now to abort this script, or wait for the installation to continue."
 	echo
 	sleep 10
 }
@@ -365,6 +368,25 @@ do_install() {
 
 	# Check if this is a forked Linux distro
 	check_forked
+
+	# Print deprecation warnings for distro versions that recently reached EOL,
+	# but may still be commonly used (especially LTS versions).
+	case "$lsb_dist.$dist_version" in
+		debian.stretch|debian.jessie)
+			deprecation_notice "$lsb_dist" "$dist_version"
+			;;
+		raspbian.stretch|raspbian.jessie)
+			deprecation_notice "$lsb_dist" "$dist_version"
+			;;
+		ubuntu.xenial|ubuntu.trusty)
+			deprecation_notice "$lsb_dist" "$dist_version"
+			;;
+		fedora.*)
+			if [ "$dist_version" -lt 33 ]; then
+				deprecation_notice "$lsb_dist" "$dist_version"
+			fi
+			;;
+	esac
 
 	# Run setup for each distro accordingly
 	case "$lsb_dist" in
