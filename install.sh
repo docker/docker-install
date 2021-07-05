@@ -171,14 +171,6 @@ get_distribution() {
 	echo "$lsb_dist"
 }
 
-add_debian_backport_repo() {
-	debian_version="$1"
-	backports="deb http://ftp.debian.org/debian $debian_version-backports main"
-	if ! grep -Fxq "$backports" /etc/apt/sources.list; then
-		(set -x; $sh_c "echo \"$backports\" >> /etc/apt/sources.list")
-	fi
-}
-
 echo_docker_as_nonroot() {
 	if is_dry_run; then
 		return
