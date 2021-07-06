@@ -171,14 +171,6 @@ get_distribution() {
 	echo "$lsb_dist"
 }
 
-add_debian_backport_repo() {
-	debian_version="$1"
-	backports="deb http://ftp.debian.org/debian $debian_version-backports main"
-	if ! grep -Fxq "$backports" /etc/apt/sources.list; then
-		(set -x; $sh_c "echo \"$backports\" >> /etc/apt/sources.list")
-	fi
-}
-
 echo_docker_as_nonroot() {
 	if is_dry_run; then
 		return
@@ -258,7 +250,7 @@ check_forked() {
 					9)
 						dist_version="stretch"
 					;;
-					8|'Kali Linux 2')
+					8)
 						dist_version="jessie"
 					;;
 				esac
@@ -392,13 +384,6 @@ do_install() {
 	case "$lsb_dist" in
 		ubuntu|debian|raspbian)
 			pre_reqs="apt-transport-https ca-certificates curl"
-			if [ "$lsb_dist" = "debian" ]; then
-				# libseccomp2 does not exist for debian jessie main repos for aarch64
-				if [ "$(uname -m)" = "aarch64" ] && [ "$dist_version" = "jessie" ]; then
-					add_debian_backport_repo "$dist_version"
-				fi
-			fi
-
 			if ! command -v gpg > /dev/null; then
 				pre_reqs="$pre_reqs gnupg"
 			fi
