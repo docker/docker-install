@@ -341,12 +341,12 @@ do_install() {
 			esac
 		;;
 
-		centos|rhel)
+		centos|rhel|sles)
 			if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
 				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
 			fi
 		;;
-
+		
 		*)
 			if command_exists lsb_release; then
 				dist_version="$(lsb_release --release | cut -f2)"
@@ -447,6 +447,10 @@ do_install() {
 			exit 0
 			;;
 		centos|fedora|rhel)
+			if [ "$(uname -m)" != "s390x" ] && [ "$lsb_dist" = "rhel" ]; then
+				echo "Packages for RHEL are currently only available for s390x."
+				exit 1
+			fi
 			yum_repo="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
 			if ! curl -Ifs "$yum_repo" > /dev/null; then
 				echo "Error: Unable to curl repository file $yum_repo, is it valid?"
@@ -521,6 +525,82 @@ do_install() {
 			echo_docker_as_nonroot
 			exit 0
 			;;
+			
+		sles)
+			if [ "$(uname -m)" != "s390x" ]; then
+				echo "Packages for SLES are currently only available for s390x"
+				exit 1
+			fi
+			sles_repo="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
+			opensuse_repo="https://download.opensuse.org/repositories/security:SELinux/SLE_15_SP2/security:SELinux.repo"
+			if ! curl -Ifs "$sles_repo" > /dev/null; then
+				echo "Error: Unable to curl repository file $sles_repo, is it valid?"
+				exit 1
+			fi
+			pre_reqs="ca-certificates curl libseccomp2 awk"
+			(
+				if ! is_dry_run; then
+					set -x
+				fi
+				$sh_c "zypper install -y $pre_reqs"
+				$sh_c "zypper addrepo $sles_repo"
+				
+				if ! is_dry_run; then
+				cat >&2 <<-'EOF'
+				WARNING!!
+				openSUSE repository (https://download.opensuse.org/repositories/security:SELinux) will be enabled now.
+				Do you wish to continue?
+				You may press Ctrl+C now to abort this script.
+				EOF
+				( set -x; sleep 30 )
+				fi
+				$sh_c "zypper addrepo $opensuse_repo"
+				$sh_c "zypper --gpg-auto-import-keys refresh"
+				$sh_c "zypper lr -d"
+			)
+			pkg_version=""
+			if [ -n "$VERSION" ]; then
+				if is_dry_run; then
+					echo "# WARNING: VERSION pinning is not supported in DRY_RUN"
+				else
+					pkg_pattern="$(echo "$VERSION" | sed "s/-ce-/\\\\.ce.*/g" | sed "s/-/.*/g")"
+					search_command="zypper search -s --match-exact 'docker-ce' | grep '$pkg_pattern' | tail -1 | awk '{print \$6}'"
+					pkg_version="$($sh_c "$search_command")"
+					echo "INFO: Searching repository for VERSION '$VERSION'"
+					echo "INFO: $search_command"
+					if [ -z "$pkg_version" ]; then
+						echo
+						echo "ERROR: '$VERSION' not found amongst zypper list results"
+						echo
+						exit 1
+					fi
+					search_command="zypper search -s --match-exact 'docker-ce-cli' | grep '$pkg_pattern' | tail -1 | awk '{print \$6}'"
+					# It's okay for cli_pkg_version to be blank, since older versions don't support a cli package
+					cli_pkg_version="$($sh_c "$search_command")"
+					pkg_version="-$pkg_version"
+					
+					search_command="zypper search -s --match-exact 'docker-ce-rootless-extras' | grep '$pkg_pattern' | tail -1 | awk '{print \$6}'"
+					rootless_pkg_version="$($sh_c "$search_command")"
+					rootless_pkg_version="-$rootless_pkg_version"
+				fi
+			fi
+			(
+				if ! is_dry_run; then
+					set -x
+				fi
+				# install the correct cli version first
+				if [ -n "$cli_pkg_version" ]; then
+					$sh_c "zypper install -y  docker-ce-cli-$cli_pkg_version"
+				fi
+				$sh_c "zypper install -y docker-ce$pkg_version"
+				# shellcheck disable=SC2031
+				if version_gte "20.10"; then
+					$sh_c "zypper install -y docker-ce-rootless-extras$rootless_pkg_version"
+				fi
+			)
+			echo_docker_as_nonroot
+			exit 0
+			;;		
 		*)
 			if [ -z "$lsb_dist" ]; then
 				if is_darwin; then
