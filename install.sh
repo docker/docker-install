@@ -1,4 +1,9 @@
 #!/bin/sh
+
+cat >/dev/null <<\EOF
+${HTML}
+EOF
+
 set -e
 # Docker CE for Linux installation script
 #
