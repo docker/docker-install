@@ -63,6 +63,9 @@ while [ $# -gt 0 ]; do
 done
 
 case "$mirror" in
+	Tencent)
+		DOWNLOAD_URL="https://mirrors.tencent.com/docker-ce"
+		;;
 	Aliyun)
 		DOWNLOAD_URL="https://mirrors.aliyun.com/docker-ce"
 		;;
