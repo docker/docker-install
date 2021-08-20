@@ -536,8 +536,10 @@ do_install() {
 				echo "Packages for SLES are currently only available for s390x"
 				exit 1
 			fi
+
+			sles_version="${dist_version##*.}"
 			sles_repo="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
-			opensuse_repo="https://download.opensuse.org/repositories/security:SELinux/SLE_15_SP2/security:SELinux.repo"
+			opensuse_repo="https://download.opensuse.org/repositories/security:SELinux/SLE_15_SP$sles_version/security:SELinux.repo"
 			if ! curl -Ifs "$sles_repo" > /dev/null; then
 				echo "Error: Unable to curl repository file $sles_repo, is it valid?"
 				exit 1
