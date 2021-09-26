@@ -606,6 +606,25 @@ do_install() {
 			echo_docker_as_nonroot
 			exit 0
 			;;
+		archarm)
+			if [ -n "$VERSION" ]; then
+				cat >&2 <<-'EOF'
+				WARNING!!
+				Arch Linux ARM does not support version pinning. 'latest' will be installed
+				Do you wish to continue?
+				You may press Ctrl+C now to abort this script.
+				EOF
+					( set -x; sleep 30 )
+			fi
+			(
+				if ! is_dry_run; then
+					set -x
+				fi
+				$sh_c "pacman -S community/docker --noconfirm"
+			)
+			echo_docker_as_nonroot
+			exit 0
+			;;
 		*)
 			if [ -z "$lsb_dist" ]; then
 				if is_darwin; then
