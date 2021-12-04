@@ -1,0 +1,62 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.205.2/containers/kubernetes-helm
+{
+	"name": "Kubernetes - Local Configuration",
+	"dockerFile": "Dockerfile",
+	"overrideCommand": false,
+
+	"remoteEnv": {
+		"SYNC_LOCALHOST_KUBECONFIG": "true"
+	},
+
+	"mounts": [
+		"source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind",
+		"source=${env:HOME}${env:USERPROFILE}/.kube,target=/usr/local/share/kube-localhost,type=bind"
+		// Uncomment the next line to also sync certs in your .minikube folder
+		// "source=${env:HOME}${env:USERPROFILE}/.minikube,target=/usr/local/share/minikube-localhost,type=bind"
+	],
+
+	// Set *default* container specific settings.json values on container create.
+	"settings": {},
+	// Add the IDs of extensions you want installed when the container is created.
+	"extensions": [
+		"ms-azuretools.vscode-docker",
+		"ms-kubernetes-tools.vscode-kubernetes-tools",
+		"mindaro.mindaro"
+	],
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "kubectl version",
+
+	// Uncomment when using a ptrace-based debugger like C++, Go, and Rust.
+	// "runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
+
+	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+	"remoteUser": "vscode",
+	"features": {
+		"docker-in-docker": "latest",
+		"docker-from-docker": "20.10",
+		"kubectl-helm-minikube": "latest",
+		"terraform": "latest",
+		"git": "latest",
+		"git-lfs": "latest",
+		"github-cli": "latest",
+		"azure-cli": "latest",
+		"sshd": "latest",
+		"desktop-lite": "latest",
+		"homebrew": "latest",
+		"node": "lts",
+		"python": "latest",
+		"golang": "latest",
+		"java": "lts",
+		"maven": "latest",
+		"gradle": "latest",
+		"ruby": "latest",
+		"rust": "latest",
+		"powershell": "latest"
+	}
+}
+
