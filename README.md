@@ -24,7 +24,7 @@ curl -fsSL https://test.docker.com -o test-docker.sh
 sh test-docker.sh
 ```
 
-From the source repo (This will install latest from the `test` channel):
+From the source repo (This will install latest from the `stable` channel):
 ```shell
 sh install.sh
 ```
