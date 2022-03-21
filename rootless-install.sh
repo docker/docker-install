@@ -156,7 +156,7 @@ dnf install -y iptables"
 	fi
 
 	# ip_tables module dependency check
-	if [ -z "$SKIP_IPTABLES" ] && ! lsmod | grep ip_tables >/dev/null 2>&1 && ! cat /lib/modules/$(uname -r)/modules.builtin | grep ip_tables >/dev/null 2>&1; then
+	if [ -z "$SKIP_IPTABLES" ] && ! lsmod | grep ip_tables >/dev/null 2>&1 && ! grep -q ip_tables "/lib/modules/$(uname -r)/modules.builtin"; then
 			INSTRUCTIONS="${INSTRUCTIONS}
 modprobe ip_tables"
 	fi
@@ -225,11 +225,13 @@ exec_setuptool() {
 }
 
 do_install() {
+	echo "# Executing docker rootless install script, commit: $SCRIPT_COMMIT_SHA"
+
 	init_vars
 	checks
 
 	tmp=$(mktemp -d)
-	trap "rm -rf $tmp" EXIT INT TERM
+	trap 'rm -rf "$tmp"' EXIT INT TERM
 	# Download tarballs docker-* and docker-rootless-extras=*
 	(
 		cd "$tmp"
