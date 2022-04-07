@@ -440,7 +440,7 @@ do_install() {
 						# also install the latest version of the "docker scan" cli-plugin (only supported on x86 currently)
 						pkgs="$pkgs docker-scan-plugin"
 				fi
-				pkgs="$pkgs docker-ce${pkg_version%=}"
+				pkgs="$pkgs docker-ce${pkg_version%=} docker-compose-plugin"
 				if ! is_dry_run; then
 					set -x
 				fi
