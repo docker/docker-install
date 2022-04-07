@@ -436,6 +436,9 @@ do_install() {
 						# older versions don't support a cli package
 						pkgs="$pkgs docker-ce-cli${cli_pkg_version%=}"
 				fi
+				if version_gte "20.10"; then
+						pkgs="$pkgs docker-compose-plugin"
+				fi
 				if version_gte "20.10" && [ "$(uname -m)" = "x86_64" ]; then
 						# also install the latest version of the "docker scan" cli-plugin (only supported on x86 currently)
 						pkgs="$pkgs docker-scan-plugin"
@@ -530,7 +533,7 @@ do_install() {
 						pkgs="$pkgs docker-scan-plugin"
 				fi
 				if version_gte "20.10"; then
-					pkgs="$pkgs docker-ce-rootless-extras$pkg_version"
+					pkgs="$pkgs docker-compose-plugin docker-ce-rootless-extras$pkg_version"
 				fi
 				if ! is_dry_run; then
 					set -x
@@ -609,7 +612,7 @@ do_install() {
 					fi
 				fi
 				if version_gte "20.10"; then
-					pkgs="$pkgs docker-ce-rootless-extras$pkg_version"
+					pkgs="$pkgs docker-compose-plugin docker-ce-rootless-extras$pkg_version"
 				fi
 				if ! is_dry_run; then
 					set -x
