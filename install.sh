@@ -431,7 +431,7 @@ do_install() {
 				fi
 			fi
 			(
-				pkgs=""
+				pkgs="docker-ce${pkg_version%=}"
 				if version_gte "18.09"; then
 						# older versions don't support a cli package
 						pkgs="$pkgs docker-ce-cli${cli_pkg_version%=}"
@@ -440,7 +440,6 @@ do_install() {
 						# also install the latest version of the "docker scan" cli-plugin (only supported on x86 currently)
 						pkgs="$pkgs docker-scan-plugin"
 				fi
-				pkgs="$pkgs docker-ce${pkg_version%=}"
 				if ! is_dry_run; then
 					set -x
 				fi
@@ -517,17 +516,26 @@ do_install() {
 				fi
 			fi
 			(
+				pkgs="docker-ce$pkg_version"
+				if version_gte "18.09"; then
+					# older versions don't support a cli package
+					if [ -n "$cli_pkg_version" ]; then
+						pkgs="$pkgs docker-ce-cli-$cli_pkg_version"
+					else
+						pkgs="$pkgs docker-ce-cli"
+					fi
+				fi
+				if version_gte "20.10" && [ "$(uname -m)" = "x86_64" ]; then
+						# also install the latest version of the "docker scan" cli-plugin (only supported on x86 currently)
+						pkgs="$pkgs docker-scan-plugin"
+				fi
+				if version_gte "20.10"; then
+					pkgs="$pkgs docker-ce-rootless-extras$pkg_version"
+				fi
 				if ! is_dry_run; then
 					set -x
 				fi
-				# install the correct cli version first
-				if [ -n "$cli_pkg_version" ]; then
-					$sh_c "$pkg_manager install -y -q docker-ce-cli-$cli_pkg_version"
-				fi
-				$sh_c "$pkg_manager install -y -q docker-ce$pkg_version"
-				if version_gte "20.10"; then
-					$sh_c "$pkg_manager install -y -q docker-ce-rootless-extras$pkg_version"
-				fi
+				$sh_c "$pkg_manager install -y -q $pkgs"
 			)
 			echo_docker_as_nonroot
 			exit 0
@@ -592,17 +600,21 @@ do_install() {
 				fi
 			fi
 			(
+				pkgs="docker-ce$pkg_version"
+				if version_gte "18.09"; then
+					if [ -n "$cli_pkg_version" ]; then
+						pkgs="$pkgs docker-ce-cli-$cli_pkg_version"
+					else
+						pkgs="$pkgs docker-ce-cli"
+					fi
+				fi
+				if version_gte "20.10"; then
+					pkgs="$pkgs docker-ce-rootless-extras$pkg_version"
+				fi
 				if ! is_dry_run; then
 					set -x
 				fi
-				# install the correct cli version first
-				if [ -n "$cli_pkg_version" ]; then
-					$sh_c "zypper install -y  docker-ce-cli-$cli_pkg_version"
-				fi
-				$sh_c "zypper install -y docker-ce$pkg_version"
-				if version_gte "20.10"; then
-					$sh_c "zypper install -y docker-ce-rootless-extras$rootless_pkg_version"
-				fi
+				$sh_c "zypper install -y -q $pkgs"
 			)
 			echo_docker_as_nonroot
 			exit 0
