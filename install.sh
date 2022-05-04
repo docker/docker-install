@@ -617,7 +617,7 @@ do_install() {
 				if ! is_dry_run; then
 					set -x
 				fi
-				$sh_c "zypper install -y -q $pkgs"
+				$sh_c "zypper -q install -y $pkgs"
 			)
 			echo_docker_as_nonroot
 			exit 0
