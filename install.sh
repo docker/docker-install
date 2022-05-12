@@ -433,8 +433,8 @@ do_install() {
 			(
 				pkgs="docker-ce${pkg_version%=}"
 				if version_gte "18.09"; then
-						# older versions don't support a cli package
-						pkgs="$pkgs docker-ce-cli${cli_pkg_version%=}"
+						# older versions didn't ship the cli and containerd as separate packages
+						pkgs="$pkgs docker-ce-cli${cli_pkg_version%=} containerd.io"
 				fi
 				if version_gte "20.10"; then
 						pkgs="$pkgs docker-compose-plugin"
@@ -521,11 +521,11 @@ do_install() {
 			(
 				pkgs="docker-ce$pkg_version"
 				if version_gte "18.09"; then
-					# older versions don't support a cli package
+					# older versions didn't ship the cli and containerd as separate packages
 					if [ -n "$cli_pkg_version" ]; then
-						pkgs="$pkgs docker-ce-cli-$cli_pkg_version"
+						pkgs="$pkgs docker-ce-cli-$cli_pkg_version containerd.io"
 					else
-						pkgs="$pkgs docker-ce-cli"
+						pkgs="$pkgs docker-ce-cli containerd.io"
 					fi
 				fi
 				if version_gte "20.10" && [ "$(uname -m)" = "x86_64" ]; then
@@ -606,9 +606,10 @@ do_install() {
 				pkgs="docker-ce$pkg_version"
 				if version_gte "18.09"; then
 					if [ -n "$cli_pkg_version" ]; then
-						pkgs="$pkgs docker-ce-cli-$cli_pkg_version"
+						# older versions didn't ship the cli and containerd as separate packages
+						pkgs="$pkgs docker-ce-cli-$cli_pkg_version containerd.io"
 					else
-						pkgs="$pkgs docker-ce-cli"
+						pkgs="$pkgs docker-ce-cli containerd.io"
 					fi
 				fi
 				if version_gte "20.10"; then
