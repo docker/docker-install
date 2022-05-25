@@ -393,15 +393,16 @@ do_install() {
 			if ! command -v gpg > /dev/null; then
 				pre_reqs="$pre_reqs gnupg"
 			fi
-			apt_repo="deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] $DOWNLOAD_URL/linux/$lsb_dist $dist_version $CHANNEL"
+			apt_repo="deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] $DOWNLOAD_URL/linux/$lsb_dist $dist_version $CHANNEL"
 			(
 				if ! is_dry_run; then
 					set -x
 				fi
 				$sh_c 'apt-get update -qq >/dev/null'
 				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq $pre_reqs >/dev/null"
-				$sh_c "curl -fsSL \"$DOWNLOAD_URL/linux/$lsb_dist/gpg\" | gpg --dearmor --yes -o /usr/share/keyrings/docker-archive-keyring.gpg"
-				$sh_c "chmod a+r /usr/share/keyrings/docker-archive-keyring.gpg"
+				$sh_c 'mkdir -p /etc/apt/keyrings && chmod -R 0755 /etc/apt/keyrings'
+				$sh_c "curl -fsSL \"$DOWNLOAD_URL/linux/$lsb_dist/gpg\" | gpg --dearmor --yes -o /etc/apt/keyrings/docker.gpg"
+				$sh_c "chmod a+r /etc/apt/keyrings/docker.gpg"
 				$sh_c "echo \"$apt_repo\" > /etc/apt/sources.list.d/docker.list"
 				$sh_c 'apt-get update -qq >/dev/null'
 			)
