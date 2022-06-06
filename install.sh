@@ -233,6 +233,9 @@ check_forked() {
 			cat <<-EOF
 			Upstream release is '$lsb_dist' version '$dist_version'.
 			EOF
+		elif [ "$lsb_dist" = "pop" ]; then
+			lsb_dist=ubuntu
+			dist_version="$(lsb_release --codename | cut -f2)"
 		else
 			if [ -r /etc/debian_version ] && [ "$lsb_dist" != "ubuntu" ] && [ "$lsb_dist" != "raspbian" ]; then
 				if [ "$lsb_dist" = "osmc" ]; then
