@@ -538,10 +538,7 @@ do_install() {
 						pkgs="$pkgs docker-ce-cli${cli_pkg_version%=} containerd.io"
 				fi
 				if version_gte "20.10"; then
-						pkgs="$pkgs docker-compose-plugin docker-ce-rootless-extras$pkg_version"
-				fi
-				if version_gte "23.0"; then
-						pkgs="$pkgs docker-buildx-plugin"
+						pkgs="$pkgs docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras$pkg_version"
 				fi
 				if ! is_dry_run; then
 					set -x
@@ -628,10 +625,7 @@ do_install() {
 					fi
 				fi
 				if version_gte "20.10"; then
-					pkgs="$pkgs docker-compose-plugin docker-ce-rootless-extras$pkg_version"
-				fi
-				if version_gte "23.0"; then
-						pkgs="$pkgs docker-buildx-plugin"
+					pkgs="$pkgs docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras$pkg_version"
 				fi
 				if ! is_dry_run; then
 					set -x
@@ -701,10 +695,7 @@ do_install() {
 					fi
 				fi
 				if version_gte "20.10"; then
-					pkgs="$pkgs docker-compose-plugin docker-ce-rootless-extras$pkg_version"
-				fi
-				if version_gte "23.0"; then
-						pkgs="$pkgs docker-buildx-plugin"
+					pkgs="$pkgs docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras$pkg_version"
 				fi
 				if ! is_dry_run; then
 					set -x
