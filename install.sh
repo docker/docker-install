@@ -444,6 +444,10 @@ do_install() {
 						# also install the latest version of the "docker scan" cli-plugin (only supported on x86 currently)
 						pkgs="$pkgs docker-scan-plugin"
 				fi
+				# TODO(thaJeztah) remove the $CHANNEL check once 22.06 and docker-buildx-plugin is published to the "stable" channel
+				if [ "$CHANNEL" = "test" ] && version_gte "22.06"; then
+						pkgs="$pkgs docker-buildx-plugin"
+				fi
 				if ! is_dry_run; then
 					set -x
 				fi
@@ -536,6 +540,10 @@ do_install() {
 				if version_gte "20.10"; then
 					pkgs="$pkgs docker-compose-plugin docker-ce-rootless-extras$pkg_version"
 				fi
+				# TODO(thaJeztah) remove the $CHANNEL check once 22.06 and docker-buildx-plugin is published to the "stable" channel
+				if [ "$CHANNEL" = "test" ] && version_gte "22.06"; then
+						pkgs="$pkgs docker-buildx-plugin"
+				fi
 				if ! is_dry_run; then
 					set -x
 				fi
@@ -615,6 +623,10 @@ do_install() {
 				fi
 				if version_gte "20.10"; then
 					pkgs="$pkgs docker-compose-plugin docker-ce-rootless-extras$pkg_version"
+				fi
+				# TODO(thaJeztah) remove the $CHANNEL check once 22.06 and docker-buildx-plugin is published to the "stable" channel
+				if [ "$CHANNEL" = "test" ] && version_gte "22.06"; then
+						pkgs="$pkgs docker-buildx-plugin"
 				fi
 				if ! is_dry_run; then
 					set -x
