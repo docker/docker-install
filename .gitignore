@@ -1,2 +1,3 @@
 *verify-install-*
 build/
+docker.sh
