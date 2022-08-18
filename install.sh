@@ -558,9 +558,14 @@ do_install() {
 				exit 1
 			fi
 
-			sles_version="${dist_version##*.}"
 			sles_repo="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
-			opensuse_repo="https://download.opensuse.org/repositories/security:SELinux/SLE_15_SP$sles_version/security:SELinux.repo"
+			if [ "$dist_version" = "15.3" ]; then
+				sles_version="SLE_15_SP3"
+			else
+				sles_minor_version="${dist_version##*.}"
+				sles_version="15.$sles_minor_version"
+			fi
+			opensuse_repo="https://download.opensuse.org/repositories/security:SELinux/$sles_version/security:SELinux.repo"
 			if ! curl -Ifs "$sles_repo" > /dev/null; then
 				echo "Error: Unable to curl repository file $sles_repo, is it valid?"
 				exit 1
