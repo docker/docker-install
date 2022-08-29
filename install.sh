@@ -465,11 +465,6 @@ do_install() {
 				echo "Packages for RHEL are currently only available for s390x."
 				exit 1
 			fi
-			yum_repo="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
-			if ! curl -Ifs "$yum_repo" > /dev/null; then
-				echo "Error: Unable to curl repository file $yum_repo, is it valid?"
-				exit 1
-			fi
 			if [ "$lsb_dist" = "fedora" ]; then
 				pkg_manager="dnf"
 				config_manager="dnf config-manager"
@@ -485,12 +480,13 @@ do_install() {
 				pre_reqs="yum-utils"
 				pkg_suffix="el"
 			fi
+			repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
 			(
 				if ! is_dry_run; then
 					set -x
 				fi
 				$sh_c "$pkg_manager install -y -q $pre_reqs"
-				$sh_c "$config_manager --add-repo $yum_repo"
+				$sh_c "$config_manager --add-repo $repo_file_url"
 
 				if [ "$CHANNEL" != "stable" ]; then
 					$sh_c "$config_manager $disable_channel_flag docker-ce-*"
@@ -557,8 +553,6 @@ do_install() {
 				echo "Packages for SLES are currently only available for s390x"
 				exit 1
 			fi
-
-			sles_repo="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
 			if [ "$dist_version" = "15.3" ]; then
 				sles_version="SLE_15_SP3"
 			else
@@ -566,17 +560,14 @@ do_install() {
 				sles_version="15.$sles_minor_version"
 			fi
 			opensuse_repo="https://download.opensuse.org/repositories/security:SELinux/$sles_version/security:SELinux.repo"
-			if ! curl -Ifs "$sles_repo" > /dev/null; then
-				echo "Error: Unable to curl repository file $sles_repo, is it valid?"
-				exit 1
-			fi
+			repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
 			pre_reqs="ca-certificates curl libseccomp2 awk"
 			(
 				if ! is_dry_run; then
 					set -x
 				fi
 				$sh_c "zypper install -y $pre_reqs"
-				$sh_c "zypper addrepo $sles_repo"
+				$sh_c "zypper addrepo $repo_file_url"
 				if ! is_dry_run; then
 						cat >&2 <<-'EOF'
 						WARNING!!
