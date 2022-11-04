@@ -1,7 +1,7 @@
 # docker/docker-install
 Home of the script that lives at `get.docker.com` and `test.docker.com`!
 
-The purpose of the install script is for a convenience for quickly
+The purpose of the install script is for the convenience of quickly
 installing the latest Docker-CE releases on the supported linux
 distros. It is not recommended to depend on this script for deployment
 to production systems. For more thorough instructions for installing
