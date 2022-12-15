@@ -244,7 +244,7 @@ check_forked() {
 				fi
 				dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
 				case "$dist_version" in
-					11)
+					11|12|bookworm)
 						dist_version="bullseye"
 					;;
 					10)
@@ -332,7 +332,7 @@ do_install() {
 		debian|raspbian)
 			dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
 			case "$dist_version" in
-				11)
+				11|12|bookworm)
 					dist_version="bullseye"
 				;;
 				10)
