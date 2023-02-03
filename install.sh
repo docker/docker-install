@@ -450,7 +450,7 @@ do_install() {
 				if ! is_dry_run; then
 					set -x
 				fi
-				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends $pkgs >/dev/null"
+				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq $pkgs >/dev/null"
 				if version_gte "20.10"; then
 					# Install docker-ce-rootless-extras without "--no-install-recommends", so as to install slirp4netns when available
 					$sh_c "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq docker-ce-rootless-extras${pkg_version%=} >/dev/null"
