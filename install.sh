@@ -437,12 +437,12 @@ do_install() {
 						# older versions didn't ship the cli and containerd as separate packages
 						pkgs="$pkgs docker-ce-cli${cli_pkg_version%=} containerd.io"
 				fi
-				if version_gte "20.10"; then
-						pkgs="$pkgs docker-compose-plugin"
-				fi
 				if version_gte "20.10" && [ "$(uname -m)" = "x86_64" ]; then
 						# also install the latest version of the "docker scan" cli-plugin (only supported on x86 currently)
 						pkgs="$pkgs docker-scan-plugin"
+				fi
+				if version_gte "20.10"; then
+						pkgs="$pkgs docker-compose-plugin docker-ce-rootless-extras$pkg_version"
 				fi
 				if version_gte "23.0"; then
 						pkgs="$pkgs docker-buildx-plugin"
@@ -451,10 +451,6 @@ do_install() {
 					set -x
 				fi
 				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq $pkgs >/dev/null"
-				if version_gte "20.10"; then
-					# Install docker-ce-rootless-extras without "--no-install-recommends", so as to install slirp4netns when available
-					$sh_c "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq docker-ce-rootless-extras${pkg_version%=} >/dev/null"
-				fi
 			)
 			echo_docker_as_nonroot
 			exit 0
