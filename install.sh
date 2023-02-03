@@ -599,10 +599,6 @@ do_install() {
 					# It's okay for cli_pkg_version to be blank, since older versions don't support a cli package
 					cli_pkg_version="$($sh_c "$search_command")"
 					pkg_version="-$pkg_version"
-
-					search_command="zypper search -s --match-exact 'docker-ce-rootless-extras' | grep '$pkg_pattern' | tail -1 | awk '{print \$6}'"
-					rootless_pkg_version="$($sh_c "$search_command")"
-					rootless_pkg_version="-$rootless_pkg_version"
 				fi
 			fi
 			(
