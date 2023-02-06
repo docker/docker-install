@@ -242,21 +242,7 @@ check_forked() {
 					# We're Debian and don't even know it!
 					lsb_dist=debian
 				fi
-				dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
-				case "$dist_version" in
-					11)
-						dist_version="bullseye"
-					;;
-					10)
-						dist_version="buster"
-					;;
-					9)
-						dist_version="stretch"
-					;;
-					8)
-						dist_version="jessie"
-					;;
-				esac
+				dist_version="$(sed -n 's/^VERSION_CODENAME=//p' < /etc/os-release )"
 			fi
 		fi
 	fi
@@ -330,21 +316,7 @@ do_install() {
 		;;
 
 		debian|raspbian)
-			dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
-			case "$dist_version" in
-				11)
-					dist_version="bullseye"
-				;;
-				10)
-					dist_version="buster"
-				;;
-				9)
-					dist_version="stretch"
-				;;
-				8)
-					dist_version="jessie"
-				;;
-			esac
+			dist_version="$(sed -n 's/^VERSION_CODENAME=//p' < /etc/os-release )"
 		;;
 
 		centos|rhel|sles)
