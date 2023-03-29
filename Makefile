@@ -1,4 +1,4 @@
-TEST_IMAGE?=ubuntu:18.04
+TEST_IMAGE?=ubuntu:22.04
 VERSION?=
 CHANNEL?=
 
