@@ -443,10 +443,6 @@ do_install() {
 						# older versions didn't ship the cli and containerd as separate packages
 						pkgs="$pkgs docker-ce-cli${cli_pkg_version%=} containerd.io"
 				fi
-				if version_gte "20.10" && [ "$(uname -m)" = "x86_64" ]; then
-						# also install the latest version of the "docker scan" cli-plugin (only supported on x86 currently)
-						pkgs="$pkgs docker-scan-plugin"
-				fi
 				if version_gte "20.10"; then
 						pkgs="$pkgs docker-compose-plugin docker-ce-rootless-extras$pkg_version"
 				fi
@@ -529,10 +525,6 @@ do_install() {
 					else
 						pkgs="$pkgs docker-ce-cli containerd.io"
 					fi
-				fi
-				if version_gte "20.10" && [ "$(uname -m)" = "x86_64" ]; then
-						# also install the latest version of the "docker scan" cli-plugin (only supported on x86 currently)
-						pkgs="$pkgs docker-scan-plugin"
 				fi
 				if version_gte "20.10"; then
 					pkgs="$pkgs docker-compose-plugin docker-ce-rootless-extras$pkg_version"
