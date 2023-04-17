@@ -12,8 +12,7 @@ jobs:
           - ubuntu:20.04
           - ubuntu:22.04
           - centos:7
-# FIXME(thaJeztah): re-enable once CentOS 9 package repositories are fixed.
-#          - quay.io/centos/centos:stream9
+          - quay.io/centos/centos:stream9
         version:
           - "20.10"
           - ""
