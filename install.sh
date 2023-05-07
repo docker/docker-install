@@ -55,6 +55,10 @@ while [ $# -gt 0 ]; do
 			mirror="$2"
 			shift
 			;;
+		--version)
+			VERSION="${2#v}"
+			shift
+			;;
 		--*)
 			echo "Illegal option $1"
 			;;
