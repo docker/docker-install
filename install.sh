@@ -560,7 +560,6 @@ do_install() {
 				sles_minor_version="${dist_version##*.}"
 				sles_version="15.$sles_minor_version"
 			fi
-			opensuse_repo="https://download.opensuse.org/repositories/security:SELinux/$sles_version/security:SELinux.repo"
 			repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
 			pre_reqs="ca-certificates curl libseccomp2 awk"
 			(
@@ -578,6 +577,7 @@ do_install() {
 						EOF
 						( set -x; sleep 30 )
 				fi
+				opensuse_repo="https://download.opensuse.org/repositories/security:SELinux/$sles_version/security:SELinux.repo"
 				$sh_c "zypper addrepo $opensuse_repo"
 				$sh_c "zypper --gpg-auto-import-keys refresh"
 				$sh_c "zypper lr -d"
