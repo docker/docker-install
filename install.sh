@@ -321,7 +321,7 @@ do_install() {
 	if is_wsl; then
 		echo
 		echo "WSL DETECTED: We recommend using Docker Desktop for Windows."
-		echo "Please get Docker Desktop from https://www.docker.com/products/docker-desktop"
+		echo "Please get Docker Desktop from https://www.docker.com/products/docker-desktop/"
 		echo
 		cat >&2 <<-'EOF'
 
