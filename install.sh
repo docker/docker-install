@@ -25,10 +25,10 @@ SCRIPT_COMMIT_SHA="${LOAD_SCRIPT_COMMIT_SHA}"
 VERSION="${VERSION#v}"
 
 # The channel to install from:
-#   * nightly
-#   * test
 #   * stable
+#   * test
 #   * edge (deprecated)
+#   * nightly (unmaintained)
 DEFAULT_CHANNEL_VALUE="stable"
 if [ -z "$CHANNEL" ]; then
 	CHANNEL=$DEFAULT_CHANNEL_VALUE
@@ -68,6 +68,19 @@ case "$mirror" in
 		;;
 	AzureChinaCloud)
 		DOWNLOAD_URL="https://mirror.azure.cn/docker-ce"
+		;;
+esac
+
+case "$CHANNEL" in
+	stable|test)
+		;;
+	edge|nightly)
+		>&2 echo "DEPRECATED: the $CHANNEL channel has been deprecated and no longer supported by this script."
+		exit 1
+		;;
+	*)
+		>&2 echo "unknown CHANNEL '$CHANNEL': use either stable or test."
+		exit 1
 		;;
 esac
 
