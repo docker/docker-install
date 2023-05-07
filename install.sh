@@ -495,8 +495,8 @@ do_install() {
 				$sh_c "$config_manager --add-repo $repo_file_url"
 
 				if [ "$CHANNEL" != "stable" ]; then
-					$sh_c "$config_manager $disable_channel_flag docker-ce-*"
-					$sh_c "$config_manager $enable_channel_flag docker-ce-$CHANNEL"
+					$sh_c "$config_manager $disable_channel_flag 'docker-ce-*'"
+					$sh_c "$config_manager $enable_channel_flag 'docker-ce-$CHANNEL'"
 				fi
 				$sh_c "$pkg_manager makecache"
 			)
