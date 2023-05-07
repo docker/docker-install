@@ -48,6 +48,10 @@ mirror=''
 DRY_RUN=${DRY_RUN:-}
 while [ $# -gt 0 ]; do
 	case "$1" in
+		--channel)
+			CHANNEL="$2"
+			shift
+			;;
 		--dry-run)
 			DRY_RUN=1
 			;;
