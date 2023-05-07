@@ -75,14 +75,15 @@ command_exists() {
 	command -v "$@" > /dev/null 2>&1
 }
 
-# version_gte checks if the version specified in $VERSION is at least
-# the given CalVer (YY.MM) version. returns 0 (success) if $VERSION is either
-# unset (=latest) or newer or equal than the specified version. Returns 1 (fail)
-# otherwise.
+# version_gte checks if the version specified in $VERSION is at least the given
+# SemVer (Maj.Minor[.Patch]), or CalVer (YY.MM) version.It returns 0 (success)
+# if $VERSION is either unset (=latest) or newer or equal than the specified
+# version, or returns 1 (fail) otherwise.
 #
 # examples:
 #
-# VERSION=20.10
+# VERSION=23.0
+# version_gte 23.0  // 0 (success)
 # version_gte 20.10 // 0 (success)
 # version_gte 19.03 // 0 (success)
 # version_gte 21.10 // 1 (fail)
@@ -90,19 +91,22 @@ version_gte() {
 	if [ -z "$VERSION" ]; then
 			return 0
 	fi
-	eval calver_compare "$VERSION" "$1"
+	eval version_compare "$VERSION" "$1"
 }
 
-# calver_compare compares two CalVer (YY.MM) version strings. returns 0 (success)
-# if version A is newer or equal than version B, or 1 (fail) otherwise. Patch
-# releases and pre-release (-alpha/-beta) are not taken into account
+# version_compare compares two version strings (either SemVer (Major.Minor.Path),
+# or CalVer (YY.MM) version strings. It returns 0 (success) if version A is newer
+# or equal than version B, or 1 (fail) otherwise. Patch releases and pre-release
+# (-alpha/-beta) are not taken into account
 #
 # examples:
 #
-# calver_compare 20.10 19.03 // 0 (success)
-# calver_compare 20.10 20.10 // 0 (success)
-# calver_compare 19.03 20.10 // 1 (fail)
-calver_compare() (
+# version_compare 23.0.0 20.10 // 0 (success)
+# version_compare 23.0 20.10   // 0 (success)
+# version_compare 20.10 19.03  // 0 (success)
+# version_compare 20.10 20.10  // 0 (success)
+# version_compare 19.03 20.10  // 1 (fail)
+version_compare() (
 	set +x
 
 	yy_a="$(echo "$1" | cut -d'.' -f1)"
@@ -115,7 +119,12 @@ calver_compare() (
 	fi
 	mm_a="$(echo "$1" | cut -d'.' -f2)"
 	mm_b="$(echo "$2" | cut -d'.' -f2)"
-	if [ "${mm_a#0}" -lt "${mm_b#0}" ]; then
+
+	# trim leading zeros to accommodate CalVer
+	mm_a="${mm_a#0}"
+	mm_b="${mm_b#0}"
+
+	if [ "${mm_a:-0}" -lt "${mm_b:-0}" ]; then
 		return 1
 	fi
 
