@@ -48,12 +48,12 @@ mirror=''
 DRY_RUN=${DRY_RUN:-}
 while [ $# -gt 0 ]; do
 	case "$1" in
+		--dry-run)
+			DRY_RUN=1
+			;;
 		--mirror)
 			mirror="$2"
 			shift
-			;;
-		--dry-run)
-			DRY_RUN=1
 			;;
 		--*)
 			echo "Illegal option $1"
@@ -68,6 +68,12 @@ case "$mirror" in
 		;;
 	AzureChinaCloud)
 		DOWNLOAD_URL="https://mirror.azure.cn/docker-ce"
+		;;
+	"")
+		;;
+	*)
+		>&2 echo "unknown mirror '$mirror': use either 'Aliyun', or 'AzureChinaCloud'."
+		exit 1
 		;;
 esac
 
