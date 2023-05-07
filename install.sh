@@ -394,6 +394,9 @@ do_install() {
 		ubuntu.xenial|ubuntu.trusty)
 			deprecation_notice "$lsb_dist" "$dist_version"
 			;;
+		ubuntu.impish|ubuntu.hirsute|ubuntu.groovy|ubuntu.eoan|ubuntu.disco|ubuntu.cosmic)
+			deprecation_notice "$lsb_dist" "$dist_version"
+			;;
 		fedora.*)
 			if [ "$dist_version" -lt 36 ]; then
 				deprecation_notice "$lsb_dist" "$dist_version"
