@@ -67,11 +67,11 @@ set -e
 # Alternatively, use the script at https://test.docker.com, which uses the test
 # channel as default.
 #
-# --mirror <Aliyun|AzureChinaCloud>
+# --mirror <Aliyun|AzureChinaCloud|azure-cn>
 #
 # Use the --mirror option to install from a mirror supported by this script.
 # Available mirrors are "Aliyun" (https://mirrors.aliyun.com/docker-ce), and
-# "AzureChinaCloud" (https://mirror.azure.cn/docker-ce), for example:
+# "AzureChinaCloud | azure-cn" (https://mirror.azure.cn/docker-ce), for example:
 #
 #   $ sudo sh install-docker.sh --mirror AzureChinaCloud
 #
@@ -135,7 +135,7 @@ case "$mirror" in
 	Aliyun)
 		DOWNLOAD_URL="https://mirrors.aliyun.com/docker-ce"
 		;;
-	AzureChinaCloud)
+	AzureChinaCloud | azure-cn)
 		DOWNLOAD_URL="https://mirror.azure.cn/docker-ce"
 		;;
 	"")
