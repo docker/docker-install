@@ -89,7 +89,7 @@ VERSION="${VERSION#v}"
 #   * stable
 #   * test
 #   * edge (deprecated)
-#   * nightly (unmaintained)
+#   * nightly (deprecated)
 DEFAULT_CHANNEL_VALUE="stable"
 if [ -z "$CHANNEL" ]; then
 	CHANNEL=$DEFAULT_CHANNEL_VALUE
@@ -150,7 +150,7 @@ case "$CHANNEL" in
 	stable|test)
 		;;
 	edge|nightly)
-		>&2 echo "DEPRECATED: the $CHANNEL channel has been deprecated and no longer supported by this script."
+		>&2 echo "DEPRECATED: the $CHANNEL channel has been deprecated and is no longer supported by this script."
 		exit 1
 		;;
 	*)

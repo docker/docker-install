@@ -21,9 +21,9 @@ SCRIPT_COMMIT_SHA=UNKNOWN
 # This script should be run with an unprivileged user and install/setup Docker under $HOME/bin/.
 
 # The channel to install from:
-#   * nightly
 #   * test
 #   * stable
+#   * nightly (deprecated)
 DEFAULT_CHANNEL_VALUE="stable"
 if [ -z "$CHANNEL" ]; then
 	CHANNEL=$DEFAULT_CHANNEL_VALUE
@@ -45,12 +45,10 @@ case "$CHANNEL" in
         STATIC_RELEASE_ROOTLESS_URL="https://download.docker.com/linux/static/$CHANNEL/$(uname -m)/docker-rootless-extras-${TEST_LATEST}.tgz"
         ;;
     "nightly")
-        echo "# Installing nightly"
-        STATIC_RELEASE_URL="https://master.dockerproject.org/linux/$(uname -m)/docker.tgz"
-        STATIC_RELEASE_ROOTLESS_URL="https://master.dockerproject.org/linux/$(uname -m)/docker-rootless-extras.tgz"
+        >&2 echo "DEPRECATED: the nightly channel has been deprecated and is no longer supported by this script."; exit 1
         ;;
     *)
-        >&2 echo "Aborting because of unknown CHANNEL \"$CHANNEL\". Set \$CHANNEL to either \"stable\", \"test\", or \"nightly\"."; exit 1
+        >&2 echo "Aborting because of unknown CHANNEL \"$CHANNEL\". Set \$CHANNEL to either \"stable\" or \"test\"."; exit 1
         ;;
 esac
 
