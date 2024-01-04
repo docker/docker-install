@@ -450,7 +450,7 @@ do_install() {
 			esac
 		;;
 
-		centos|rhel|sles)
+		centos|rhel)
 			if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
 				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
 			fi
@@ -645,12 +645,6 @@ do_install() {
 				echo "Packages for SLES are currently only available for s390x"
 				exit 1
 			fi
-			if [ "$dist_version" = "15.3" ]; then
-				sles_version="SLE_15_SP3"
-			else
-				sles_minor_version="${dist_version##*.}"
-				sles_version="15.$sles_minor_version"
-			fi
 			repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
 			pre_reqs="ca-certificates curl libseccomp2 awk"
 			(
@@ -662,13 +656,13 @@ do_install() {
 				if ! is_dry_run; then
 						cat >&2 <<-'EOF'
 						WARNING!!
-						openSUSE repository (https://download.opensuse.org/repositories/security:SELinux) will be enabled now.
+						openSUSE repository (https://download.opensuse.org/repositories/security:/SELinux) will be enabled now.
 						Do you wish to continue?
 						You may press Ctrl+C now to abort this script.
 						EOF
 						( set -x; sleep 30 )
 				fi
-				opensuse_repo="https://download.opensuse.org/repositories/security:SELinux/$sles_version/security:SELinux.repo"
+				opensuse_repo="https://download.opensuse.org/repositories/security:/SELinux/openSUSE_Factory/security:SELinux.repo"
 				$sh_c "zypper addrepo $opensuse_repo"
 				$sh_c "zypper --gpg-auto-import-keys refresh"
 				$sh_c "zypper lr -d"
