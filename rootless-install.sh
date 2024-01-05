@@ -30,7 +30,7 @@ if [ -z "$CHANNEL" ]; then
 fi
 # The latest release is currently hard-coded.
 STABLE_LATEST="24.0.7"
-TEST_LATEST="25.0.0-beta.1"
+TEST_LATEST="25.0.0-rc.1"
 STATIC_RELEASE_URL=
 STATIC_RELEASE_ROOTLESS_URL=
 case "$CHANNEL" in
