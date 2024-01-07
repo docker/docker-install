@@ -301,7 +301,12 @@ echo_docker_as_nonroot() {
 	echo "         documentation for details: https://docs.docker.com/go/attack-surface/"
 	echo
 	echo "================================================================================"
-	echo
+	echo 
+	echo "Hint: You might want to grant Docker access to the current user by executing:"
+	echo 
+	echo '         sudo usermod -aG docker $USER'
+	echo 
+	echo "================================================================================"
 }
 
 # Check if this is a forked Linux distro
