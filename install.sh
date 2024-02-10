@@ -559,19 +559,24 @@ do_install() {
 				echo "Packages for RHEL are currently only available for s390x."
 				exit 1
 			fi
-			if [ "$lsb_dist" = "fedora" ]; then
+
+			if command_exists dnf; then
 				pkg_manager="dnf"
 				config_manager="dnf config-manager"
 				enable_channel_flag="--set-enabled"
 				disable_channel_flag="--set-disabled"
 				pre_reqs="dnf-plugins-core"
-				pkg_suffix="fc$dist_version"
 			else
 				pkg_manager="yum"
 				config_manager="yum-config-manager"
 				enable_channel_flag="--enable"
 				disable_channel_flag="--disable"
 				pre_reqs="yum-utils"
+			fi
+
+			if [ "$lsb_dist" = "fedora" ]; then
+				pkg_suffix="fc$dist_version"
+			else
 				pkg_suffix="el"
 			fi
 			repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
