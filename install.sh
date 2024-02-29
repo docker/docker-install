@@ -559,19 +559,26 @@ do_install() {
 				echo "Packages for RHEL are currently only available for s390x."
 				exit 1
 			fi
-			if [ "$lsb_dist" = "fedora" ]; then
+
+			if command_exists dnf; then
 				pkg_manager="dnf"
+				pkg_manager_flags="--best"
 				config_manager="dnf config-manager"
 				enable_channel_flag="--set-enabled"
 				disable_channel_flag="--set-disabled"
 				pre_reqs="dnf-plugins-core"
-				pkg_suffix="fc$dist_version"
 			else
 				pkg_manager="yum"
+				pkg_manager_flags=""
 				config_manager="yum-config-manager"
 				enable_channel_flag="--enable"
 				disable_channel_flag="--disable"
 				pre_reqs="yum-utils"
+			fi
+
+			if [ "$lsb_dist" = "fedora" ]; then
+				pkg_suffix="fc$dist_version"
+			else
 				pkg_suffix="el"
 			fi
 			repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
@@ -579,7 +586,7 @@ do_install() {
 				if ! is_dry_run; then
 					set -x
 				fi
-				$sh_c "$pkg_manager install -y -q $pre_reqs"
+				$sh_c "$pkg_manager $pkg_manager_flags install -y -q $pre_reqs"
 				$sh_c "$config_manager --add-repo $repo_file_url"
 
 				if [ "$CHANNEL" != "stable" ]; then
@@ -632,7 +639,7 @@ do_install() {
 				if ! is_dry_run; then
 					set -x
 				fi
-				$sh_c "$pkg_manager install -y -q $pkgs"
+				$sh_c "$pkg_manager $pkg_manager_flags install -y -q $pkgs"
 			)
 			echo_docker_as_nonroot
 			exit 0
