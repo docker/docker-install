@@ -562,12 +562,14 @@ do_install() {
 
 			if command_exists dnf; then
 				pkg_manager="dnf"
+				pkg_manager_flags="--best"
 				config_manager="dnf config-manager"
 				enable_channel_flag="--set-enabled"
 				disable_channel_flag="--set-disabled"
 				pre_reqs="dnf-plugins-core"
 			else
 				pkg_manager="yum"
+				pkg_manager_flags=""
 				config_manager="yum-config-manager"
 				enable_channel_flag="--enable"
 				disable_channel_flag="--disable"
@@ -584,7 +586,7 @@ do_install() {
 				if ! is_dry_run; then
 					set -x
 				fi
-				$sh_c "$pkg_manager install -y -q $pre_reqs"
+				$sh_c "$pkg_manager $pkg_manager_flags install -y -q $pre_reqs"
 				$sh_c "$config_manager --add-repo $repo_file_url"
 
 				if [ "$CHANNEL" != "stable" ]; then
@@ -637,7 +639,7 @@ do_install() {
 				if ! is_dry_run; then
 					set -x
 				fi
-				$sh_c "$pkg_manager install -y -q $pkgs"
+				$sh_c "$pkg_manager $pkg_manager_flags install -y -q $pkgs"
 			)
 			echo_docker_as_nonroot
 			exit 0
