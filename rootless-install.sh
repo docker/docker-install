@@ -21,7 +21,7 @@ SCRIPT_COMMIT_SHA=UNKNOWN
 # This script should be run with an unprivileged user and install/setup Docker under $HOME/bin/.
 
 # The latest release is currently hard-coded.
-STABLE_LATEST="25.0.5"
+STABLE_LATEST="26.0.0"
 
 # The channel to install from:
 #   * test
