@@ -20,6 +20,9 @@ SCRIPT_COMMIT_SHA=UNKNOWN
 
 # This script should be run with an unprivileged user and install/setup Docker under $HOME/bin/.
 
+# The latest release is currently hard-coded.
+STABLE_LATEST="25.0.5"
+
 # The channel to install from:
 #   * test
 #   * stable
@@ -28,9 +31,10 @@ DEFAULT_CHANNEL_VALUE="stable"
 if [ -z "$CHANNEL" ]; then
 	CHANNEL=$DEFAULT_CHANNEL_VALUE
 fi
-# The latest release is currently hard-coded.
-STABLE_LATEST="25.0.5"
+
+# The test release is currently hard-coded.
 TEST_LATEST="26.0.0-rc3"
+
 STATIC_RELEASE_URL=
 STATIC_RELEASE_ROOTLESS_URL=
 case "$CHANNEL" in
