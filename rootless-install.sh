@@ -29,7 +29,7 @@ if [ -z "$CHANNEL" ]; then
 	CHANNEL=$DEFAULT_CHANNEL_VALUE
 fi
 # The latest release is currently hard-coded.
-STABLE_LATEST="25.0.4"
+STABLE_LATEST="25.0.5"
 TEST_LATEST="26.0.0-rc2"
 STATIC_RELEASE_URL=
 STATIC_RELEASE_ROOTLESS_URL=
