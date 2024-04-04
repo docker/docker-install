@@ -10,7 +10,7 @@ set -e
 #   $ sh get-docker.sh
 #
 # NOTE: Make sure to verify the contents of the script
-#       you downloaded matches the contents of install.sh
+#       you downloaded matches the contents of rootless-install.sh
 #       located at https://github.com/docker/docker-install
 #       before executing.
 #
@@ -234,7 +234,7 @@ do_install() {
 
 	tmp=$(mktemp -d)
 	trap 'rm -rf "$tmp"' EXIT INT TERM
-	# Download tarballs docker-* and docker-rootless-extras=*
+	# Download tarballs docker-* and docker-rootless-extras-*
 	(
 		cd "$tmp"
 		curl -L -o docker.tgz "$STATIC_RELEASE_URL"
