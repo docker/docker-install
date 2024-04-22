@@ -139,7 +139,7 @@ case "$mirror" in
 		DOWNLOAD_URL="https://mirror.azure.cn/docker-ce"
 		;;
   	TencentCloud)
-		DOWNLOAD_URL="https://mirror.cloud.tencent.com/docker-ce"
+		DOWNLOAD_URL="https://mirrors.cloud.tencent.com/docker-ce"
 		;;
 	"")
 		;;
