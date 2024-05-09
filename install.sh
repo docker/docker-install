@@ -174,7 +174,7 @@ command_exists() {
 # version_gte 23.0  // 0 (success)
 # version_gte 20.10 // 0 (success)
 # version_gte 19.03 // 0 (success)
-# version_gte 21.10 // 1 (fail)
+# version_gte 26.1  // 1 (fail)
 version_gte() {
 	if [ -z "$VERSION" ]; then
 			return 0
