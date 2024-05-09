@@ -179,7 +179,7 @@ version_gte() {
 	if [ -z "$VERSION" ]; then
 			return 0
 	fi
-	eval version_compare "$VERSION" "$1"
+	version_compare "$VERSION" "$1"
 }
 
 # version_compare compares two version strings (either SemVer (Major.Minor.Path),
