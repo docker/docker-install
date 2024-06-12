@@ -33,7 +33,7 @@ if [ -z "$CHANNEL" ]; then
 fi
 
 # The test release is currently hard-coded.
-TEST_LATEST="26.1.4"
+TEST_LATEST="27.0.0-rc.1"
 
 STATIC_RELEASE_URL=
 STATIC_RELEASE_ROOTLESS_URL=
