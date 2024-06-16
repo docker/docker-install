@@ -108,6 +108,9 @@ fi
 mirror=''
 DRY_RUN=${DRY_RUN:-}
 
+# Provide a helpful usage statement when --help or any invalid argument is passed
+# to the script. Exit code deliberately not included here as error depends on
+# argument provided.
 usage() {
 	echo
 	echo "USAGE: "
