@@ -107,6 +107,14 @@ fi
 
 mirror=''
 DRY_RUN=${DRY_RUN:-}
+
+usage() {
+	echo
+	echo "USAGE: "
+	echo "    ${0} [--channel <stable|test>] [--mirror <Aliyun|AzureChinaCloud>] [--version <VERSION>] [--dry-run] [--help]"
+	echo
+}
+
 while [ $# -gt 0 ]; do
 	case "$1" in
 		--channel)
@@ -124,8 +132,13 @@ while [ $# -gt 0 ]; do
 			VERSION="${2#v}"
 			shift
 			;;
+		--help)
+			usage
+			exit 0
+			;;
 		--*)
 			echo "Illegal option $1"
+			usage
 			exit 1
 			;;
 	esac
