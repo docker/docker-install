@@ -473,6 +473,9 @@ do_install() {
 	# Print deprecation warnings for distro versions that recently reached EOL,
 	# but may still be commonly used (especially LTS versions).
 	case "$lsb_dist.$dist_version" in
+		centos.7|rhel.7)
+			deprecation_notice "$lsb_dist" "$dist_version"
+			;;
 		debian.stretch|debian.jessie)
 			deprecation_notice "$lsb_dist" "$dist_version"
 			;;
