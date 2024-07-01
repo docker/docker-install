@@ -88,8 +88,6 @@ VERSION="${VERSION#v}"
 # The channel to install from:
 #   * stable
 #   * test
-#   * edge (deprecated)
-#   * nightly (deprecated)
 DEFAULT_CHANNEL_VALUE="stable"
 if [ -z "$CHANNEL" ]; then
 	CHANNEL=$DEFAULT_CHANNEL_VALUE
@@ -148,10 +146,6 @@ esac
 
 case "$CHANNEL" in
 	stable|test)
-		;;
-	edge|nightly)
-		>&2 echo "DEPRECATED: the $CHANNEL channel has been deprecated and is no longer supported by this script."
-		exit 1
 		;;
 	*)
 		>&2 echo "unknown CHANNEL '$CHANNEL': use either stable or test."

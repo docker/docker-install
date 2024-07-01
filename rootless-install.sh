@@ -26,7 +26,6 @@ STABLE_LATEST="27.0.3"
 # The channel to install from:
 #   * test
 #   * stable
-#   * nightly (deprecated)
 DEFAULT_CHANNEL_VALUE="stable"
 if [ -z "$CHANNEL" ]; then
 	CHANNEL=$DEFAULT_CHANNEL_VALUE
@@ -48,11 +47,9 @@ case "$CHANNEL" in
         STATIC_RELEASE_URL="https://download.docker.com/linux/static/$CHANNEL/$(uname -m)/docker-${TEST_LATEST}.tgz"
         STATIC_RELEASE_ROOTLESS_URL="https://download.docker.com/linux/static/$CHANNEL/$(uname -m)/docker-rootless-extras-${TEST_LATEST}.tgz"
         ;;
-    "nightly")
-        >&2 echo "DEPRECATED: the nightly channel has been deprecated and is no longer supported by this script."; exit 1
-        ;;
     *)
-        >&2 echo "Aborting because of unknown CHANNEL \"$CHANNEL\". Set \$CHANNEL to either \"stable\" or \"test\"."; exit 1
+        >&2 echo "Aborting because of unknown CHANNEL \"$CHANNEL\". Set \$CHANNEL to either \"stable\" or \"test\"."
+        exit 1
         ;;
 esac
 
