@@ -11,10 +11,10 @@ jobs:
         os:
           - ubuntu:20.04
           - ubuntu:22.04
-          - centos:7
+          - ubuntu:24.04
           - quay.io/centos/centos:stream9
         version:
-          - "20.10"
+          - "26.1"
           - ""
 
     steps:
