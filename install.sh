@@ -476,7 +476,7 @@ do_install() {
 		raspbian.stretch|raspbian.jessie)
 			deprecation_notice "$lsb_dist" "$dist_version"
 			;;
-		ubuntu.xenial|ubuntu.trusty)
+		ubuntu.bionic|ubuntu.xenial|ubuntu.trusty)
 			deprecation_notice "$lsb_dist" "$dist_version"
 			;;
 		ubuntu.lunar|ubuntu.kinetic|ubuntu.impish|ubuntu.hirsute|ubuntu.groovy|ubuntu.eoan|ubuntu.disco|ubuntu.cosmic)
