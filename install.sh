@@ -470,10 +470,10 @@ do_install() {
 		centos.7|rhel.7)
 			deprecation_notice "$lsb_dist" "$dist_version"
 			;;
-		debian.stretch|debian.jessie)
+		debian.buster|debian.stretch|debian.jessie)
 			deprecation_notice "$lsb_dist" "$dist_version"
 			;;
-		raspbian.stretch|raspbian.jessie)
+		raspbian.buster|raspbian.stretch|raspbian.jessie)
 			deprecation_notice "$lsb_dist" "$dist_version"
 			;;
 		ubuntu.bionic|ubuntu.xenial|ubuntu.trusty)
