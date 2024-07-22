@@ -552,11 +552,6 @@ do_install() {
 			exit 0
 			;;
 		centos|fedora|rhel)
-			if [ "$(uname -m)" != "s390x" ] && [ "$lsb_dist" = "rhel" ]; then
-				echo "Packages for RHEL are currently only available for s390x."
-				exit 1
-			fi
-
 			if command_exists dnf; then
 				pkg_manager="dnf"
 				pkg_manager_flags="--best"
