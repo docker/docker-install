@@ -127,8 +127,8 @@ checks() {
 
 	# uidmap dependency check
 	if ! command -v newuidmap >/dev/null 2>&1; then
-		if command -v apt-get >/dev/null 2>&1; then
-			INSTRUCTIONS="apt-get install -y uidmap"
+		if command -v apt-get -o DPkg::Lock::Timeout=60 >/dev/null 2>&1; then
+			INSTRUCTIONS="apt-get -o DPkg::Lock::Timeout=60 install -y uidmap"
 		elif command -v dnf >/dev/null 2>&1; then
 			INSTRUCTIONS="dnf install -y shadow-utils"
 		elif command -v yum >/dev/null 2>&1; then
@@ -142,9 +142,9 @@ yum install -y shadow-utils46-newxidmap"
 
 	# iptables dependency check
 	if [ -z "$SKIP_IPTABLES" ] && ! command -v iptables >/dev/null 2>&1 && [ ! -f /sbin/iptables ] && [ ! -f /usr/sbin/iptables ]; then
-		if command -v apt-get >/dev/null 2>&1; then
+		if command -v apt-get -o DPkg::Lock::Timeout=60 >/dev/null 2>&1; then
 			INSTRUCTIONS="${INSTRUCTIONS}
-apt-get install -y iptables"
+apt-get -o DPkg::Lock::Timeout=60 install -y iptables"
 		elif command -v dnf >/dev/null 2>&1; then
 			INSTRUCTIONS="${INSTRUCTIONS}
 dnf install -y iptables"
