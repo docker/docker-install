@@ -558,7 +558,7 @@ do_install() {
 					set -x
 				fi
 				if command_exists dnf5; then
-					$sh_c "dnf -y -q install dnf-plugins-core"
+					$sh_c "dnf -y -q --setopt=install_weak_deps=False install dnf-plugins-core"
 					$sh_c	"dnf5 config-manager addrepo --save-filename=docker-ce.repo --from-repofile='$repo_file_url'"
 
 					if [ "$CHANNEL" != "stable" ]; then
@@ -567,7 +567,7 @@ do_install() {
 					fi
 					$sh_c "dnf makecache"
 				elif command_exists dnf; then
-					$sh_c "dnf -y -q install dnf-plugins-core"
+					$sh_c "dnf -y -q --setopt=install_weak_deps=False install dnf-plugins-core"
 					$sh_c "dnf config-manager --add-repo $repo_file_url"
 
 					if [ "$CHANNEL" != "stable" ]; then
