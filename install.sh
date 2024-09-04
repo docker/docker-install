@@ -552,46 +552,57 @@ do_install() {
 			exit 0
 			;;
 		centos|fedora|rhel)
-			if command_exists dnf; then
-				pkg_manager="dnf"
-				pkg_manager_flags="-y -q --best"
-				config_manager="dnf config-manager"
-				enable_channel_flag="--set-enabled"
-				disable_channel_flag="--set-disabled"
-				pre_reqs="dnf-plugins-core"
-			else
-				pkg_manager="yum"
-				pkg_manager_flags="-y -q"
-				config_manager="yum-config-manager"
-				enable_channel_flag="--enable"
-				disable_channel_flag="--disable"
-				pre_reqs="yum-utils"
-			fi
-
-			if [ "$lsb_dist" = "fedora" ]; then
-				pkg_suffix="fc$dist_version"
-			else
-				pkg_suffix="el"
-			fi
 			repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
 			(
 				if ! is_dry_run; then
 					set -x
 				fi
-				$sh_c "$pkg_manager $pkg_manager_flags install $pre_reqs"
-				$sh_c "$config_manager --add-repo $repo_file_url"
+				if command_exists dnf5; then
+					$sh_c "dnf -y -q install dnf-plugins-core"
+					$sh_c	"dnf5 config-manager addrepo --save-filename=docker-ce.repo --from-repofile='$repo_file_url'"
 
-				if [ "$CHANNEL" != "stable" ]; then
-					$sh_c "$config_manager $disable_channel_flag 'docker-ce-*'"
-					$sh_c "$config_manager $enable_channel_flag 'docker-ce-$CHANNEL'"
+					if [ "$CHANNEL" != "stable" ]; then
+						$sh_c "dnf5 config-manager setopt 'docker-ce-*.enabled=0'"
+						$sh_c "dnf5 config-manager setopt 'docker-ce-$CHANNEL.enabled=1'"
+					fi
+					$sh_c "dnf makecache"
+				elif command_exists dnf; then
+					$sh_c "dnf -y -q install dnf-plugins-core"
+					$sh_c "dnf config-manager --add-repo $repo_file_url"
+
+					if [ "$CHANNEL" != "stable" ]; then
+						$sh_c "dnf config-manager --set-disabled 'docker-ce-*'"
+						$sh_c "dnf config-manager --set-enabled 'docker-ce-$CHANNEL'"
+					fi
+					$sh_c "dnf makecache"
+				else
+					$sh_c "yum -y -q install yum-utils"
+					$sh_c "yum config-manager --add-repo $repo_file_url"
+
+					if [ "$CHANNEL" != "stable" ]; then
+						$sh_c "yum config-manager --disable 'docker-ce-*'"
+						$sh_c "yum config-manager --enable 'docker-ce-$CHANNEL'"
+					fi
+					$sh_c "yum makecache"
 				fi
-				$sh_c "$pkg_manager makecache"
 			)
 			pkg_version=""
+			if command_exists dnf; then
+				pkg_manager="dnf"
+				pkg_manager_flags="-y -q --best"
+			else
+				pkg_manager="yum"
+				pkg_manager_flags="-y -q"
+			fi
 			if [ -n "$VERSION" ]; then
 				if is_dry_run; then
 					echo "# WARNING: VERSION pinning is not supported in DRY_RUN"
 				else
+					if [ "$lsb_dist" = "fedora" ]; then
+						pkg_suffix="fc$dist_version"
+					else
+						pkg_suffix="el"
+					fi
 					pkg_pattern="$(echo "$VERSION" | sed 's/-ce-/\\\\.ce.*/g' | sed 's/-/.*/g').*$pkg_suffix"
 					search_command="$pkg_manager list --showduplicates docker-ce | grep '$pkg_pattern' | tail -1 | awk '{print \$2}'"
 					pkg_version="$($sh_c "$search_command")"
