@@ -130,10 +130,10 @@ checks() {
 		if command -v apt-get >/dev/null 2>&1; then
 			INSTRUCTIONS="apt-get install -y uidmap"
 		elif command -v dnf >/dev/null 2>&1; then
-			INSTRUCTIONS="dnf install -y shadow-utils"
+			INSTRUCTIONS="dnf -y install shadow-utils"
 		elif command -v yum >/dev/null 2>&1; then
 			INSTRUCTIONS="curl -o /etc/yum.repos.d/vbatts-shadow-utils-newxidmap-epel-7.repo https://copr.fedorainfracloud.org/coprs/vbatts/shadow-utils-newxidmap/repo/epel-7/vbatts-shadow-utils-newxidmap-epel-7.repo
-yum install -y shadow-utils46-newxidmap"
+yum -y install shadow-utils46-newxidmap"
 		else
 			echo "newuidmap binary not found. Please install with a package manager."
 			exit 1
@@ -147,7 +147,7 @@ yum install -y shadow-utils46-newxidmap"
 apt-get install -y iptables"
 		elif command -v dnf >/dev/null 2>&1; then
 			INSTRUCTIONS="${INSTRUCTIONS}
-dnf install -y iptables"
+dnf -y install iptables"
 		else
 			echo "iptables binary not found. Please install with a package manager."
 			exit 1
