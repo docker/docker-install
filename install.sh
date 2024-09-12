@@ -498,13 +498,13 @@ do_install() {
 				if ! is_dry_run; then
 					set -x
 				fi
-				$sh_c 'apt-get update -qq >/dev/null'
-				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq $pre_reqs >/dev/null"
+				$sh_c 'apt-get -qq update >/dev/null'
+				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get -y -qq install $pre_reqs >/dev/null"
 				$sh_c 'install -m 0755 -d /etc/apt/keyrings'
 				$sh_c "curl -fsSL \"$DOWNLOAD_URL/linux/$lsb_dist/gpg\" -o /etc/apt/keyrings/docker.asc"
 				$sh_c "chmod a+r /etc/apt/keyrings/docker.asc"
 				$sh_c "echo \"$apt_repo\" > /etc/apt/sources.list.d/docker.list"
-				$sh_c 'apt-get update -qq >/dev/null'
+				$sh_c 'apt-get -qq update >/dev/null'
 			)
 			pkg_version=""
 			if [ -n "$VERSION" ]; then
@@ -546,52 +546,70 @@ do_install() {
 				if ! is_dry_run; then
 					set -x
 				fi
-				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq $pkgs >/dev/null"
+				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get -y -qq install $pkgs >/dev/null"
 			)
 			echo_docker_as_nonroot
 			exit 0
 			;;
 		centos|fedora|rhel)
-			if command_exists dnf; then
-				pkg_manager="dnf"
-				pkg_manager_flags="--best"
-				config_manager="dnf config-manager"
-				enable_channel_flag="--set-enabled"
-				disable_channel_flag="--set-disabled"
-				pre_reqs="dnf-plugins-core"
-			else
-				pkg_manager="yum"
-				pkg_manager_flags=""
-				config_manager="yum-config-manager"
-				enable_channel_flag="--enable"
-				disable_channel_flag="--disable"
-				pre_reqs="yum-utils"
-			fi
-
-			if [ "$lsb_dist" = "fedora" ]; then
-				pkg_suffix="fc$dist_version"
-			else
-				pkg_suffix="el"
-			fi
 			repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
 			(
 				if ! is_dry_run; then
 					set -x
 				fi
-				$sh_c "$pkg_manager $pkg_manager_flags install -y -q $pre_reqs"
-				$sh_c "$config_manager --add-repo $repo_file_url"
+				if command_exists dnf5; then
+					# $sh_c "dnf -y -q --setopt=install_weak_deps=False install dnf-plugins-core"
+					# $sh_c	"dnf5 config-manager addrepo --save-filename=docker-ce.repo --from-repofile='$repo_file_url'"
 
-				if [ "$CHANNEL" != "stable" ]; then
-					$sh_c "$config_manager $disable_channel_flag 'docker-ce-*'"
-					$sh_c "$config_manager $enable_channel_flag 'docker-ce-$CHANNEL'"
+					$sh_c "dnf -y -q --setopt=install_weak_deps=False install curl dnf-plugins-core"
+					# FIXME(thaJeztah); strip empty lines as workaround for https://github.com/rpm-software-management/dnf5/issues/1603
+					TMP_REPO_FILE="$(mktemp --dry-run)"
+					$sh_c "curl -fsSL '$repo_file_url' | tr -s '\n' > '${TMP_REPO_FILE}'"
+					$sh_c "dnf5 config-manager addrepo --save-filename=docker-ce.repo --overwrite --from-repofile='${TMP_REPO_FILE}'"
+					$sh_c "rm -f '${TMP_REPO_FILE}'"
+
+					if [ "$CHANNEL" != "stable" ]; then
+						$sh_c "dnf5 config-manager setopt 'docker-ce-*.enabled=0'"
+						$sh_c "dnf5 config-manager setopt 'docker-ce-$CHANNEL.enabled=1'"
+					fi
+					$sh_c "dnf makecache"
+				elif command_exists dnf; then
+					$sh_c "dnf -y -q --setopt=install_weak_deps=False install dnf-plugins-core"
+					$sh_c "dnf config-manager --add-repo $repo_file_url"
+
+					if [ "$CHANNEL" != "stable" ]; then
+						$sh_c "dnf config-manager --set-disabled 'docker-ce-*'"
+						$sh_c "dnf config-manager --set-enabled 'docker-ce-$CHANNEL'"
+					fi
+					$sh_c "dnf makecache"
+				else
+					$sh_c "yum -y -q install yum-utils"
+					$sh_c "yum config-manager --add-repo $repo_file_url"
+
+					if [ "$CHANNEL" != "stable" ]; then
+						$sh_c "yum config-manager --disable 'docker-ce-*'"
+						$sh_c "yum config-manager --enable 'docker-ce-$CHANNEL'"
+					fi
+					$sh_c "yum makecache"
 				fi
-				$sh_c "$pkg_manager makecache"
 			)
 			pkg_version=""
+			if command_exists dnf; then
+				pkg_manager="dnf"
+				pkg_manager_flags="-y -q --best"
+			else
+				pkg_manager="yum"
+				pkg_manager_flags="-y -q"
+			fi
 			if [ -n "$VERSION" ]; then
 				if is_dry_run; then
 					echo "# WARNING: VERSION pinning is not supported in DRY_RUN"
 				else
+					if [ "$lsb_dist" = "fedora" ]; then
+						pkg_suffix="fc$dist_version"
+					else
+						pkg_suffix="el"
+					fi
 					pkg_pattern="$(echo "$VERSION" | sed 's/-ce-/\\\\.ce.*/g' | sed 's/-/.*/g').*$pkg_suffix"
 					search_command="$pkg_manager list --showduplicates docker-ce | grep '$pkg_pattern' | tail -1 | awk '{print \$2}'"
 					pkg_version="$($sh_c "$search_command")"
@@ -631,7 +649,7 @@ do_install() {
 				if ! is_dry_run; then
 					set -x
 				fi
-				$sh_c "$pkg_manager $pkg_manager_flags install -y -q $pkgs"
+				$sh_c "$pkg_manager $pkg_manager_flags install $pkgs"
 			)
 			echo_docker_as_nonroot
 			exit 0
