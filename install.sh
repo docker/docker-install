@@ -569,8 +569,8 @@ do_install() {
 					$sh_c "rm -f '${TMP_REPO_FILE}'"
 
 					if [ "$CHANNEL" != "stable" ]; then
-						$sh_c "dnf5 config-manager setopt 'docker-ce-*.enabled=0'"
-						$sh_c "dnf5 config-manager setopt 'docker-ce-$CHANNEL.enabled=1'"
+						$sh_c "dnf5 config-manager setopt \"docker-ce-*.enabled=0\""
+						$sh_c "dnf5 config-manager setopt \"docker-ce-$CHANNEL.enabled=1\""
 					fi
 					$sh_c "dnf makecache"
 				elif command_exists dnf; then
@@ -578,8 +578,8 @@ do_install() {
 					$sh_c "dnf config-manager --add-repo $repo_file_url"
 
 					if [ "$CHANNEL" != "stable" ]; then
-						$sh_c "dnf config-manager --set-disabled 'docker-ce-*'"
-						$sh_c "dnf config-manager --set-enabled 'docker-ce-$CHANNEL'"
+						$sh_c "dnf config-manager --set-disabled \"docker-ce-*\""
+						$sh_c "dnf config-manager --set-enabled \"docker-ce-$CHANNEL\""
 					fi
 					$sh_c "dnf makecache"
 				else
@@ -587,8 +587,8 @@ do_install() {
 					$sh_c "yum config-manager --add-repo $repo_file_url"
 
 					if [ "$CHANNEL" != "stable" ]; then
-						$sh_c "yum config-manager --disable 'docker-ce-*'"
-						$sh_c "yum config-manager --enable 'docker-ce-$CHANNEL'"
+						$sh_c "yum config-manager --disable \"docker-ce-*\""
+						$sh_c "yum config-manager --enable \"docker-ce-$CHANNEL\""
 					fi
 					$sh_c "yum makecache"
 				fi
