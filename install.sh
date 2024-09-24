@@ -584,11 +584,11 @@ do_install() {
 					$sh_c "dnf makecache"
 				else
 					$sh_c "yum -y -q install yum-utils"
-					$sh_c "yum config-manager --add-repo $repo_file_url"
+					$sh_c "yum-config-manager --add-repo $repo_file_url"
 
 					if [ "$CHANNEL" != "stable" ]; then
-						$sh_c "yum config-manager --disable \"docker-ce-*\""
-						$sh_c "yum config-manager --enable \"docker-ce-$CHANNEL\""
+						$sh_c "yum-config-manager --disable \"docker-ce-*\""
+						$sh_c "yum-config-manager --enable \"docker-ce-$CHANNEL\""
 					fi
 					$sh_c "yum makecache"
 				fi
