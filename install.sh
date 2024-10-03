@@ -559,14 +559,14 @@ do_install() {
 				fi
 				if command_exists dnf5; then
 					# $sh_c "dnf -y -q --setopt=install_weak_deps=False install dnf-plugins-core"
-					# $sh_c	"dnf5 config-manager addrepo --save-filename=docker-ce.repo --from-repofile='$repo_file_url'"
+					# $sh_c	"dnf5 config-manager addrepo --save-filename=docker-ce.repo --from-repofile=\"$repo_file_url\""
 
 					$sh_c "dnf -y -q --setopt=install_weak_deps=False install curl dnf-plugins-core"
 					# FIXME(thaJeztah); strip empty lines as workaround for https://github.com/rpm-software-management/dnf5/issues/1603
 					TMP_REPO_FILE="$(mktemp --dry-run)"
-					$sh_c "curl -fsSL '$repo_file_url' | tr -s '\n' > '${TMP_REPO_FILE}'"
-					$sh_c "dnf5 config-manager addrepo --save-filename=docker-ce.repo --overwrite --from-repofile='${TMP_REPO_FILE}'"
-					$sh_c "rm -f '${TMP_REPO_FILE}'"
+					$sh_c "curl -fsSL \"$repo_file_url\" | tr -s \"\n\" > \"${TMP_REPO_FILE}\""
+					$sh_c "dnf5 config-manager addrepo --save-filename=docker-ce.repo --overwrite --from-repofile=\"${TMP_REPO_FILE}\""
+					$sh_c "rm -f \"${TMP_REPO_FILE}\""
 
 					if [ "$CHANNEL" != "stable" ]; then
 						$sh_c "dnf5 config-manager setopt \"docker-ce-*.enabled=0\""
@@ -575,7 +575,7 @@ do_install() {
 					$sh_c "dnf makecache"
 				elif command_exists dnf; then
 					$sh_c "dnf -y -q --setopt=install_weak_deps=False install dnf-plugins-core"
-					$sh_c "dnf config-manager --add-repo $repo_file_url"
+					$sh_c "dnf config-manager --add-repo \"$repo_file_url\""
 
 					if [ "$CHANNEL" != "stable" ]; then
 						$sh_c "dnf config-manager --set-disabled \"docker-ce-*\""
@@ -584,7 +584,7 @@ do_install() {
 					$sh_c "dnf makecache"
 				else
 					$sh_c "yum -y -q install yum-utils"
-					$sh_c "yum-config-manager --add-repo $repo_file_url"
+					$sh_c "yum-config-manager --add-repo \"$repo_file_url\""
 
 					if [ "$CHANNEL" != "stable" ]; then
 						$sh_c "yum-config-manager --disable \"docker-ce-*\""
