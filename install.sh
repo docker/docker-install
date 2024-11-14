@@ -483,7 +483,7 @@ do_install() {
 			deprecation_notice "$lsb_dist" "$dist_version"
 			;;
 		fedora.*)
-			if [ "$dist_version" -lt 39 ]; then
+			if [ "$dist_version" -lt 40 ]; then
 				deprecation_notice "$lsb_dist" "$dist_version"
 			fi
 			;;
