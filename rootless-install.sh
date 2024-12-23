@@ -24,7 +24,7 @@ SCRIPT_COMMIT_SHA=UNKNOWN
 STABLE_LATEST="27.4.1"
 
 # latest version available in the test channel.
-TEST_LATEST="27.4.1"
+TEST_LATEST="27.5.0-rc.1"
 
 # The channel to install from:
 #   * test
