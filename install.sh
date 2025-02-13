@@ -651,6 +651,9 @@ do_install() {
 			echo_docker_as_nonroot
 			exit 0
 			;;
+		sles)
+			echo "Starting from v28, SLES packages will no longer be available for s390x."
+			exit 1
 		*)
 			if [ -z "$lsb_dist" ]; then
 				if is_darwin; then
