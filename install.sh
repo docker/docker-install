@@ -221,14 +221,6 @@ is_dry_run() {
 	fi
 }
 
-is_wsl() {
-	case "$(uname -r)" in
-	*microsoft* ) true ;; # WSL 2
-	*Microsoft* ) true ;; # WSL 1
-	* ) false;;
-	esac
-}
-
 is_darwin() {
 	case "$(uname -s)" in
 	*darwin* ) true ;;
@@ -401,18 +393,6 @@ do_install() {
 	# perform some very rudimentary platform detection
 	lsb_dist=$( get_distribution )
 	lsb_dist="$(echo "$lsb_dist" | tr '[:upper:]' '[:lower:]')"
-
-	if is_wsl; then
-		echo
-		echo "WSL DETECTED: We recommend using Docker Desktop for Windows."
-		echo "Please get Docker Desktop from https://www.docker.com/products/docker-desktop/"
-		echo
-		cat >&2 <<-'EOF'
-
-			You may press Ctrl+C now to abort this script.
-		EOF
-		( set -x; sleep 20 )
-	fi
 
 	case "$lsb_dist" in
 
