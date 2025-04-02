@@ -99,8 +99,15 @@ if [ -z "$DOWNLOAD_URL" ]; then
 fi
 
 DEFAULT_REPO_FILE="docker-ce.repo"
+DEFAULT_STAGING_REPO_FILE="docker-ce-staging.repo"
+
 if [ -z "$REPO_FILE" ]; then
 	REPO_FILE="$DEFAULT_REPO_FILE"
+    # Automatically default to a staging repo fora
+    # a staging download url (download-stage.docker.com)
+    case "$DOWNLOAD_URL" in
+        *-stage*) REPO_FILE="$DEFAULT_STAGING_REPO_FILE";;
+    esac
 fi
 
 mirror=''
