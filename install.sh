@@ -335,6 +335,9 @@ check_forked() {
 				fi
 				dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
 				case "$dist_version" in
+					13)
+						dist_version="trixie"
+					;;
 					12)
 						dist_version="bookworm"
 					;;
@@ -428,6 +431,9 @@ do_install() {
 		debian|raspbian)
 			dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
 			case "$dist_version" in
+				13)
+					dist_version="trixie"
+				;;
 				12)
 					dist_version="bookworm"
 				;;
