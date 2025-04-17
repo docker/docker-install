@@ -23,3 +23,15 @@ jobs:
       run: make shellcheck
     - name: Check distribution
       run: TEST_IMAGE=${{ matrix.os }} VERSION=${{ matrix.version }} make test
+
+  # This is a separate workflow step, because we need to check it outside of container (due to lsmod, iptables checks)
+  test-install-rootless:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install rootless
+      run: |
+        sudo sh -c 'echo 0 > /proc/sys/kernel/apparmor_restrict_unprivileged_userns'
+        FORCE_ROOTLESS_INSTALL=1 ./rootless-install.sh
+    
