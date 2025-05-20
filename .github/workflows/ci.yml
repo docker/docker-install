@@ -9,12 +9,11 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu:20.04
           - ubuntu:22.04
           - ubuntu:24.04
           - quay.io/centos/centos:stream9
         version:
-          - "26.1"
+          - "27.5"
           - ""
 
     steps:
