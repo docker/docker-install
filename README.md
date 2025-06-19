@@ -66,3 +66,11 @@ ruling it out in the future.
 
 docker/docker-install is licensed under the Apache License, Version 2.0.
 See [LICENSE](LICENSE) for the full license text.
+
+## Contributing
+
+Make sure you have read and understood our [contributing
+guidelines](https://github.com/docker/cli/blob/master/CONTRIBUTING.md).
+
+**Make sure all your commits are signed off and include a signature generated
+with `git commit -s`.**
