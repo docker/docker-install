@@ -554,7 +554,10 @@ do_install() {
 						pkgs="$pkgs docker-compose-plugin docker-ce-rootless-extras$pkg_version"
 				fi
 				if version_gte "23.0"; then
-						pkgs="$pkgs docker-buildx-plugin docker-model-plugin"
+						pkgs="$pkgs docker-buildx-plugin"
+				fi
+				if version_gte "28.2"; then
+						pkgs="$pkgs docker-model-plugin"
 				fi
 				if ! is_dry_run; then
 					set -x
