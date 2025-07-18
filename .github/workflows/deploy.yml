@@ -1,0 +1,60 @@
+name: Deploy
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  diff:
+    name: Diff
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Diff stable
+        run: |
+            make CHANNEL=stable diff
+      - name: Diff test
+        run: |
+            make CHANNEL=test diff
+
+  deploy:
+    name: Deploy
+    if: ${{ github.event_name == 'workflow_dispatch' && github.actor == 'vvoland' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build
+        run: |
+            make build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: github-actions-${{ github.run_id }}-docker-install-test
+          aws-region: us-east-1
+
+      - name: Deploy test
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET_TEST }}
+          CF_DISTRIBUTION_ID: ${{ secrets.CF_DISTRIBUTION_ID_TEST }}
+          CHANNEL: test
+        run: |
+            make diff
+            make deploy
+
+      - name: Deploy stable
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET_STABLE }}
+          CF_DISTRIBUTION_ID: ${{ secrets.CF_DISTRIBUTION_ID_STABLE }}
+          CHANNEL: stable
+        run: |
+            make diff
+            make deploy

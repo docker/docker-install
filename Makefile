@@ -8,26 +8,83 @@ SHELLCHECK=docker run --rm $(VOLUME_MOUNTS) -w /v koalaman/shellcheck:stable $(S
 
 ENVSUBST_VARS=LOAD_SCRIPT_COMMIT_SHA
 
-.PHONY: build
-build: build/install.sh
+# Define the channels we want to build for
+CHANNELS=test stable
 
-build/install.sh: install.sh
+FILES=build/test/install.sh build/stable/install.sh build/stable/rootless-install.sh
+
+.PHONY: build
+build: $(FILES)
+
+build/%/install.sh: install.sh
 	mkdir -p $(@D)
-	LOAD_SCRIPT_COMMIT_SHA='$(shell git rev-parse HEAD)' envsubst '$(addprefix $$,$(ENVSUBST_VARS))' < $< > $@
+	sed 's/DEFAULT_CHANNEL_VALUE="stable"/DEFAULT_CHANNEL_VALUE="$*"/' $< | \
+		LOAD_SCRIPT_COMMIT_SHA='$(shell git rev-parse HEAD)' envsubst '$(addprefix $$,$(ENVSUBST_VARS))' > $@
+
+build/%/rootless-install.sh: rootless-install.sh
+	mkdir -p $(@D)
+	sed 's/DEFAULT_CHANNEL_VALUE="stable"/DEFAULT_CHANNEL_VALUE="$*"/' $< | \
+		LOAD_SCRIPT_COMMIT_SHA='$(shell git rev-parse HEAD)' envsubst '$(addprefix $$,$(ENVSUBST_VARS))' > $@
 
 .PHONY: shellcheck
-shellcheck: build/install.sh
-	$(SHELLCHECK) $<
+shellcheck: $(FILES)
+	$(SHELLCHECK) $^
 
 .PHONY: test
-test: build/install.sh
-	docker run --rm -i \
-		$(VOLUME_MOUNTS) \
-		-w /v \
-		-e VERSION \
-		-e CHANNEL \
-		$(TEST_IMAGE) \
-		sh "$<"
+test: $(foreach channel,$(CHANNELS),build/$(channel)/install.sh)
+	for file in $^; do \
+		(set -x; docker run --rm -it \
+			$(VOLUME_MOUNTS) \
+			--privileged \
+			-e HOME=/tmp \
+			-v /var/lib/docker \
+			-w /v \
+			-e VERSION \
+			-e CHANNEL \
+			$(TEST_IMAGE) \
+			sh $$file) | tail -n 30; \
+	done
+
+AWS?=docker run \
+	-v ./build:/build \
+	-e AWS_ACCESS_KEY_ID \
+	-e AWS_SECRET_ACCESS_KEY \
+	-e AWS_SESSION_TOKEN \
+	--rm -it amazon/aws-cli
+
+.PHONY: deploy
+deploy: build/$(CHANNEL)/install.sh build/$(CHANNEL)/rootless-install.sh
+ifeq ($(S3_BUCKET),)
+	$(error S3_BUCKET is empty.)
+endif
+ifeq ($(CF_DISTRIBUTION_ID),)
+	$(error CF_DISTRIBUTION_ID is empty.)
+endif
+ifeq ($(CHANNEL),)
+	$(error CHANNEL is empty.)
+endif
+	$(AWS) s3 cp --acl public-read --content-type 'text/plain' /build/$(CHANNEL)/install.sh s3://$(S3_BUCKET)/index
+ifeq ($(CHANNEL),stable)
+	$(AWS) s3 cp --acl public-read --content-type 'text/plain' /build/$(CHANNEL)/rootless-install.sh s3://$(S3_BUCKET)/rootless
+endif
+
+	$(AWS) cloudfront create-invalidation --distribution-id $(CF_DISTRIBUTION_ID) --paths '/*'
+
+.PHONY: diff
+diff: TMP_DIR=/tmp
+diff: CHANNEL=stable
+diff: SUBDOMAIN=$(if $(filter test,$(CHANNEL)),test,$(if $(filter stable,$(CHANNEL)),get,$(error Invalid CHANNEL: $(CHANNEL))))
+diff: build/$(CHANNEL)/install.sh build/$(CHANNEL)/rootless-install.sh
+	curl -sfSL https://$(SUBDOMAIN).docker.com -o $(TMP_DIR)/install.sh
+
+	echo "# Diff $(CHANNEL) install.sh"
+	diff --color=always -u build/$(CHANNEL)/install.sh $(TMP_DIR)/install.sh || true
+
+ifeq ($(CHANNEL),stable)
+	curl -sfSL https://$(SUBDOMAIN).docker.com/rootless -o $(TMP_DIR)/rootless-install.sh
+	echo "# Diff $(CHANNEL) rootless-install.sh"
+	diff --color=always -u build/$(CHANNEL)/rootless-install.sh $(TMP_DIR)/rootless-install.sh || true
+endif
 
 .PHONY: clean
 clean:
