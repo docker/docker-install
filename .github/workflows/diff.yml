@@ -1,0 +1,21 @@
+name: Diff
+
+on:
+  pull_request:
+
+jobs:
+  diff:
+    name: Diff
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Diff stable
+        run: |
+            make CHANNEL=stable diff
+
+      - name: Diff test
+        run: |
+            make CHANNEL=test diff
+
