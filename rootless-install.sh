@@ -16,7 +16,7 @@ set -e
 #
 # Git commit from https://github.com/docker/docker-install when
 # the script was uploaded (Should only be modified by upload job):
-SCRIPT_COMMIT_SHA=UNKNOWN
+SCRIPT_COMMIT_SHA="$LOAD_SCRIPT_COMMIT_SHA"
 
 # This script should be run with an unprivileged user and install/setup Docker under $HOME/bin/.
 
