@@ -71,20 +71,11 @@ endif
 	$(AWS) cloudfront create-invalidation --distribution-id $(CF_DISTRIBUTION_ID) --paths '/*'
 
 .PHONY: diff
-diff: TMP_DIR=/tmp
-diff: CHANNEL=stable
-diff: SUBDOMAIN=$(if $(filter test,$(CHANNEL)),test,$(if $(filter stable,$(CHANNEL)),get,$(error Invalid CHANNEL: $(CHANNEL))))
 diff: build/$(CHANNEL)/install.sh build/$(CHANNEL)/rootless-install.sh
-	curl -sfSL https://$(SUBDOMAIN).docker.com -o $(TMP_DIR)/install.sh
-
-	echo "# Diff $(CHANNEL) install.sh"
-	diff --color=always -u build/$(CHANNEL)/install.sh $(TMP_DIR)/install.sh || true
-
-ifeq ($(CHANNEL),stable)
-	curl -sfSL https://$(SUBDOMAIN).docker.com/rootless -o $(TMP_DIR)/rootless-install.sh
-	echo "# Diff $(CHANNEL) rootless-install.sh"
-	diff --color=always -u build/$(CHANNEL)/rootless-install.sh $(TMP_DIR)/rootless-install.sh || true
+ifeq ($(CHANNEL),)
+	$(error CHANNEL is empty.)
 endif
+	./diff.sh $(CHANNEL) || true
 
 .PHONY: clean
 clean:
