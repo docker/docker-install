@@ -21,10 +21,10 @@ SCRIPT_COMMIT_SHA="$LOAD_SCRIPT_COMMIT_SHA"
 # This script should be run with an unprivileged user and install/setup Docker under $HOME/bin/.
 
 # latest version available in the stable channel.
-STABLE_LATEST="28.3.2"
+STABLE_LATEST="28.3.3"
 
 # latest version available in the test channel.
-TEST_LATEST="28.3.2"
+TEST_LATEST="28.3.3"
 
 # The channel to install from:
 #   * test
