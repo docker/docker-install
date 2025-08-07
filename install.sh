@@ -75,6 +75,17 @@ set -e
 #
 #   $ sudo sh install-docker.sh --mirror AzureChinaCloud
 #
+# --start-daemon
+#
+# Use the --start-daemon option to automatically start and enable the Docker
+# daemon service after installation. This option will attempt to start the
+# Docker service using the appropriate service management system (systemd,
+# etc.) for your distribution:
+#
+#   $ sudo sh install-docker.sh --start-daemon
+#
+# Note: This option requires appropriate privileges to manage system services.
+#
 # ==============================================================================
 
 
@@ -110,6 +121,7 @@ fi
 
 mirror=''
 DRY_RUN=${DRY_RUN:-}
+START_DAEMON=${START_DAEMON:-}
 while [ $# -gt 0 ]; do
 	case "$1" in
 		--channel)
@@ -122,6 +134,9 @@ while [ $# -gt 0 ]; do
 		--mirror)
 			mirror="$2"
 			shift
+			;;
+		--start-daemon)
+			START_DAEMON=1
 			;;
 		--version)
 			VERSION="${2#v}"
@@ -265,6 +280,64 @@ get_distribution() {
 	# Returning an empty string here should be alright since the
 	# case statements don't act unless you provide an actual value
 	echo "$lsb_dist"
+}
+
+# Check if systemd is available and running
+has_systemd() {
+	command_exists systemctl && systemctl --version >/dev/null 2>&1
+}
+
+# Start and enable Docker daemon service
+start_docker_daemon() {
+	if is_dry_run; then
+		echo "# DRY RUN: Would start and enable Docker daemon service"
+		if has_systemd; then
+			echo "# DRY RUN: systemctl start docker"
+			echo "# DRY RUN: systemctl enable docker"
+		else
+			echo "# DRY RUN: service docker start"
+			echo "# DRY RUN: chkconfig docker on (or equivalent)"
+		fi
+		return
+	fi
+
+	echo
+	echo "Starting and enabling Docker daemon service..."
+
+	if has_systemd; then
+		# Use systemd for modern distributions
+		echo "Using systemd to manage Docker service"
+		(
+			set -x
+			$sh_c 'systemctl start docker'
+			$sh_c 'systemctl enable docker'
+		)
+		echo "Docker daemon started and enabled successfully"
+	else
+		# Fallback for older systems without systemd
+		echo "Using traditional service management"
+		(
+			set -x
+			$sh_c 'service docker start'
+		)
+		# Try to enable service on boot (distribution-specific)
+		if command_exists chkconfig; then
+			(
+				set -x
+				$sh_c 'chkconfig docker on'
+			)
+		elif command_exists update-rc.d; then
+			(
+				set -x
+				$sh_c 'update-rc.d docker defaults'
+			)
+		else
+			echo "Warning: Could not enable Docker service to start on boot"
+			echo "Please manually configure Docker to start on boot for your system"
+		fi
+		echo "Docker daemon started successfully"
+	fi
+	echo
 }
 
 echo_docker_as_nonroot() {
@@ -564,6 +637,9 @@ do_install() {
 				fi
 				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get -y -qq install $pkgs >/dev/null"
 			)
+			if [ -n "$START_DAEMON" ]; then
+				start_docker_daemon
+			fi
 			echo_docker_as_nonroot
 			exit 0
 			;;
@@ -666,6 +742,9 @@ do_install() {
 				fi
 				$sh_c "$pkg_manager $pkg_manager_flags install $pkgs"
 			)
+			if [ -n "$START_DAEMON" ]; then
+				start_docker_daemon
+			fi
 			echo_docker_as_nonroot
 			exit 0
 			;;
