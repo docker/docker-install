@@ -24,7 +24,7 @@ SCRIPT_COMMIT_SHA="$LOAD_SCRIPT_COMMIT_SHA"
 STABLE_LATEST="28.3.3"
 
 # latest version available in the test channel.
-TEST_LATEST="28.3.3"
+TEST_LATEST="28.4.0-rc.2"
 
 # The channel to install from:
 #   * test
