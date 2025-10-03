@@ -22,6 +22,7 @@ From `https://test.docker.com`:
 ```shell
 curl -fsSL https://test.docker.com -o test-docker.sh
 sh test-docker.sh
+rm test-docker.sh
 ```
 
 From the source repo (This will install latest from the `stable` channel):
