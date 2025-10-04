@@ -83,6 +83,18 @@ set -e
 #
 #   $ sudo sh install-docker.sh --setup-repo
 #
+# Automatic Service Start
+#
+# By default, this script will automatically start and enable the Docker daemon
+# service after installation using the appropriate service management system
+# (systemd, etc.) for your distribution.
+#
+# If you prefer to start the service manually, use the --no-autostart option:
+#
+#   $ sudo sh install-docker.sh --no-autostart
+#
+# Note: Starting the service requires appropriate privileges to manage system services.
+#
 # ==============================================================================
 
 
@@ -119,6 +131,8 @@ fi
 mirror=''
 DRY_RUN=${DRY_RUN:-}
 REPO_ONLY=${REPO_ONLY:-0}
+# Default to autostart unless explicitly disabled
+AUTOSTART=${AUTOSTART:-1}
 while [ $# -gt 0 ]; do
 	case "$1" in
 		--channel)
@@ -139,6 +153,9 @@ while [ $# -gt 0 ]; do
 		--setup-repo)
 			REPO_ONLY=1
 			shift
+			;;
+		--no-autostart)
+			AUTOSTART=0
 			;;
 		--*)
 			echo "Illegal option $1"
@@ -278,6 +295,81 @@ get_distribution() {
 	# Returning an empty string here should be alright since the
 	# case statements don't act unless you provide an actual value
 	echo "$lsb_dist"
+}
+
+# Check if systemd is available and running
+# Returns 0 if systemd is available, 1 otherwise
+has_systemd() {
+	command_exists systemctl && systemctl --version >/dev/null 2>&1
+}
+
+# Start and enable Docker daemon service after installation
+# This function detects the init system (systemd vs traditional) and uses
+# the appropriate commands to start the Docker daemon and enable it to
+# start automatically on system boot.
+#
+# For systemd-based systems:
+#   - Uses 'systemctl start docker' to start the service
+#   - Uses 'systemctl enable docker' to enable on boot
+#
+# For traditional init systems:
+#   - Uses 'service docker start' to start the service
+#   - Uses 'chkconfig docker on' (RHEL/CentOS) or 'update-rc.d docker defaults' (Debian/Ubuntu)
+#     to enable on boot
+#
+# The function respects the dry-run mode and will only print commands without
+# executing them when $sh_c is set to 'echo' (dry-run mode).
+start_docker_daemon() {
+	echo
+	echo "Starting and enabling Docker daemon service..."
+
+	if has_systemd; then
+		# Use systemd for modern distributions (most current Linux distributions)
+		if ! is_dry_run; then
+			echo "Using systemd to manage Docker service"
+		fi
+		(
+			set -x
+			$sh_c 'systemctl start docker'
+			$sh_c 'systemctl enable docker'
+		)
+		if ! is_dry_run; then
+			echo "Docker daemon started and enabled successfully"
+		fi
+	else
+		# Fallback for older systems without systemd (legacy init systems)
+		if ! is_dry_run; then
+			echo "Using traditional service management"
+		fi
+		(
+			set -x
+			$sh_c 'service docker start'
+		)
+		# Try to enable service on boot (distribution-specific commands)
+		if command_exists chkconfig; then
+			# RHEL/CentOS/Fedora legacy systems
+			(
+				set -x
+				$sh_c 'chkconfig docker on'
+			)
+		elif command_exists update-rc.d; then
+			# Debian/Ubuntu legacy systems
+			(
+				set -x
+				$sh_c 'update-rc.d docker defaults'
+			)
+		else
+			# Unknown init system - warn the user
+			if ! is_dry_run; then
+				echo "Warning: Could not enable Docker service to start on boot"
+				echo "Please manually configure Docker to start on boot for your system"
+			fi
+		fi
+		if ! is_dry_run; then
+			echo "Docker daemon started successfully"
+		fi
+	fi
+	echo
 }
 
 echo_docker_as_nonroot() {
@@ -582,6 +674,9 @@ do_install() {
 				fi
 				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get -y -qq install $pkgs >/dev/null"
 			)
+			if [ "$AUTOSTART" = "1" ]; then
+				start_docker_daemon
+			fi
 			echo_docker_as_nonroot
 			exit 0
 			;;
@@ -689,6 +784,9 @@ do_install() {
 				fi
 				$sh_c "$pkg_manager $pkg_manager_flags install $pkgs"
 			)
+			if [ "$AUTOSTART" = "1" ]; then
+				start_docker_daemon
+			fi
 			echo_docker_as_nonroot
 			exit 0
 			;;
