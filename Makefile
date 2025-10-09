@@ -33,7 +33,7 @@ shellcheck: $(FILES)
 .PHONY: test
 test: $(foreach channel,$(CHANNELS),build/$(channel)/install.sh)
 	for file in $^; do \
-		(set -x; docker run --rm -it \
+		(set -eux; docker run --rm -i \
 			$(VOLUME_MOUNTS) \
 			--privileged \
 			-e HOME=/tmp \
