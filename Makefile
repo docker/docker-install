@@ -42,7 +42,7 @@ test: $(foreach channel,$(CHANNELS),build/$(channel)/install.sh)
 			-e VERSION \
 			-e CHANNEL \
 			$(TEST_IMAGE) \
-			sh $$file) | tail -n 30; \
+			sh $$file) || exit $$?; \
 	done
 
 AWS?=docker run \
