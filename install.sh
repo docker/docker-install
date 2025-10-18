@@ -83,6 +83,17 @@ set -e
 #
 #   $ sudo sh install-docker.sh --setup-repo
 #
+# Automatic Service Start
+#
+# By default, this script automatically starts the Docker daemon and enables the docker
+# service after installation if systemd is used as init.
+#
+# If you prefer to start the service manually, use the --no-autostart option:
+#
+#   $ sudo sh install-docker.sh --no-autostart
+#
+# Note: Starting the service requires appropriate privileges to manage system services.
+#
 # ==============================================================================
 
 
@@ -119,6 +130,7 @@ fi
 mirror=''
 DRY_RUN=${DRY_RUN:-}
 REPO_ONLY=${REPO_ONLY:-0}
+NO_AUTOSTART=${NO_AUTOSTART:-0}
 while [ $# -gt 0 ]; do
 	case "$1" in
 		--channel)
@@ -139,6 +151,9 @@ while [ $# -gt 0 ]; do
 		--setup-repo)
 			REPO_ONLY=1
 			shift
+			;;
+		--no-autostart)
+			NO_AUTOSTART=1
 			;;
 		--*)
 			echo "Illegal option $1"
@@ -278,6 +293,29 @@ get_distribution() {
 	# Returning an empty string here should be alright since the
 	# case statements don't act unless you provide an actual value
 	echo "$lsb_dist"
+}
+
+start_docker_daemon() {
+	# Use systemctl if available (for systemd-based systems)
+	if command_exists systemctl; then
+		is_dry_run || >&2 echo "Using systemd to manage Docker service"
+		if (
+			is_dry_run || set -x
+			$sh_c systemctl enable --now docker.service 2>/dev/null
+		); then
+			is_dry_run || echo "INFO: Docker daemon enabled and started" >&2
+		else
+			is_dry_run || echo "WARNING: unable to enable the docker service" >&2
+		fi
+	else
+		# No service management available (container environment)
+		if ! is_dry_run; then
+			>&2 echo "Note: Running in a container environment without service management"
+			>&2 echo "Docker daemon cannot be started automatically in this environment"
+			>&2 echo "The Docker packages have been installed successfully"
+		fi
+	fi
+	>&2 echo
 }
 
 echo_docker_as_nonroot() {
@@ -582,6 +620,9 @@ do_install() {
 				fi
 				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get -y -qq install $pkgs >/dev/null"
 			)
+			if [ "$NO_AUTOSTART" != "1" ]; then
+				start_docker_daemon
+			fi
 			echo_docker_as_nonroot
 			exit 0
 			;;
@@ -689,6 +730,9 @@ do_install() {
 				fi
 				$sh_c "$pkg_manager $pkg_manager_flags install $pkgs"
 			)
+			if [ "$NO_AUTOSTART" != "1" ]; then
+				start_docker_daemon
+			fi
 			echo_docker_as_nonroot
 			exit 0
 			;;
