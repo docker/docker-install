@@ -83,6 +83,18 @@ set -e
 #
 #   $ sudo sh install-docker.sh --setup-repo
 #
+# Automatic Service Start
+#
+# By default, this script will automatically start and enable the Docker daemon
+# service after installation using the appropriate service management system
+# (systemd, etc.) for your distribution.
+#
+# If you prefer to start the service manually, use the --no-autostart option:
+#
+#   $ sudo sh install-docker.sh --no-autostart
+#
+# Note: Starting the service requires appropriate privileges to manage system services.
+#
 # ==============================================================================
 
 
@@ -119,6 +131,7 @@ fi
 mirror=''
 DRY_RUN=${DRY_RUN:-}
 REPO_ONLY=${REPO_ONLY:-0}
+AUTOSTART=${AUTOSTART:-1}
 while [ $# -gt 0 ]; do
 	case "$1" in
 		--channel)
@@ -139,6 +152,9 @@ while [ $# -gt 0 ]; do
 		--setup-repo)
 			REPO_ONLY=1
 			shift
+			;;
+		--no-autostart)
+			AUTOSTART=0
 			;;
 		--*)
 			echo "Illegal option $1"
@@ -278,6 +294,76 @@ get_distribution() {
 	# Returning an empty string here should be alright since the
 	# case statements don't act unless you provide an actual value
 	echo "$lsb_dist"
+}
+
+# Check if systemd is available and running
+# Returns 0 if systemd is available, 1 otherwise
+has_systemd() {
+	if [ -d /run/systemd/system ]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+start_docker_daemon() {
+	>&2 echo
+	>&2 echo "Starting and enabling Docker daemon service..."
+
+	# In container environments, systemd may be installed but not running as PID 1.
+	# We try systemctl if it exists, regardless of whether systemd is the init system.
+	if command_exists systemctl; then
+		if ! is_dry_run; then
+			if has_systemd; then
+				>&2 echo "Using systemd to manage Docker service"
+			else
+				>&2 echo "Attempting to use systemctl (systemd not running as init)"
+			fi
+		fi
+		(
+			set -x
+			# In containers, these commands may fail but we try anyway
+			$sh_c 'systemctl start docker' || true
+			$sh_c 'systemctl enable docker' || true
+		)
+		if ! is_dry_run; then
+			>&2 echo "Docker service configuration attempted"
+		fi
+	elif command_exists service; then
+		# Fallback for older systems without systemd
+		if ! is_dry_run; then
+			>&2 echo "Using traditional service management"
+		fi
+		(
+			set -x
+			$sh_c 'service docker start'
+		)
+		# Try to enable service on boot (distribution-specific commands)
+		if command_exists chkconfig; then
+			# RHEL/CentOS/Fedora legacy systems
+			(
+				set -x
+				$sh_c 'chkconfig docker on'
+			)
+		elif command_exists update-rc.d; then
+			# Debian/Ubuntu legacy systems
+			(
+				set -x
+				$sh_c 'update-rc.d docker defaults'
+			)
+		fi
+		if ! is_dry_run; then
+			>&2 echo "Docker daemon started successfully"
+		fi
+	else
+		# No service management available (container environment)
+		if ! is_dry_run; then
+			>&2 echo "Note: Running in a container environment without service management"
+			>&2 echo "Docker daemon cannot be started automatically in this environment"
+			>&2 echo "The Docker packages have been installed successfully"
+		fi
+	fi
+	>&2 echo
 }
 
 echo_docker_as_nonroot() {
@@ -582,6 +668,9 @@ do_install() {
 				fi
 				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get -y -qq install $pkgs >/dev/null"
 			)
+			if [ "$AUTOSTART" = "1" ]; then
+				start_docker_daemon
+			fi
 			echo_docker_as_nonroot
 			exit 0
 			;;
@@ -689,6 +778,9 @@ do_install() {
 				fi
 				$sh_c "$pkg_manager $pkg_manager_flags install $pkgs"
 			)
+			if [ "$AUTOSTART" = "1" ]; then
+				start_docker_daemon
+			fi
 			echo_docker_as_nonroot
 			exit 0
 			;;
