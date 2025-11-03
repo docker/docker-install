@@ -8,7 +8,7 @@ SHELLCHECK=docker run --rm $(VOLUME_MOUNTS) -w /v koalaman/shellcheck:stable $(S
 
 ENVSUBST_VARS=LOAD_SCRIPT_COMMIT_SHA
 
-# Define the channels we want to build for
+# Define the channels we want to build forа
 CHANNELS=test stable
 
 FILES=build/test/install.sh build/stable/install.sh build/stable/rootless-install.sh
