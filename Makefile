@@ -6,12 +6,23 @@ VOLUME_MOUNTS=-v "$(CURDIR)":/v
 SHELLCHECK_EXCLUSIONS=$(addprefix -e, SC1091 SC1117 SC2317 SC2329)
 SHELLCHECK=docker run --rm $(VOLUME_MOUNTS) -w /v koalaman/shellcheck:stable $(SHELLCHECK_EXCLUSIONS)
 
-ENVSUBST_VARS=LOAD_SCRIPT_COMMIT_SHA
+ENVSUBST_VARS=LOAD_SCRIPT_COMMIT_SHA LOAD_SCRIPT_STABLE_LATEST LOAD_SCRIPT_TEST_LATEST
 
 # Define the channels we want to build for
 CHANNELS=test stable
 
 FILES=build/test/install.sh build/stable/install.sh build/stable/rootless-install.sh
+
+STABLE_LATEST=$(shell ./scripts/get-version.sh stable)
+TEST_LATEST=$(shell ./scripts/get-version.sh test)
+
+# Error checking for empty version variables
+ifeq ($(STABLE_LATEST),)
+$(error STABLE_LATEST is empty)
+endif
+ifeq ($(TEST_LATEST),)
+$(error TEST_LATEST is empty)
+endif
 
 .PHONY: build
 build: $(FILES)
@@ -19,12 +30,20 @@ build: $(FILES)
 build/%/install.sh: install.sh
 	mkdir -p $(@D)
 	sed 's/DEFAULT_CHANNEL_VALUE="stable"/DEFAULT_CHANNEL_VALUE="$*"/' $< | \
-		LOAD_SCRIPT_COMMIT_SHA='$(shell git rev-parse HEAD)' envsubst '$(addprefix $$,$(ENVSUBST_VARS))' > $@
+		LOAD_SCRIPT_COMMIT_SHA='$(shell git rev-parse HEAD)' \
+		LOAD_SCRIPT_STABLE_LATEST='$(STABLE_LATEST)' \
+		LOAD_SCRIPT_TEST_LATEST='$(TEST_LATEST)' \
+		envsubst '$(addprefix $$,$(ENVSUBST_VARS))' > $@
+	chmod +x $@
 
 build/%/rootless-install.sh: rootless-install.sh
 	mkdir -p $(@D)
 	sed 's/DEFAULT_CHANNEL_VALUE="stable"/DEFAULT_CHANNEL_VALUE="$*"/' $< | \
-		LOAD_SCRIPT_COMMIT_SHA='$(shell git rev-parse HEAD)' envsubst '$(addprefix $$,$(ENVSUBST_VARS))' > $@
+		LOAD_SCRIPT_COMMIT_SHA='$(shell git rev-parse HEAD)' \
+		LOAD_SCRIPT_STABLE_LATEST='$(STABLE_LATEST)' \
+		LOAD_SCRIPT_TEST_LATEST='$(TEST_LATEST)' \
+		envsubst '$(addprefix $$,$(ENVSUBST_VARS))' > $@
+	chmod +x $@
 
 .PHONY: shellcheck
 shellcheck: $(FILES)

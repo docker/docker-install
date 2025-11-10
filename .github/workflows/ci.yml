@@ -19,8 +19,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Shellcheck
+      env:
+        GH_TOKEN: ${{ github.token }}
       run: make shellcheck
     - name: Check distribution
+      env:
+        GH_TOKEN: ${{ github.token }}
       run: TEST_IMAGE=${{ matrix.os }} VERSION=${{ matrix.version }} make test
 
   # This is a separate workflow step, because we need to check it outside of container (due to lsmod, iptables checks)
@@ -30,7 +34,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install rootless
+      env:
+        GH_TOKEN: ${{ github.token }}
       run: |
         sudo sh -c 'echo 0 > /proc/sys/kernel/apparmor_restrict_unprivileged_userns'
-        FORCE_ROOTLESS_INSTALL=1 ./rootless-install.sh
+        make build/test/rootless-install.sh
+        FORCE_ROOTLESS_INSTALL=1 ./build/test/rootless-install.sh
     

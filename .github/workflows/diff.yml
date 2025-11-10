@@ -12,10 +12,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Diff stable
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
             make CHANNEL=stable diff
 
       - name: Diff test
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
             make CHANNEL=test diff
 
