@@ -98,6 +98,11 @@ checks() {
 		>&2 echo "Aborting because rootful Docker is running and accessible. Set FORCE_ROOTLESS_INSTALL=1 to ignore."; exit 1
 	fi
 
+	# Check if tun device is avaliable for rootless kit
+	if [ ! -e /dev/net/tun ] && [ -z "$FORCE_ROOTLESS_INSTALL" ]; then
+		>&2 echo "Aborting because /dev/net/tun is not avaliable.  Set FORCE_ROOTLESS_INSTALL=1 to ignore."; exit 1
+	fi
+
 	# Validate XDG_RUNTIME_DIR
 	if [ ! -w "$XDG_RUNTIME_DIR" ]; then
 		if [ -n "$SYSTEMD" ]; then
