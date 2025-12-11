@@ -391,7 +391,7 @@ check_forked() {
 				fi
 				dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
 				case "$dist_version" in
-					13)
+					13|14|forky)
 						dist_version="trixie"
 					;;
 					12)
