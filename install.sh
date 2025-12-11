@@ -632,6 +632,9 @@ do_install() {
 				exit 1
 			fi
 			repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
+			if [ "$dist_version" -lt 10 ]; then
+				repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$dist_version/$REPO_FILE"
+			fi
 			(
 				if ! is_dry_run; then
 					set -x
