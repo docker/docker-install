@@ -99,7 +99,7 @@ set -e
 
 # Git commit from https://github.com/docker/docker-install when
 # the script was uploaded (Should only be modified by upload job):
-SCRIPT_COMMIT_SHA="${LOAD_SCRIPT_COMMIT_SHA}"
+SCRIPT_COMMIT_SHA="8b33a64d28ec86a1121623f1d349801b48f2837b"
 
 # strip "v" prefix if present
 VERSION="${VERSION#v}"
@@ -508,7 +508,7 @@ do_install() {
 			esac
 		;;
 
-		centos|rhel)
+		centos|rhel|rocky|rockylinux|almalinux|alma)
 			if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
 				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
 			fi
@@ -533,6 +533,9 @@ do_install() {
 	case "$lsb_dist.$dist_version" in
 		centos.8|centos.7|rhel.7)
 			deprecation_notice "$lsb_dist" "$dist_version"
+			;;
+		rocky.8|rocky.9|rockylinux.8|rockylinux.9|almalinux.8|almalinux.9)
+			echo "INFO: $lsb_dist $dist_version is a RHEL-based distribution, using RHEL-compatible installation method."
 			;;
 		debian.buster|debian.stretch|debian.jessie)
 			deprecation_notice "$lsb_dist" "$dist_version"
@@ -626,12 +629,21 @@ do_install() {
 			echo_docker_as_nonroot
 			exit 0
 			;;
-		centos|fedora|rhel)
+		centos|fedora|rhel|rocky|rockylinux|almalinux|alma)
 			if [ "$(uname -m)" = "s390x" ]; then
 				echo "Effective v27.5, please consult RHEL distro statement for s390x support."
 				exit 1
 			fi
-			repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
+			# Use centos repo for Rocky Linux and AlmaLinux since they are RHEL compatible
+			case "$lsb_dist" in
+				rocky|rockylinux|almalinux|alma)
+					repo_dist="centos"
+					;;
+				*)
+					repo_dist="$lsb_dist"
+					;;
+			esac
+			repo_file_url="$DOWNLOAD_URL/linux/$repo_dist/$REPO_FILE"
 			(
 				if ! is_dry_run; then
 					set -x
