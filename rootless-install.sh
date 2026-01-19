@@ -16,21 +16,24 @@ set -e
 #
 # Git commit from https://github.com/docker/docker-install when
 # the script was uploaded (Should only be modified by upload job):
-SCRIPT_COMMIT_SHA=UNKNOWN
+SCRIPT_COMMIT_SHA="$LOAD_SCRIPT_COMMIT_SHA"
 
 # This script should be run with an unprivileged user and install/setup Docker under $HOME/bin/.
 
+# latest version available in the stable channel.
+STABLE_LATEST="$LOAD_SCRIPT_STABLE_LATEST"
+
+# latest version available in the test channel.
+TEST_LATEST="$LOAD_SCRIPT_TEST_LATEST"
+
 # The channel to install from:
-#   * nightly
 #   * test
 #   * stable
 DEFAULT_CHANNEL_VALUE="stable"
 if [ -z "$CHANNEL" ]; then
 	CHANNEL=$DEFAULT_CHANNEL_VALUE
 fi
-# The latest release is currently hard-coded.
-STABLE_LATEST="20.10.17"
-TEST_LATEST="22.06.0-beta.0"
+
 STATIC_RELEASE_URL=
 STATIC_RELEASE_ROOTLESS_URL=
 case "$CHANNEL" in
@@ -44,13 +47,9 @@ case "$CHANNEL" in
         STATIC_RELEASE_URL="https://download.docker.com/linux/static/$CHANNEL/$(uname -m)/docker-${TEST_LATEST}.tgz"
         STATIC_RELEASE_ROOTLESS_URL="https://download.docker.com/linux/static/$CHANNEL/$(uname -m)/docker-rootless-extras-${TEST_LATEST}.tgz"
         ;;
-    "nightly")
-        echo "# Installing nightly"
-        STATIC_RELEASE_URL="https://master.dockerproject.org/linux/$(uname -m)/docker.tgz"
-        STATIC_RELEASE_ROOTLESS_URL="https://master.dockerproject.org/linux/$(uname -m)/docker-rootless-extras.tgz"
-        ;;
     *)
-        >&2 echo "Aborting because of unknown CHANNEL \"$CHANNEL\". Set \$CHANNEL to either \"stable\", \"test\", or \"nightly\"."; exit 1
+        >&2 echo "Aborting because of unknown CHANNEL \"$CHANNEL\". Set \$CHANNEL to either \"stable\" or \"test\"."
+        exit 1
         ;;
 esac
 
@@ -129,12 +128,12 @@ checks() {
 	# uidmap dependency check
 	if ! command -v newuidmap >/dev/null 2>&1; then
 		if command -v apt-get >/dev/null 2>&1; then
-			INSTRUCTIONS="apt-get install -y uidmap"
+			INSTRUCTIONS="apt-get -y install uidmap"
 		elif command -v dnf >/dev/null 2>&1; then
-			INSTRUCTIONS="dnf install -y shadow-utils"
+			INSTRUCTIONS="dnf -y install shadow-utils"
 		elif command -v yum >/dev/null 2>&1; then
 			INSTRUCTIONS="curl -o /etc/yum.repos.d/vbatts-shadow-utils-newxidmap-epel-7.repo https://copr.fedorainfracloud.org/coprs/vbatts/shadow-utils-newxidmap/repo/epel-7/vbatts-shadow-utils-newxidmap-epel-7.repo
-yum install -y shadow-utils46-newxidmap"
+yum -y install shadow-utils46-newxidmap"
 		else
 			echo "newuidmap binary not found. Please install with a package manager."
 			exit 1
@@ -145,10 +144,10 @@ yum install -y shadow-utils46-newxidmap"
 	if [ -z "$SKIP_IPTABLES" ] && ! command -v iptables >/dev/null 2>&1 && [ ! -f /sbin/iptables ] && [ ! -f /usr/sbin/iptables ]; then
 		if command -v apt-get >/dev/null 2>&1; then
 			INSTRUCTIONS="${INSTRUCTIONS}
-apt-get install -y iptables"
+apt-get -y install iptables"
 		elif command -v dnf >/dev/null 2>&1; then
 			INSTRUCTIONS="${INSTRUCTIONS}
-dnf install -y iptables"
+dnf -y install iptables"
 		else
 			echo "iptables binary not found. Please install with a package manager."
 			exit 1

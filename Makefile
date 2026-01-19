@@ -1,33 +1,100 @@
-TEST_IMAGE?=ubuntu:18.04
+TEST_IMAGE?=ubuntu:22.04
 VERSION?=
 CHANNEL?=
 
 VOLUME_MOUNTS=-v "$(CURDIR)":/v
-SHELLCHECK_EXCLUSIONS=$(addprefix -e, SC1091 SC1117)
-SHELLCHECK=docker run --rm $(VOLUME_MOUNTS) -w /v koalaman/shellcheck $(SHELLCHECK_EXCLUSIONS)
+SHELLCHECK_EXCLUSIONS=$(addprefix -e, SC1091 SC1117 SC2317 SC2329)
+SHELLCHECK=docker run --rm $(VOLUME_MOUNTS) -w /v koalaman/shellcheck:stable $(SHELLCHECK_EXCLUSIONS)
 
-ENVSUBST_VARS=LOAD_SCRIPT_COMMIT_SHA
+ENVSUBST_VARS=LOAD_SCRIPT_COMMIT_SHA LOAD_SCRIPT_STABLE_LATEST LOAD_SCRIPT_TEST_LATEST
+
+# Define the channels we want to build for
+CHANNELS=test stable
+
+FILES=build/test/install.sh build/stable/install.sh build/stable/rootless-install.sh
+
+STABLE_LATEST=$(shell ./scripts/get-version.sh stable)
+TEST_LATEST=$(shell ./scripts/get-version.sh test)
+
+# Error checking for empty version variables
+ifeq ($(STABLE_LATEST),)
+$(error STABLE_LATEST is empty)
+endif
+ifeq ($(TEST_LATEST),)
+$(error TEST_LATEST is empty)
+endif
 
 .PHONY: build
-build: build/install.sh
+build: $(FILES)
 
-build/install.sh: install.sh
+build/%/install.sh: install.sh
 	mkdir -p $(@D)
-	LOAD_SCRIPT_COMMIT_SHA='$(shell git rev-parse HEAD)' envsubst '$(addprefix $$,$(ENVSUBST_VARS))' < $< > $@
+	sed 's/DEFAULT_CHANNEL_VALUE="stable"/DEFAULT_CHANNEL_VALUE="$*"/' $< | \
+		LOAD_SCRIPT_COMMIT_SHA='$(shell git rev-parse HEAD)' \
+		LOAD_SCRIPT_STABLE_LATEST='$(STABLE_LATEST)' \
+		LOAD_SCRIPT_TEST_LATEST='$(TEST_LATEST)' \
+		envsubst '$(addprefix $$,$(ENVSUBST_VARS))' > $@
+	chmod +x $@
+
+build/%/rootless-install.sh: rootless-install.sh
+	mkdir -p $(@D)
+	sed 's/DEFAULT_CHANNEL_VALUE="stable"/DEFAULT_CHANNEL_VALUE="$*"/' $< | \
+		LOAD_SCRIPT_COMMIT_SHA='$(shell git rev-parse HEAD)' \
+		LOAD_SCRIPT_STABLE_LATEST='$(STABLE_LATEST)' \
+		LOAD_SCRIPT_TEST_LATEST='$(TEST_LATEST)' \
+		envsubst '$(addprefix $$,$(ENVSUBST_VARS))' > $@
+	chmod +x $@
 
 .PHONY: shellcheck
-shellcheck: build/install.sh
-	$(SHELLCHECK) $<
+shellcheck: $(FILES)
+	$(SHELLCHECK) $^
 
 .PHONY: test
-test: build/install.sh
-	docker run --rm -i \
-		$(VOLUME_MOUNTS) \
-		-w /v \
-		-e VERSION \
-		-e CHANNEL \
-		$(TEST_IMAGE) \
-		sh "$<"
+test: $(foreach channel,$(CHANNELS),build/$(channel)/install.sh)
+	for file in $^; do \
+		(set -eux; docker run --rm -i \
+			$(VOLUME_MOUNTS) \
+			--privileged \
+			-e HOME=/tmp \
+			-v /var/lib/docker \
+			-w /v \
+			-e VERSION \
+			-e CHANNEL \
+			$(TEST_IMAGE) \
+			sh $$file) || exit $$?; \
+	done
+
+AWS?=docker run \
+	-v ./build:/build \
+	-e AWS_ACCESS_KEY_ID \
+	-e AWS_SECRET_ACCESS_KEY \
+	-e AWS_SESSION_TOKEN \
+	--rm amazon/aws-cli
+
+.PHONY: deploy
+deploy: build/$(CHANNEL)/install.sh build/$(CHANNEL)/rootless-install.sh
+ifeq ($(S3_BUCKET),)
+	$(error S3_BUCKET is empty.)
+endif
+ifeq ($(CF_DISTRIBUTION_ID),)
+	$(error CF_DISTRIBUTION_ID is empty.)
+endif
+ifeq ($(CHANNEL),)
+	$(error CHANNEL is empty.)
+endif
+	$(AWS) s3 cp --acl public-read --content-type 'text/plain' /build/$(CHANNEL)/install.sh s3://$(S3_BUCKET)/index
+ifeq ($(CHANNEL),stable)
+	$(AWS) s3 cp --acl public-read --content-type 'text/plain' /build/$(CHANNEL)/rootless-install.sh s3://$(S3_BUCKET)/rootless
+endif
+
+	$(AWS) cloudfront create-invalidation --distribution-id $(CF_DISTRIBUTION_ID) --paths '/*'
+
+.PHONY: diff
+diff: build/$(CHANNEL)/install.sh build/$(CHANNEL)/rootless-install.sh
+ifeq ($(CHANNEL),)
+	$(error CHANNEL is empty.)
+endif
+	./diff.sh $(CHANNEL) || true
 
 .PHONY: clean
 clean:
