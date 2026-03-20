@@ -508,7 +508,7 @@ do_install() {
 			esac
 		;;
 
-		centos|rhel)
+		centos|rhel|tencentos)
 			if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
 				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
 			fi
@@ -626,12 +626,17 @@ do_install() {
 			echo_docker_as_nonroot
 			exit 0
 			;;
-		centos|fedora|rhel)
+		centos|fedora|rhel|tencentos)
 			if [ "$(uname -m)" = "s390x" ]; then
 				echo "Effective v27.5, please consult RHEL distro statement for s390x support."
 				exit 1
 			fi
-			repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
+			# TencentOS is RHEL-compatible, use centos repo
+			if [ "$lsb_dist" = "tencentos" ]; then
+				repo_file_url="$DOWNLOAD_URL/linux/centos/$REPO_FILE"
+			else
+				repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
+			fi
 			(
 				if ! is_dry_run; then
 					set -x
