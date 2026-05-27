@@ -138,7 +138,7 @@ NO_AUTOSTART=${NO_AUTOSTART:-0}
 usage() {
 	echo
 	echo "USAGE: "
-	echo "    ${0} [--channel <stable|test>] [--mirror <Aliyun|AzureChinaCloud>] [--version <VERSION>] [--dry-run] [--help]"
+	echo "    ${0} [--channel <stable|test>] [--mirror <Aliyun|AzureChinaCloud>] [--version <VERSION>] [--setup-repo] [--no-autostart] [--dry-run] [--help]"
 	echo
 }
 
