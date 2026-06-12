@@ -290,6 +290,14 @@ get_distribution() {
 	if [ -r /etc/os-release ]; then
 		lsb_dist="$(. /etc/os-release && echo "$ID")"
 	fi
+	# Updates the "lsb_dist" variable for the CentOS forks
+	# by checking the file "redhat-release" present in the Red Hat based distros.
+	if [ -r /etc/redhat-release ]; then
+        	if ! egrep -i "centos|redhat|red hat|fedora" /etc/redhat-release; then
+			echo "Forked distribution, switching to CentOS ID"
+			lsb_dist="centos"
+		fi
+	fi
 	# Returning an empty string here should be alright since the
 	# case statements don't act unless you provide an actual value
 	echo "$lsb_dist"
