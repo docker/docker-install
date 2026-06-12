@@ -21,7 +21,7 @@ last_release_tag() {
 
 case "$channel" in
     stable) last_release_tag 'isLatest' ;;
-    test) last_release_tag 'isPrerelease' ;;
+    test) last_release_tag 'isPrerelease or .isLatest' ;;
     *)
         echo "Error: Invalid channel '$channel'. Use 'stable' or 'test'." >&2
         exit 1
