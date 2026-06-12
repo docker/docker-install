@@ -631,7 +631,11 @@ do_install() {
 				echo "Effective v27.5, please consult RHEL distro statement for s390x support."
 				exit 1
 			fi
-			repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
+			if [ "$lsb_dist" = rocky ]; then
+			    repo_file_url="$DOWNLOAD_URL/linux/rhel/$REPO_FILE"
+			else
+			    repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
+			fi
 			(
 				if ! is_dry_run; then
 					set -x
