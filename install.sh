@@ -762,3 +762,47 @@ do_install() {
 # wrapped up in a function so that we have some protection against only getting
 # half the file during "curl | sh"
 do_install
+
+: <<'MANUAL_INSTALL_DOCS'
+Manual setup: https://docs.docker.com/engine/install/
+
+# Fedora / RHEL
+
+sudo dnf -y install dnf-plugins-core
+
+# dnf5
+sudo dnf5 config-manager addrepo --from-repofile https://download.docker.com/linux/$(. /etc/os-release && echo $ID)/docker-ce.repo
+# dnf older than 5
+sudo dnf config-manager --add-repo https://download.docker.com/linux/$(. /etc/os-release && echo $ID)/docker-ce.repo
+
+
+sudo dnf install docker-ce
+sudo systemctl enable --now docker
+
+# ======
+
+# Ubuntu / Debian
+
+sudo apt update
+sudo apt install -y ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/$(. /etc/os-release && echo "$ID")/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/$(. /etc/os-release && echo "$ID")
+Suites: $(. /etc/os-release && echo "$VERSION_CODENAME")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+sudo apt update
+sudo apt install docker-ce
+
+# ======
+
+Post-install: run Docker as non-root
+
+sudo usermod -aG docker $USER
+(log out and back in for the group change to take effect)
+MANUAL_INSTALL_DOCS
