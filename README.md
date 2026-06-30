@@ -29,6 +29,17 @@ From the source repo (This will install latest from the `stable` channel):
 sh install.sh
 ```
 
+### Repository Setup Only
+
+To configure Docker's package repositories without installing Docker packages,
+use the `/repo` endpoint:
+
+```shell
+curl -fsSL https://get.docker.com/repo | sh -
+```
+
+This is equivalent to running `sh install.sh --setup-repo`.
+
 ## Testing:
 
 To verify that the install script works amongst the supported operating systems run:
