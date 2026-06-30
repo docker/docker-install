@@ -290,6 +290,12 @@ get_distribution() {
 	if [ -r /etc/os-release ]; then
 		lsb_dist="$(. /etc/os-release && echo "$ID")"
 	fi
+
+	# Normalize Fedora Asahi Remix to fedora
+	if [ "$lsb_dist" = "fedora-asahi-remix" ]; then
+		lsb_dist="fedora"
+	fi
+
 	# Returning an empty string here should be alright since the
 	# case statements don't act unless you provide an actual value
 	echo "$lsb_dist"
