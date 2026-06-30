@@ -563,7 +563,12 @@ do_install() {
 	case "$lsb_dist" in
 		ubuntu|debian|raspbian)
 			pre_reqs="ca-certificates curl"
-			apt_repo="deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] $DOWNLOAD_URL/linux/$lsb_dist $dist_version $CHANNEL"
+			apt_repo_lsb_dist="$lsb_dist"
+			# Docker does not publish a Raspbian Trixie repo; use Debian Trixie instead.
+			if [ "$lsb_dist" = "raspbian" ] && [ "$dist_version" = "trixie" ]; then
+				apt_repo_lsb_dist="debian"
+			fi
+			apt_repo="deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] $DOWNLOAD_URL/linux/$apt_repo_lsb_dist $dist_version $CHANNEL"
 			(
 				if ! is_dry_run; then
 					set -x
@@ -571,7 +576,7 @@ do_install() {
 				$sh_c 'apt-get -qq update >/dev/null'
 				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get -y -qq install $pre_reqs >/dev/null"
 				$sh_c 'install -m 0755 -d /etc/apt/keyrings'
-				$sh_c "curl -fsSL \"$DOWNLOAD_URL/linux/$lsb_dist/gpg\" -o /etc/apt/keyrings/docker.asc"
+				$sh_c "curl -fsSL \"$DOWNLOAD_URL/linux/$apt_repo_lsb_dist/gpg\" -o /etc/apt/keyrings/docker.asc"
 				$sh_c "chmod a+r /etc/apt/keyrings/docker.asc"
 				$sh_c "echo \"$apt_repo\" > /etc/apt/sources.list.d/docker.list"
 				$sh_c 'apt-get -qq update >/dev/null'
