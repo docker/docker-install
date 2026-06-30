@@ -288,7 +288,7 @@ get_distribution() {
 	lsb_dist=""
 	# Every system that we officially support has /etc/os-release
 	if [ -r /etc/os-release ]; then
-		lsb_dist="$(. /etc/os-release && echo "$ID")"
+		lsb_dist="$(. /etc/os-release && echo "$ID_LIKE")"
 	fi
 
 	# Normalize Fedora Asahi Remix to fedora
