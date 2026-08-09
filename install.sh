@@ -594,7 +594,10 @@ do_install() {
 				else
 					# Will work for incomplete versions IE (17.12), but may not actually grab the "latest" if in the test channel
 					pkg_pattern="$(echo "$VERSION" | sed 's/-ce-/~ce~.*/g' | sed 's/-/.*/g')"
-					search_command="apt-cache madison docker-ce | grep '$pkg_pattern' | head -1 | awk '{\$1=\$1};1' | cut -d' ' -f 3"
+					# Anchor on the madison version field (optional "5:" epoch) so the pattern
+					# matches the package version, not the distro version in the release suffix
+					# (VERSION=24.0 must match 5:24.0.x, not 28.4.0-1~ubuntu.24.04~noble). See #526.
+					search_command="apt-cache madison docker-ce | grep -E ' \\| (5:)?$pkg_pattern' | head -1 | awk '{\$1=\$1};1' | cut -d' ' -f 3"
 					echo "INFO: Searching repository for VERSION '$VERSION'"
 					echo "INFO: $search_command"
 					pkg_version="$($sh_c "$search_command")"
@@ -607,7 +610,7 @@ do_install() {
 					pkg_version="=$pkg_version"
 
 					if version_gte "18.09"; then
-						search_command="apt-cache madison docker-ce-cli | grep '$pkg_pattern' | head -1 | awk '{\$1=\$1};1' | cut -d' ' -f 3"
+						search_command="apt-cache madison docker-ce-cli | grep -E ' \\| (5:)?$pkg_pattern' | head -1 | awk '{\$1=\$1};1' | cut -d' ' -f 3"
 						echo "INFO: $search_command"
 						cli_pkg_version="$($sh_c "$search_command")"
 						if [ -n "$cli_pkg_version" ]; then
