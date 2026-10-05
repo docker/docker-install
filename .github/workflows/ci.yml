@@ -19,6 +19,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
+    - name: Check mirrors (dry-run)
+      run: sh scripts/test-mirrors.sh
     - name: Shellcheck
       env:
         GH_TOKEN: ${{ github.token }}

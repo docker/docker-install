@@ -67,13 +67,15 @@ set -e
 # Alternatively, use the script at https://test.docker.com, which uses the test
 # channel as default.
 #
-# --mirror <Aliyun|AzureChinaCloud>
+# --mirror <Aliyun|AzureChinaCloud|TencentCloud>
 #
 # Use the --mirror option to install from a mirror supported by this script.
-# Available mirrors are "Aliyun" (https://mirrors.aliyun.com/docker-ce), and
-# "AzureChinaCloud" (https://mirror.azure.cn/docker-ce), for example:
+# Available mirrors are "Aliyun" (https://mirrors.aliyun.com/docker-ce),
+# "AzureChinaCloud" (https://mirror.azure.cn/docker-ce), and
+# "TencentCloud" (https://mirrors.cloud.tencent.com/docker-ce), for example:
 #
 #   $ sudo sh install-docker.sh --mirror AzureChinaCloud
+#   $ sudo sh install-docker.sh --mirror TencentCloud
 #
 # --setup-repo
 #
@@ -146,7 +148,7 @@ SBX=${SBX:-0}
 usage() {
 	echo
 	echo "USAGE: "
-	echo "    ${0} [--channel <stable|test>] [--mirror <Aliyun|AzureChinaCloud>] [--version <VERSION>] [--setup-repo] [--no-autostart] [--dry-run] [--help]"
+	echo "    ${0} [--channel <stable|test>] [--mirror <Aliyun|AzureChinaCloud|TencentCloud>] [--version <VERSION>] [--setup-repo] [--no-autostart] [--dry-run] [--help]"
 	echo
 }
 
@@ -194,10 +196,13 @@ case "$mirror" in
 	AzureChinaCloud)
 		DOWNLOAD_URL="https://mirror.azure.cn/docker-ce"
 		;;
+	TencentCloud)
+		DOWNLOAD_URL="https://mirrors.cloud.tencent.com/docker-ce"
+		;;
 	"")
 		;;
 	*)
-		>&2 echo "unknown mirror '$mirror': use either 'Aliyun', or 'AzureChinaCloud'."
+		>&2 echo "unknown mirror '$mirror': use 'Aliyun', 'AzureChinaCloud', or 'TencentCloud'."
 		exit 1
 		;;
 esac

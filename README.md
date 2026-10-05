@@ -31,12 +31,56 @@ From the source repo (This will install latest from the `stable` channel):
 sh install.sh
 ```
 
+### Package mirrors
+
+Use `--mirror` to select a Docker package mirror:
+
+| Mirror | Download URL |
+| --- | --- |
+| `Aliyun` | `https://mirrors.aliyun.com/docker-ce` |
+| `AzureChinaCloud` | `https://mirror.azure.cn/docker-ce` |
+| `TencentCloud` | `https://mirrors.cloud.tencent.com/docker-ce` |
+
+For example, on a Tencent Cloud host running a supported Linux distribution,
+review the script and preview the installation before running it as root:
+
+```shell
+sh install.sh --mirror TencentCloud --dry-run
+sudo sh install.sh --mirror TencentCloud
+```
+
+To configure the package repository without installing Docker packages:
+
+```shell
+sudo sh install.sh --mirror TencentCloud --setup-repo
+```
+
+The `DOWNLOAD_URL` environment variable remains available for custom mirrors.
+For example, the following previews the same mirror selection:
+
+```shell
+sudo env DOWNLOAD_URL=https://mirrors.cloud.tencent.com/docker-ce \
+  sh install.sh --dry-run
+```
+
+An explicit `--mirror` takes precedence over `DOWNLOAD_URL`. These options select
+Docker package repositories, not Docker Hub registry mirrors. Mirror selection
+does not change the supported distributions, and package availability depends on
+the selected mirror.
+
 ## Testing:
 
 To verify that the install script works amongst the supported operating systems run:
 
 ```shell
 make shellcheck
+```
+
+To test mirror selection on a supported Linux distribution without installing
+packages or contacting the mirrors:
+
+```shell
+sh scripts/test-mirrors.sh
 ```
 
 ## Legal
