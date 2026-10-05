@@ -171,7 +171,6 @@ while [ $# -gt 0 ]; do
 			;;
 		--setup-repo)
 			REPO_ONLY=1
-			shift
 			;;
 		--no-autostart)
 			NO_AUTOSTART=1
