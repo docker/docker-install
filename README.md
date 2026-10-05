@@ -39,6 +39,43 @@ To verify that the install script works amongst the supported operating systems 
 make shellcheck
 ```
 
+### APT dpkg lock waiting
+
+APT prerequisite and Engine installations, and the rootless installer's suggested
+`uidmap`/`iptables` installation commands, use `DPkg::Lock::Timeout=60`. On APT
+1.9.11 and later, this bounds waiting for the dpkg frontend and administration
+locks to 60 seconds; contention that outlasts the timeout still fails. Older APT
+versions do not provide this waiting behavior. This is a lock-acquisition timeout,
+not a timeout for the full installation. See the [APT implementation history](https://bugs.debian.org/864681).
+
+The option does not cover the lists lock used by `apt-get update`; those commands
+retain their existing behavior. See the [APT lists-lock report](https://bugs.debian.org/1069167).
+
+Run the command-generation regression checks without installing packages:
+
+```shell
+python3 scripts/test-apt-lock-wait.py
+```
+
+The dedicated CI job also checks real `fcntl` locks in disposable Ubuntu 22.04,
+Ubuntu 24.04, and Debian 12 containers. To run the same live checks locally:
+
+```shell
+docker run --rm -v "$PWD:/v:ro" -w /v \
+  -e DOCKER_INSTALL_LOCK_TEST_CONTAINER=1 ubuntu:24.04 sh -ec '
+    apt-get -qq update
+    DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=60 -y -qq install --no-install-recommends python3 >/dev/null
+    python3 scripts/test-apt-lock-wait.py --live
+  '
+```
+
+Live checks include a real 60-second timeout; total runtime also depends on APT
+processing and the container runtime. They verify a
+fail-fast control, successful waiting after lock release, a real 60-second
+timeout, CLI precedence over a zero-second configuration default, and the lists
+lock limitation. They pin the already-installed `bash` version with downloads
+disabled; they do not install Docker or validate package/service compatibility.
+
 ## Legal
 *Brought to you courtesy of our legal counsel. For more context,
 please see the [NOTICE](NOTICE) document in this repo.*

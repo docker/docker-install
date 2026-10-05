@@ -599,7 +599,7 @@ do_install() {
 					set -x
 				fi
 				$sh_c 'apt-get -qq update >/dev/null'
-				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get -y -qq install $pre_reqs >/dev/null"
+				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=60 -y -qq install $pre_reqs >/dev/null"
 				$sh_c 'install -m 0755 -d /etc/apt/keyrings'
 				$sh_c "curl -fsSL \"$DOWNLOAD_URL/linux/$apt_repo_lsb_dist/gpg\" -o /etc/apt/keyrings/docker.asc"
 				$sh_c "chmod a+r /etc/apt/keyrings/docker.asc"
@@ -666,7 +666,7 @@ do_install() {
 				if [ -n "$pkg_version" ]; then
 					apt_flags="$apt_flags --allow-downgrades"
 				fi
-				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get $apt_flags install $pkgs >/dev/null"
+				$sh_c "DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=60 $apt_flags install $pkgs >/dev/null"
 			)
 			if [ "$NO_AUTOSTART" != "1" ]; then
 				start_docker_daemon

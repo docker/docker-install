@@ -3,6 +3,29 @@ name: docker-install CI
 on: [push, pull_request]
 
 jobs:
+  # Real dpkg lock checks run only in disposable official distribution containers.
+  # DPkg::Lock::Timeout does not cover the apt-get update lists lock.
+  test-apt-lock-wait:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      matrix:
+        os:
+          - ubuntu:22.04
+          - ubuntu:24.04
+          - debian:12-slim
+    steps:
+    - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
+    - name: Check generated commands and real dpkg locks
+      run: |
+        docker run --rm -v "$PWD:/v:ro" -w /v \
+          -e DOCKER_INSTALL_LOCK_TEST_CONTAINER=1 "${{ matrix.os }}" \
+          sh -ec '
+            apt-get -qq update
+            DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=60 -y -qq install --no-install-recommends python3 >/dev/null
+            python3 scripts/test-apt-lock-wait.py --live
+          '
+
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 5
