@@ -215,6 +215,25 @@ command_exists() {
 	command -v "$@" > /dev/null 2>&1
 }
 
+# Quote one argument for commands executed through the POSIX shell in $sh_c.
+# A closing quote preserves trailing newlines when the result is captured.
+shell_quote() (
+	value=$1
+	printf "'"
+	while :; do
+		case "$value" in
+			*"'"*)
+				printf '%s' "${value%%\'*}" "'\''"
+				value=${value#*\'}
+				;;
+			*)
+				printf "%s'" "$value"
+				break
+				;;
+		esac
+	done
+)
+
 # version_gte checks if the version specified in $VERSION is at least the given
 # SemVer (Maj.Minor[.Patch]), or CalVer (YY.MM) version.It returns 0 (success)
 # if $VERSION is either unset (=latest) or newer or equal than the specified
@@ -676,13 +695,14 @@ do_install() {
 			;;
 		centos|fedora|rhel|rocky)
 			repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
+			repo_file_url_quoted=$(shell_quote "$repo_file_url")
 			(
 				if ! is_dry_run; then
 					set -x
 				fi
 				if command_exists dnf5; then
 					$sh_c "dnf -y -q --setopt=install_weak_deps=False install dnf-plugins-core"
-					$sh_c "dnf5 config-manager addrepo --overwrite --save-filename=docker-ce.repo --from-repofile='$repo_file_url'"
+					$sh_c "dnf5 config-manager addrepo --overwrite --save-filename=docker-ce.repo --from-repofile=$repo_file_url_quoted"
 
 					if [ "$CHANNEL" != "stable" ]; then
 						$sh_c "dnf5 config-manager setopt \"docker-ce-*.enabled=0\""
@@ -692,7 +712,7 @@ do_install() {
 				elif command_exists dnf; then
 					$sh_c "dnf -y -q --setopt=install_weak_deps=False install dnf-plugins-core"
 					$sh_c "rm -f /etc/yum.repos.d/docker-ce.repo  /etc/yum.repos.d/docker-ce-staging.repo"
-					$sh_c "dnf config-manager --add-repo $repo_file_url"
+					$sh_c "dnf config-manager --add-repo $repo_file_url_quoted"
 
 					if [ "$CHANNEL" != "stable" ]; then
 						$sh_c "dnf config-manager --set-disabled \"docker-ce-*\""
@@ -702,7 +722,7 @@ do_install() {
 				else
 					$sh_c "yum -y -q install yum-utils"
 					$sh_c "rm -f /etc/yum.repos.d/docker-ce.repo  /etc/yum.repos.d/docker-ce-staging.repo"
-					$sh_c "yum-config-manager --add-repo $repo_file_url"
+					$sh_c "yum-config-manager --add-repo $repo_file_url_quoted"
 
 					if [ "$CHANNEL" != "stable" ]; then
 						$sh_c "yum-config-manager --disable \"docker-ce-*\""

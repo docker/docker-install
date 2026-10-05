@@ -39,6 +39,21 @@ To verify that the install script works amongst the supported operating systems 
 make shellcheck
 ```
 
+### Offline RPM repository URL regression checks
+
+Run the repository URL argument checks with Python 3:
+
+```shell
+python3 scripts/test-repository-url-quoting.py
+TEST_SHELL=bash python3 scripts/test-repository-url-quoting.py
+```
+
+The suite executes the installer's generated shell commands against inert dnf5,
+dnf and yum mocks. It checks exact URL arguments, literal special characters,
+mirror precedence, staging defaults and both channels. It makes no network
+requests, installs no packages and never writes host repository files. These
+checks do not validate live RPM repositories or package-manager compatibility.
+
 ## Legal
 *Brought to you courtesy of our legal counsel. For more context,
 please see the [NOTICE](NOTICE) document in this repo.*
