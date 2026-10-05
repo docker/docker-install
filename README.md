@@ -39,6 +39,23 @@ To verify that the install script works amongst the supported operating systems 
 make shellcheck
 ```
 
+### Offline APT version-selection regression checks
+
+```shell
+sh scripts/test-apt-version-selection.sh
+TEST_SHELL=bash sh scripts/test-apt-version-selection.sh
+```
+
+These checks execute the installer's APT installation flow against package-list
+fixtures and assert the selected Engine and CLI installation arguments. Platform
+detection is fixed to Ubuntu noble and privileged commands are intercepted by a
+strict command allowlist, so the checks do not access repositories, change the
+host, or install packages. They cover version-field boundaries, literal matching,
+epochs, partial versions, historical `-ce` releases, pre-releases, and unavailable
+versions. CI runs the fixtures under both `sh` and `bash`. This does not establish
+live repository availability or installation success; `--dry-run` still does not
+resolve version pins.
+
 ## Legal
 *Brought to you courtesy of our legal counsel. For more context,
 please see the [NOTICE](NOTICE) document in this repo.*

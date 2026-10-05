@@ -3,6 +3,19 @@ name: docker-install CI
 on: [push, pull_request]
 
 jobs:
+  # Fixture-driven installer execution; no repository access or package changes.
+  test-apt-version-selection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+    - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
+    - name: Check APT version test syntax
+      run: sh -n scripts/test-apt-version-selection.sh
+    - name: Check APT package selection (offline)
+      run: |
+        sh scripts/test-apt-version-selection.sh
+        TEST_SHELL=bash sh scripts/test-apt-version-selection.sh
+
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 5

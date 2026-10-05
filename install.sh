@@ -271,6 +271,23 @@ version_compare() (
 	return 0
 )
 
+# Select the first APT package version matching a literal Docker version prefix.
+# Restrict matching to madison's version field, ignoring the epoch and distro
+# suffix. Require a component boundary so 24.0.1 cannot select 24.0.10.
+# Debian packages use "~" for Docker's "-ce" and pre-release separators.
+# Repository ordering is preserved, including the existing test-channel behavior.
+select_apt_package_version() (
+	# An embedded newline would give grep multiple expressions and could turn a
+	# later fragment into an unanchored match. Invalid pins must select nothing.
+	case "$1" in
+		*'
+'*) return ;;
+	esac
+	pkg_pattern="$(printf '%s\n' "$1" | sed 's/-/~/g; s/[][\\.^$*+?(){}|]/\\&/g')"
+	awk -F '|' '{gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}' |
+		grep -E "^([0-9]+:)?$pkg_pattern([.~+-]|$)" | head -1
+)
+
 is_dry_run() {
 	if [ -z "$DRY_RUN" ]; then
 		return 1
@@ -617,12 +634,10 @@ do_install() {
 				if is_dry_run; then
 					echo "# WARNING: VERSION pinning is not supported in DRY_RUN"
 				else
-					# Will work for incomplete versions IE (17.12), but may not actually grab the "latest" if in the test channel
-					pkg_pattern="$(echo "$VERSION" | sed 's/-ce-/~ce~.*/g' | sed 's/-/.*/g')"
-					search_command="apt-cache madison docker-ce | grep '$pkg_pattern' | head -1 | awk '{\$1=\$1};1' | cut -d' ' -f 3"
+					search_command="apt-cache madison docker-ce"
 					echo "INFO: Searching repository for VERSION '$VERSION'"
 					echo "INFO: $search_command"
-					pkg_version="$($sh_c "$search_command")"
+					pkg_version="$($sh_c "$search_command" | select_apt_package_version "$VERSION")"
 					if [ -z "$pkg_version" ]; then
 						echo
 						echo "ERROR: '$VERSION' not found amongst apt-cache madison results"
@@ -632,9 +647,9 @@ do_install() {
 					pkg_version="=$pkg_version"
 
 					if version_gte "18.09"; then
-						search_command="apt-cache madison docker-ce-cli | grep '$pkg_pattern' | head -1 | awk '{\$1=\$1};1' | cut -d' ' -f 3"
+						search_command="apt-cache madison docker-ce-cli"
 						echo "INFO: $search_command"
-						cli_pkg_version="$($sh_c "$search_command")"
+						cli_pkg_version="$($sh_c "$search_command" | select_apt_package_version "$VERSION")"
 						if [ -n "$cli_pkg_version" ]; then
 							cli_pkg_version="=$cli_pkg_version"
 						fi
