@@ -507,7 +507,10 @@ do_install() {
 	case "$lsb_dist" in
 
 		ubuntu)
-			if command_exists lsb_release; then
+			if [ -r /etc/os-release ]; then
+				dist_version="$(. /etc/os-release && echo "$VERSION_CODENAME")"
+			fi
+			if [ -z "$dist_version" ] && command_exists lsb_release; then
 				dist_version="$(lsb_release --codename | cut -f2)"
 			fi
 			if [ -z "$dist_version" ] && [ -r /etc/lsb-release ]; then
