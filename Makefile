@@ -11,7 +11,7 @@ ENVSUBST_VARS=LOAD_SCRIPT_COMMIT_SHA LOAD_SCRIPT_STABLE_LATEST LOAD_SCRIPT_TEST_
 # Define the channels we want to build for
 CHANNELS=test stable
 
-FILES=build/test/install.sh build/stable/install.sh build/stable/rootless-install.sh
+FILES=build/test/install.sh build/stable/install.sh build/stable/rootless-install.sh build/stable/setup-repo.sh
 
 STABLE_LATEST=$(shell ./scripts/get-version.sh stable)
 TEST_LATEST=$(shell ./scripts/get-version.sh test)
@@ -45,6 +45,16 @@ build/%/rootless-install.sh: rootless-install.sh
 		envsubst '$(addprefix $$,$(ENVSUBST_VARS))' > $@
 	chmod +x $@
 
+build/%/setup-repo.sh: install.sh
+	mkdir -p $(@D)
+	sed -e 's/DEFAULT_CHANNEL_VALUE="stable"/DEFAULT_CHANNEL_VALUE="$*"/' \
+		-e 's/REPO_ONLY=$${REPO_ONLY:-0}/REPO_ONLY=$${REPO_ONLY:-1}/' $< | \
+		LOAD_SCRIPT_COMMIT_SHA='$(shell git rev-parse HEAD)' \
+		LOAD_SCRIPT_STABLE_LATEST='$(STABLE_LATEST)' \
+		LOAD_SCRIPT_TEST_LATEST='$(TEST_LATEST)' \
+		envsubst '$(addprefix $$,$(ENVSUBST_VARS))' > $@
+	chmod +x $@
+
 .PHONY: shellcheck
 shellcheck: $(FILES)
 	$(SHELLCHECK) $^
@@ -72,7 +82,7 @@ AWS?=docker run \
 	--rm amazon/aws-cli
 
 .PHONY: deploy
-deploy: build/$(CHANNEL)/install.sh build/$(CHANNEL)/rootless-install.sh
+deploy: build/$(CHANNEL)/install.sh build/$(CHANNEL)/rootless-install.sh build/$(CHANNEL)/setup-repo.sh
 ifeq ($(S3_BUCKET),)
 	$(error S3_BUCKET is empty.)
 endif
@@ -85,12 +95,13 @@ endif
 	$(AWS) s3 cp --acl public-read --content-type 'text/plain' /build/$(CHANNEL)/install.sh s3://$(S3_BUCKET)/index
 ifeq ($(CHANNEL),stable)
 	$(AWS) s3 cp --acl public-read --content-type 'text/plain' /build/$(CHANNEL)/rootless-install.sh s3://$(S3_BUCKET)/rootless
+	$(AWS) s3 cp --acl public-read --content-type 'text/plain' /build/$(CHANNEL)/setup-repo.sh s3://$(S3_BUCKET)/repo
 endif
 
 	$(AWS) cloudfront create-invalidation --distribution-id $(CF_DISTRIBUTION_ID) --paths '/*'
 
 .PHONY: diff
-diff: build/$(CHANNEL)/install.sh build/$(CHANNEL)/rootless-install.sh
+diff: build/$(CHANNEL)/install.sh build/$(CHANNEL)/rootless-install.sh build/$(CHANNEL)/setup-repo.sh
 ifeq ($(CHANNEL),)
 	$(error CHANNEL is empty.)
 endif

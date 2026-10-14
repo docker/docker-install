@@ -35,6 +35,11 @@ if [[ "$CHANNEL" == "stable" ]] && [[ ! -f "build/$CHANNEL/rootless-install.sh" 
     exit 1
 fi
 
+if [[ "$CHANNEL" == "stable" ]] && [[ ! -f "build/$CHANNEL/setup-repo.sh" ]]; then
+    echo "Error: build/$CHANNEL/setup-repo.sh not found" >&2
+    exit 1
+fi
+
 TMP_DIR=$(mktemp -d)
 
 # Download and compare install.sh
@@ -45,11 +50,17 @@ if ! diff -u "$TMP_DIR/install.sh" "build/$CHANNEL/install.sh"; then
     DIFF_FOUND=1
 fi
 
-# For stable channel, also compare rootless-install.sh
+# For stable channel, also compare rootless-install.sh and setup-repo.sh
 if [[ "$CHANNEL" == "stable" ]]; then
     curl -sfSL "https://$SUBDOMAIN.docker.com/rootless" -o "$TMP_DIR/rootless-install.sh"
     echo "# Diff $CHANNEL rootless-install.sh"
     if ! diff -u "$TMP_DIR/rootless-install.sh" "build/$CHANNEL/rootless-install.sh"; then
+        DIFF_FOUND=1
+    fi
+
+    curl -sfSL "https://$SUBDOMAIN.docker.com/repo" -o "$TMP_DIR/setup-repo.sh"
+    echo "# Diff $CHANNEL setup-repo.sh"
+    if ! diff -u "$TMP_DIR/setup-repo.sh" "build/$CHANNEL/setup-repo.sh"; then
         DIFF_FOUND=1
     fi
 fi
