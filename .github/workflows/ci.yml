@@ -50,3 +50,16 @@ jobs:
         make build/${{ matrix.channel }}/rootless-install.sh \
           ${{ matrix.stable_latest && format('STABLE_LATEST={0}', matrix.stable_latest) || '' }}
         FORCE_ROOTLESS_INSTALL=1 ./build/${{ matrix.channel }}/rootless-install.sh
+
+  # Execute repository commands against inert mocks; never contact a mirror.
+  test-repository-url-quoting:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+    - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
+    - name: Check installer syntax
+      run: sh -n install.sh
+    - name: Check RPM repository URL arguments (offline only)
+      run: |
+        python3 scripts/test-repository-url-quoting.py
+        TEST_SHELL=bash python3 scripts/test-repository-url-quoting.py
