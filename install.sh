@@ -316,10 +316,12 @@ get_distribution() {
 		lsb_dist="$(. /etc/os-release && echo "$ID")"
 	fi
 
-	# Normalize Fedora Asahi Remix to fedora
-	if [ "$lsb_dist" = "fedora-asahi-remix" ]; then
-		lsb_dist="fedora"
-	fi
+	# Map os-release IDs to their download.docker.com repository names
+	case "$lsb_dist" in
+		almalinux) lsb_dist="alma" ;;
+		fedora-asahi-remix) lsb_dist="fedora" ;;
+		ol) lsb_dist="oracle" ;;
+	esac
 
 	# Returning an empty string here should be alright since the
 	# case statements don't act unless you provide an actual value
@@ -542,7 +544,7 @@ do_install() {
 			esac
 		;;
 
-		centos|rhel|rocky)
+		alma|centos|oracle|rhel|rocky)
 			if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
 				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
 			fi
@@ -677,7 +679,7 @@ do_install() {
 			echo_docker_as_nonroot
 			exit 0
 			;;
-		centos|fedora|rhel|rocky)
+		alma|centos|fedora|oracle|rhel|rocky)
 			repo_file_url="$DOWNLOAD_URL/linux/$lsb_dist/$REPO_FILE"
 			(
 				if ! is_dry_run; then
