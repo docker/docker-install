@@ -3,6 +3,22 @@ name: docker-install CI
 on: [push, pull_request]
 
 jobs:
+  # Test mirror-option handling, not mirror reachability. Live Tencent Cloud
+  # validation must be run explicitly from a Tencent Cloud VPC private network.
+  test-mirror-options:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+    - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
+    - name: Check mirror test syntax
+      run: |
+        sh -n scripts/test-mirrors.sh
+        sh -n scripts/test-tencent-cloud-mirror.sh
+    - name: Check mirror options (offline only)
+      run: |
+        sh scripts/test-mirrors.sh
+        TEST_SHELL=bash sh scripts/test-mirrors.sh
+
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 5
